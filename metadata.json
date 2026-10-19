@@ -1,0 +1,6 @@
+{
+  "name": "The Taté Glow",
+  "description": "Effortless shine for her — pure stainless steel jewelry designed for everyday luxury.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
