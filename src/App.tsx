@@ -11,6 +11,7 @@ import { CheckoutModal } from './components/CheckoutModal';
 import { SteelScienceModal } from './components/SteelScienceModal';
 import { SizeGuideModal } from './components/SizeGuideModal';
 import { WishlistModal } from './components/WishlistModal';
+import { OrdersDrawer } from './components/OrdersDrawer';
 import { ReviewsSection } from './components/ReviewsSection';
 import { Footer } from './components/Footer';
 import { PRODUCTS, BRAND_CONFIG } from './data/products';
@@ -100,6 +101,7 @@ export default function App() {
   const [isScienceOpen, setIsScienceOpen] = useState(false);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
+  const [isOrdersOpen, setIsOrdersOpen] = useState(false);
 
   // Authenticated User State (Firebase Auth & Google Workspace Gmail)
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -182,6 +184,11 @@ export default function App() {
     selectedSize: string = product.specs.sizes[0] || 'Standard',
     quantity: number = 1
   ) => {
+    if (product.stock !== undefined && product.stock <= 0) {
+      showToast(lang === 'ar' ? 'عذراً، هذه القطعة نفدت من المخزون حالياً' : 'Sorry, this piece is currently out of stock');
+      return;
+    }
+
     const compoundId = `${product.id}-${selectedSize.toLowerCase().replace(/\s+/g, '-')}`;
 
     setCart((prevCart) => {
@@ -280,6 +287,7 @@ export default function App() {
         wishlistCount={wishlist.length}
         onOpenCart={() => setIsCartOpen(true)}
         onOpenWishlist={() => setIsWishlistOpen(true)}
+        onOpenOrders={() => setIsOrdersOpen(true)}
         onOpenScience={() => setIsScienceOpen(true)}
         searchQuery={searchQuery}
         onSearchChange={(q) => {
@@ -484,6 +492,14 @@ export default function App() {
         onRemoveFromWishlist={handleToggleWishlist}
         onAddToCart={(p) => handleAddToCart(p)}
         lang={lang}
+      />
+
+      <OrdersDrawer
+        isOpen={isOrdersOpen}
+        onClose={() => setIsOrdersOpen(false)}
+        currentUser={currentUser}
+        lang={lang}
+        onContinueShopping={() => setIsOrdersOpen(false)}
       />
     </div>
   );

@@ -26,6 +26,7 @@ export interface Product {
   isNew?: boolean;
   rating: number;
   reviewCount: number;
+  stock?: number;
 }
 
 export interface CartItem {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Product } from '../types/jewelry';
-import { X, Heart, ShieldCheck, Droplets, Sparkles, Check, Ruler, Truck, Shield, Tag } from 'lucide-react';
+import { X, Heart, ShieldCheck, Droplets, Sparkles, Check, Ruler, Truck, Shield, Tag, AlertCircle } from 'lucide-react';
 import { formatEGP } from '../utils/pricing';
 import { Language, TRANSLATIONS } from '../i18n/translations';
 
@@ -37,7 +37,11 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const displayDesc = lang === 'ar' && product.descriptionAr ? product.descriptionAr : product.description;
   const displayDetails = lang === 'ar' && product.detailsAr ? product.detailsAr : product.details;
 
+  const isOutOfStock = product.stock !== undefined && product.stock <= 0;
+  const isLowStock = !isOutOfStock && product.stock !== undefined && product.stock > 0 && product.stock <= 5;
+
   const handleAdd = () => {
+    if (isOutOfStock) return;
     onAddToCart(product, selectedSize, quantity);
     onClose();
   };
@@ -67,9 +71,22 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               <img
                 src={product.image}
                 alt={displayName}
-                className="w-full h-full object-cover object-center"
+                className={`w-full h-full object-cover object-center ${
+                  isOutOfStock ? 'opacity-65 grayscale-[35%]' : ''
+                }`}
                 referrerPolicy="no-referrer"
               />
+              {isOutOfStock && (
+                <div className="absolute top-3 left-3 rtl:left-auto rtl:right-3 bg-stone-900/90 text-white text-[10px] uppercase tracking-wider font-semibold px-2.5 py-1 rounded shadow-xs">
+                  {t.outOfStock}
+                </div>
+              )}
+              {isLowStock && (
+                <div className="absolute top-3 left-3 rtl:left-auto rtl:right-3 bg-amber-600 text-white text-[10px] font-semibold px-2.5 py-1 rounded shadow-xs flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                  <span>{t.lowStockOnly.replace('{count}', String(product.stock))}</span>
+                </div>
+              )}
               <div className="absolute bottom-3 left-3 rtl:left-auto rtl:right-3 bg-stone-950/80 backdrop-blur-xs px-2.5 py-1 rounded text-white text-[11px] font-medium flex items-center gap-1.5">
                 <Droplets className="w-3.5 h-3.5 text-sky-400" />
                 <span>{t.waterproofBadge}</span>
@@ -100,6 +117,22 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   {lang === 'ar' ? 'اشتري 2 والثالث بـ 50% · اشتري 3 والرابع مجاناً' : 'Buy 2 get 3rd 50% OFF · Buy 3 get 4th FREE'}
                 </span>
               </div>
+
+              {/* Low Inventory & Out of Stock Alerts */}
+              {isLowStock && (
+                <div className="mb-3 p-2.5 bg-amber-50/90 border border-amber-200/90 rounded text-xs text-amber-900 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
+                  <span className="font-medium">
+                    {t.lowStockBadge.replace('{count}', String(product.stock))}
+                  </span>
+                </div>
+              )}
+              {isOutOfStock && (
+                <div className="mb-3 p-2.5 bg-stone-100 border border-stone-200 rounded text-xs text-stone-600 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-stone-400 shrink-0" />
+                  <span className="font-medium">{t.outOfStock}</span>
+                </div>
+              )}
 
               {/* Quiet unboxed metadata */}
               <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-stone-500 font-medium mb-1.5">
@@ -247,9 +280,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({
             <div className="pt-4 border-t border-stone-200 mt-4 space-y-3">
               <div className="flex items-center gap-3">
                 {/* Quantity */}
-                <div className="flex items-center border border-stone-200 rounded bg-white">
+                <div className={`flex items-center border border-stone-200 rounded bg-white ${isOutOfStock ? 'opacity-40 pointer-events-none' : ''}`}>
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    disabled={isOutOfStock}
                     className="px-3 py-2 text-stone-600 hover:text-stone-900 transition-colors text-xs font-semibold cursor-pointer"
                   >
                     -
@@ -259,6 +293,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   </span>
                   <button
                     onClick={() => setQuantity(quantity + 1)}
+                    disabled={isOutOfStock}
                     className="px-3 py-2 text-stone-600 hover:text-stone-900 transition-colors text-xs font-semibold cursor-pointer"
                   >
                     +
@@ -268,9 +303,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 {/* Primary Buy CTA */}
                 <button
                   onClick={handleAdd}
-                  className="flex-1 py-3 px-6 bg-stone-950 text-white rounded text-xs uppercase tracking-[0.2em] font-medium hover:bg-stone-800 transition-colors cursor-pointer shadow-sm text-center"
+                  disabled={isOutOfStock}
+                  className={`flex-1 py-3 px-6 rounded text-xs uppercase tracking-[0.2em] font-medium transition-colors text-center ${
+                    isOutOfStock
+                      ? 'bg-stone-200 text-stone-400 cursor-not-allowed border border-stone-300'
+                      : 'bg-stone-950 text-white hover:bg-stone-800 cursor-pointer shadow-sm'
+                  }`}
                 >
-                  {t.addToBagBtn} · {formatEGP(product.price * quantity, lang)}
+                  {isOutOfStock ? t.outOfStock : `${t.addToBagBtn} · ${formatEGP(product.price * quantity, lang)}`}
                 </button>
 
                 {/* Wishlist Toggle */}

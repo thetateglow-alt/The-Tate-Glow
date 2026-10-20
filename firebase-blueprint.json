@@ -1,0 +1,36 @@
+{
+  "entities": {
+    "Order": {
+      "title": "Order",
+      "description": "Customer purchase order for jewelry items",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Order reference code (e.g. TG-123456)" },
+        "userId": { "type": "string", "description": "Authenticated user UID" },
+        "customerName": { "type": "string", "description": "Recipient full name" },
+        "customerEmail": { "type": "string", "description": "Recipient contact email" },
+        "phone": { "type": "string", "description": "Courier contact phone number" },
+        "city": { "type": "string", "description": "Egyptian governorate / delivery city" },
+        "address": { "type": "string", "description": "Detailed street address, building, apt" },
+        "paymentMethod": { "type": "string", "description": "Selected payment method" },
+        "subtotal": { "type": "number", "description": "Jewelry items subtotal in EGP" },
+        "discount": { "type": "number", "description": "Bundle or reward discount amount in EGP" },
+        "deliveryFee": { "type": "number", "description": "Courier delivery fee in EGP" },
+        "total": { "type": "number", "description": "Total amount due in EGP" },
+        "status": {
+          "type": "string",
+          "enum": ["confirmed", "processing", "shipped", "delivered"],
+          "description": "Current order fulfillment status"
+        },
+        "createdAt": { "type": "string", "description": "ISO date string when order was placed" }
+      },
+      "required": ["id", "userId", "customerName", "phone", "city", "address", "paymentMethod", "total", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Orders placed by authenticated users"
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Product } from '../types/jewelry';
-import { Heart, Plus, Eye, Sparkles, ShieldCheck } from 'lucide-react';
+import { Heart, Plus, Eye, Sparkles, ShieldCheck, AlertCircle, ShoppingBag } from 'lucide-react';
 import { formatEGP } from '../utils/pricing';
 import { Language, TRANSLATIONS } from '../i18n/translations';
 
@@ -29,6 +29,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const displayCategory = lang === 'ar' && product.categoryAr ? product.categoryAr : product.category;
   const displayDesc = lang === 'ar' && product.descriptionAr ? product.descriptionAr : product.description;
 
+  const isOutOfStock = product.stock !== undefined && product.stock <= 0;
+  const isLowStock = !isOutOfStock && product.stock !== undefined && product.stock > 0 && product.stock <= 5;
+
   return (
     <article
       className="group flex flex-col bg-white rounded-md border border-stone-200/80 overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
@@ -56,13 +59,31 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           />
         </button>
 
-        {/* Quiet unboxed kicker status */}
-        {product.isBestSeller && (
+        {/* Visual Badge Indicator: Out of Stock */}
+        {isOutOfStock && (
+          <div className="absolute top-3 left-3 rtl:left-auto rtl:right-3 z-10 text-[10px] uppercase tracking-[0.18em] font-semibold text-stone-700 bg-stone-100/95 border border-stone-300/90 backdrop-blur-xs px-2.5 py-1 rounded shadow-xs">
+            {t.outOfStock}
+          </div>
+        )}
+
+        {/* Visual Badge Indicator: Low Inventory */}
+        {isLowStock && (
+          <div className="absolute top-3 left-3 rtl:left-auto rtl:right-3 z-10 text-[10px] font-semibold tracking-wide text-amber-950 bg-amber-50/95 border border-amber-300/90 backdrop-blur-xs px-2.5 py-1 rounded shadow-xs flex items-center gap-1.5">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-600" />
+            </span>
+            <span>{t.lowStockBadgeTitle.replace('{count}', String(product.stock))}</span>
+          </div>
+        )}
+
+        {/* Quiet unboxed kicker status (for healthy stock items) */}
+        {!isOutOfStock && !isLowStock && product.isBestSeller && (
           <div className="absolute top-3 left-3 rtl:left-auto rtl:right-3 z-10 text-[10px] uppercase tracking-[0.2em] font-semibold text-stone-900 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-xs shadow-2xs">
             {t.signaturePiece}
           </div>
         )}
-        {!product.isBestSeller && product.isNew && (
+        {!isOutOfStock && !isLowStock && !product.isBestSeller && product.isNew && (
           <div className="absolute top-3 left-3 rtl:left-auto rtl:right-3 z-10 text-[10px] uppercase tracking-[0.2em] font-semibold text-stone-900 bg-stone-100/90 backdrop-blur-xs px-2 py-0.5 rounded-xs shadow-2xs">
             {t.newArrival}
           </div>
@@ -76,7 +97,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             onError={() => setImageFailed(true)}
             referrerPolicy="no-referrer"
             loading="lazy"
-            className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+            className={`w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105 ${
+              isOutOfStock ? 'opacity-65 grayscale-[35%]' : ''
+            }`}
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center bg-stone-100 p-6 text-stone-400">
@@ -101,12 +124,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             <span>{t.details}</span>
           </button>
           <button
-            onClick={() => onQuickAdd(product)}
-            className="py-2 px-3 bg-stone-950 hover:bg-stone-800 text-white text-xs font-medium rounded shadow-sm flex items-center justify-center gap-1 transition-colors cursor-pointer"
-            title={t.add}
+            onClick={() => !isOutOfStock && onQuickAdd(product)}
+            disabled={isOutOfStock}
+            className={`py-2 px-3 text-xs font-medium rounded shadow-sm flex items-center justify-center gap-1 transition-colors ${
+              isOutOfStock
+                ? 'bg-stone-200 text-stone-400 cursor-not-allowed opacity-80 border border-stone-300'
+                : 'bg-stone-950 hover:bg-stone-800 text-white cursor-pointer'
+            }`}
+            title={isOutOfStock ? t.outOfStock : t.add}
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span>{t.add}</span>
+            {isOutOfStock ? (
+              <span className="text-[11px] whitespace-nowrap">{t.soldOut}</span>
+            ) : (
+              <>
+                <Plus className="w-3.5 h-3.5" />
+                <span>{t.add}</span>
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -131,26 +165,90 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <p className="text-xs text-stone-500 line-clamp-2 mt-1 leading-relaxed">
             {displayDesc}
           </p>
+
+          {/* Visual Indicator: Low Inventory Meter */}
+          {isLowStock && (
+            <div className="mt-2.5 p-2 bg-gradient-to-r from-amber-50/90 via-amber-50/60 to-white border border-amber-200/90 rounded text-xs space-y-1">
+              <div className="flex items-center justify-between text-[11px] font-medium text-amber-950">
+                <div className="flex items-center gap-1.5 text-amber-900">
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                  <span>{t.lowStockBadge.replace('{count}', String(product.stock))}</span>
+                </div>
+                <span className="text-[10px] text-amber-700 font-semibold uppercase tracking-wider">
+                  {lang === 'ar' ? 'سارعي بالطلب' : 'Order soon'}
+                </span>
+              </div>
+              <div className="w-full bg-amber-200/60 rounded-full h-1 overflow-hidden">
+                <div
+                  className="bg-amber-600 h-1 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min(100, Math.max(20, ((product.stock ?? 1) / 5) * 100))}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Visual Indicator: Out of Stock Status */}
+          {isOutOfStock && (
+            <div className="mt-2.5 p-2 bg-stone-100/90 border border-stone-200/80 rounded text-xs text-stone-500 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-stone-400 shrink-0" />
+              <div className="flex-1">
+                <span className="font-semibold text-stone-700 block text-[11px]">{t.outOfStock}</span>
+                <span className="text-[10px] text-stone-400 block">
+                  {lang === 'ar' ? 'غير متوفر حالياً · جاري إعادة التوفير' : 'Currently unavailable for purchase'}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer: Material Assurance & Price in EGP */}
-        <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between">
-          <div className="flex items-center gap-1 text-[11px] text-stone-500 font-medium">
-            <ShieldCheck className="w-3.5 h-3.5 text-stone-700" />
-            <span>{t.pureSteelBadge}</span>
+        <div className="mt-4 pt-3 border-t border-stone-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-1 text-[11px] text-stone-500 font-medium">
+              <ShieldCheck className="w-3.5 h-3.5 text-stone-700" />
+              <span>{t.pureSteelBadge}</span>
+            </div>
+
+            {/* Pricing in EGP */}
+            <div className="flex items-baseline gap-2">
+              {product.originalPrice && (
+                <span className="text-xs text-stone-400 line-through tabular-nums">
+                  {formatEGP(product.originalPrice, lang)}
+                </span>
+              )}
+              <span className="text-sm font-semibold text-stone-900 tabular-nums">
+                {formatEGP(product.price, lang)}
+              </span>
+            </div>
           </div>
 
-          {/* Pricing in EGP */}
-          <div className="flex items-baseline gap-2">
-            {product.originalPrice && (
-              <span className="text-xs text-stone-400 line-through tabular-nums">
-                {formatEGP(product.originalPrice, lang)}
-              </span>
+          {/* Primary Add to Cart CTA (Disabled if Out of Stock) */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!isOutOfStock) onQuickAdd(product);
+            }}
+            disabled={isOutOfStock}
+            aria-disabled={isOutOfStock}
+            className={`w-full py-2.5 px-3 rounded text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-200 ${
+              isOutOfStock
+                ? 'bg-stone-100 text-stone-400 border border-stone-200 cursor-not-allowed select-none'
+                : 'bg-stone-950 hover:bg-stone-800 active:scale-[0.98] text-white shadow-xs cursor-pointer'
+            }`}
+          >
+            {isOutOfStock ? (
+              <>
+                <AlertCircle className="w-3.5 h-3.5 text-stone-400" />
+                <span>{t.outOfStock}</span>
+              </>
+            ) : (
+              <>
+                <ShoppingBag className="w-3.5 h-3.5" />
+                <span>{t.addToCart}</span>
+              </>
             )}
-            <span className="text-sm font-semibold text-stone-900 tabular-nums">
-              {formatEGP(product.price, lang)}
-            </span>
-          </div>
+          </button>
         </div>
       </div>
     </article>

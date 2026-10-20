@@ -6,6 +6,7 @@ import {
   onAuthStateChanged,
   User,
 } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 export const GMAIL_SCOPES = [
@@ -27,6 +28,9 @@ export const GMAIL_SCOPES = [
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+export const db = firebaseConfig.firestoreDatabaseId
+  ? getFirestore(app, firebaseConfig.firestoreDatabaseId)
+  : getFirestore(app);
 
 const provider = new GoogleAuthProvider();
 GMAIL_SCOPES.forEach((scope) => {

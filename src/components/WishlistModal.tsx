@@ -68,12 +68,14 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
               const displayName = lang === 'ar' && p.nameAr ? p.nameAr : p.name;
               const displayCategory = lang === 'ar' && p.categoryAr ? p.categoryAr : p.category;
 
+              const isOutOfStock = p.stock !== undefined && p.stock <= 0;
+
               return (
                 <div key={p.id} className="py-4 flex items-center gap-4">
                   <img
                     src={p.image}
                     alt={displayName}
-                    className="w-18 h-18 rounded bg-stone-100 object-cover border border-stone-200 shrink-0"
+                    className={`w-18 h-18 rounded bg-stone-100 object-cover border border-stone-200 shrink-0 ${isOutOfStock ? 'opacity-60 grayscale-[35%]' : ''}`}
                   />
 
                   <div className="flex-1 min-w-0">
@@ -83,21 +85,34 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
                     <h3 className="text-sm font-serif font-medium text-stone-900 truncate">
                       {displayName}
                     </h3>
-                    <p className="text-xs font-semibold text-stone-900 mt-0.5 tabular-nums">
-                      {formatEGP(p.price, lang)}
-                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <p className="text-xs font-semibold text-stone-900 tabular-nums">
+                        {formatEGP(p.price, lang)}
+                      </p>
+                      {isOutOfStock && (
+                        <span className="text-[10px] font-medium text-stone-500 bg-stone-100 px-1.5 py-0.5 rounded">
+                          {t.outOfStock}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => {
+                        if (isOutOfStock) return;
                         onAddToCart(p);
                         onRemoveFromWishlist(p.id);
                       }}
-                      className="px-3 py-1.5 bg-stone-950 text-white rounded text-xs font-medium hover:bg-stone-800 transition-colors flex items-center gap-1.5 cursor-pointer"
+                      disabled={isOutOfStock}
+                      className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center gap-1.5 ${
+                        isOutOfStock
+                          ? 'bg-stone-200 text-stone-400 cursor-not-allowed border border-stone-300'
+                          : 'bg-stone-950 text-white hover:bg-stone-800 cursor-pointer'
+                      }`}
                     >
                       <ShoppingBag className="w-3.5 h-3.5" />
-                      <span>{t.moveToBag}</span>
+                      <span>{isOutOfStock ? t.outOfStock : t.moveToBag}</span>
                     </button>
                     <button
                       onClick={() => onRemoveFromWishlist(p.id)}

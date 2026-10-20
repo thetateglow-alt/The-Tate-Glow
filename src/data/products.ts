@@ -50,7 +50,8 @@ export const PRODUCTS: Product[] = [
     },
     isBestSeller: true,
     rating: 4.9,
-    reviewCount: 142
+    reviewCount: 142,
+    stock: 14
   },
   {
     id: 'tate-solace-teardrop',
@@ -78,7 +79,8 @@ export const PRODUCTS: Product[] = [
     },
     isNew: true,
     rating: 4.8,
-    reviewCount: 68
+    reviewCount: 68,
+    stock: 2
   },
   {
     id: 'tate-serpent-choker',
@@ -105,7 +107,8 @@ export const PRODUCTS: Product[] = [
       sizes: ['38cm + 5cm choker', '42cm + 5cm collar']
     },
     rating: 4.9,
-    reviewCount: 95
+    reviewCount: 95,
+    stock: 11
   },
 
   // --- BRACELETS ---
@@ -135,7 +138,8 @@ export const PRODUCTS: Product[] = [
     },
     isBestSeller: true,
     rating: 5.0,
-    reviewCount: 184
+    reviewCount: 184,
+    stock: 8
   },
   {
     id: 'tate-bond-box-chain',
@@ -163,7 +167,8 @@ export const PRODUCTS: Product[] = [
       sizes: ['16cm + 3cm extender', '18cm + 3cm extender']
     },
     rating: 4.8,
-    reviewCount: 76
+    reviewCount: 76,
+    stock: 12
   },
   {
     id: 'tate-verona-fine-chain',
@@ -191,7 +196,8 @@ export const PRODUCTS: Product[] = [
     },
     isNew: true,
     rating: 4.9,
-    reviewCount: 52
+    reviewCount: 52,
+    stock: 0
   },
 
   // --- RINGS ---
@@ -221,7 +227,8 @@ export const PRODUCTS: Product[] = [
     },
     isBestSeller: true,
     rating: 4.9,
-    reviewCount: 219
+    reviewCount: 219,
+    stock: 3
   },
   {
     id: 'tate-trilogy-stack-rings',
@@ -249,7 +256,8 @@ export const PRODUCTS: Product[] = [
       sizes: ['US 5', 'US 6', 'US 7', 'US 8', 'US 9']
     },
     rating: 4.8,
-    reviewCount: 164
+    reviewCount: 164,
+    stock: 15
   },
   {
     id: 'tate-horizon-brushed-band',
@@ -276,7 +284,8 @@ export const PRODUCTS: Product[] = [
       sizes: ['US 5', 'US 6', 'US 7', 'US 8', 'US 9', 'US 10']
     },
     rating: 4.9,
-    reviewCount: 88
+    reviewCount: 88,
+    stock: 0
   },
 
   // --- EARRINGS ---
@@ -306,7 +315,8 @@ export const PRODUCTS: Product[] = [
     },
     isBestSeller: true,
     rating: 5.0,
-    reviewCount: 231
+    reviewCount: 231,
+    stock: 19
   },
   {
     id: 'tate-eclat-chunky-hoops',
@@ -335,7 +345,8 @@ export const PRODUCTS: Product[] = [
     },
     isNew: true,
     rating: 4.9,
-    reviewCount: 112
+    reviewCount: 112,
+    stock: 6
   },
   {
     id: 'tate-cascade-drop-earrings',
@@ -362,7 +373,8 @@ export const PRODUCTS: Product[] = [
       sizes: ['One Size (28mm length)']
     },
     rating: 4.8,
-    reviewCount: 79
+    reviewCount: 79,
+    stock: 2
   }
 ];
 

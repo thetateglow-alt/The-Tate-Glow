@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Heart, Search, X, ShieldCheck, Tag, Globe } from 'lucide-react';
+import { ShoppingBag, Heart, Search, X, ShieldCheck, Tag, Globe, Package } from 'lucide-react';
 import { JewelryCategory } from '../types/jewelry';
 import { BRAND_CONFIG } from '../data/products';
 import { Language, TRANSLATIONS } from '../i18n/translations';
@@ -11,6 +11,7 @@ interface NavbarProps {
   wishlistCount: number;
   onOpenCart: () => void;
   onOpenWishlist: () => void;
+  onOpenOrders?: () => void;
   onOpenScience: () => void;
   searchQuery: string;
   onSearchChange: (q: string) => void;
@@ -25,6 +26,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   wishlistCount,
   onOpenCart,
   onOpenWishlist,
+  onOpenOrders,
   onOpenScience,
   searchQuery,
   onSearchChange,
@@ -188,6 +190,19 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
           </div>
 
+          {/* Orders Button */}
+          {onOpenOrders && (
+            <button
+              onClick={onOpenOrders}
+              aria-label={t.myOrders}
+              className="p-2 text-stone-700 hover:text-stone-950 transition-colors cursor-pointer flex items-center gap-1.5"
+              title={t.myOrders}
+            >
+              <Package className="w-4.5 h-4.5 text-stone-700" />
+              <span className="text-xs font-medium hidden md:inline">{t.myOrders}</span>
+            </button>
+          )}
+
           {/* Wishlist Button */}
           <button
             onClick={onOpenWishlist}
@@ -220,6 +235,15 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile Category Secondary Strip */}
       <div className="lg:hidden border-t border-stone-200/60 overflow-x-auto no-scrollbar py-2 px-4 flex items-center gap-4 text-xs tracking-wider uppercase font-medium text-stone-600">
+        {onOpenOrders && (
+          <button
+            onClick={onOpenOrders}
+            className="whitespace-nowrap shrink-0 py-1 text-stone-900 flex items-center gap-1 font-semibold"
+          >
+            <Package className="w-3.5 h-3.5 text-stone-700" />
+            <span>{t.myOrders}</span>
+          </button>
+        )}
         <button
           onClick={() => onSelectCategory('all')}
           className={`whitespace-nowrap shrink-0 py-1 ${activeCategory === 'all' ? 'text-stone-950 font-bold border-b border-stone-950' : ''}`}

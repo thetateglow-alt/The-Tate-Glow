@@ -69,6 +69,12 @@ export interface Translations {
   resetFilters: string;
   pureSteelBadge: string;
   waterproofBadge: string;
+  lowStockOnly: string;
+  lowStockBadge: string;
+  lowStockBadgeTitle: string;
+  outOfStock: string;
+  soldOut: string;
+  addToCart: string;
 
   // Product Modal / Quick View
   materialLabel: string;
@@ -145,8 +151,11 @@ export interface Translations {
   cardSecurityNote: string;
   applePaySelected: string;
   applePayDesc: string;
+  codSubtitle: string;
   codSelected: string;
   codDesc: string;
+  codTotalNote: string;
+  codCashReminder: string;
   instapaySelected: string;
   instapayDesc: string;
   confirmOrder: string;
@@ -157,6 +166,35 @@ export interface Translations {
   deliverTo: string;
   totalDue: string;
   continueShopping: string;
+
+  // Glow Points Rewards
+  glowPoints: string;
+  glowPointsTitle: string;
+  glowPointsEarnNotice: string;
+  glowPointsRateDesc: string;
+  glowPointsBalanceLabel: string;
+  points: string;
+  redeemGlowPoints: string;
+  redeemGlowPointsDesc: string;
+  glowPointsDiscount: string;
+  pointsEarnedSuccess: string;
+  newPointsBalance: string;
+  tierGlowInsider: string;
+
+  // My Orders
+  myOrders: string;
+  orderHistory: string;
+  noOrdersFound: string;
+  noOrdersDesc: string;
+  orderStatus: string;
+  orderDate: string;
+  trackingNumber: string;
+  viewOrderDetails: string;
+  signInToViewOrders: string;
+  signInToViewOrdersDesc: string;
+  packageContents: string;
+  backToCheckout: string;
+  trackOrder: string;
 
   // Sizing Guide
   sizingConcierge: string;
@@ -305,6 +343,12 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     resetFilters: 'Reset Filters',
     pureSteelBadge: 'Pure Stainless Steel',
     waterproofBadge: '100% Waterproof',
+    lowStockOnly: 'Only {count} left',
+    lowStockBadge: 'Low Stock · Only {count} left',
+    lowStockBadgeTitle: 'Low Stock · Only {count} left',
+    outOfStock: 'Out of Stock',
+    soldOut: 'Sold Out',
+    addToCart: 'Add to Cart',
 
     // Product Modal / Quick View
     materialLabel: 'Material',
@@ -381,8 +425,11 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     cardSecurityNote: 'Encrypted & secured via 256-bit SSL',
     applePaySelected: 'Apple Pay Selected',
     applePayDesc: 'Click confirm order to authenticate {amount} securely via Touch ID, Face ID, or Passcode.',
-    codSelected: 'Cash on Delivery Selected',
-    codDesc: 'Pay exactly {amount} directly to the courier when your package arrives at your door.',
+    codSubtitle: 'Total Amount Due on Delivery',
+    codSelected: 'Cash on Delivery (Full Order Total)',
+    codDesc: 'Pay the total amount due of {amount} (jewelry items + shipping) in cash directly to the courier upon arrival at your doorstep. No prepayment required.',
+    codTotalNote: 'Total Amount Due Upon Delivery:',
+    codCashReminder: 'Please have {amount} in cash ready for the courier when your order arrives.',
     instapaySelected: 'InstaPay Payment Details',
     instapayDesc: 'Submit your order, then send {amount} via InstaPay. Our customer support will confirm via WhatsApp.',
     confirmOrder: 'Confirm Order',
@@ -393,6 +440,35 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     deliverTo: 'Deliver To',
     totalDue: 'Total Due',
     continueShopping: 'Continue Shopping',
+
+    // Glow Points Rewards
+    glowPoints: 'Glow Points',
+    glowPointsTitle: 'Glow Points Rewards',
+    glowPointsEarnNotice: 'You will earn +{points} Glow Points on this order',
+    glowPointsRateDesc: 'Earn 10 Glow Points for every 100 EGP spent on jewelry',
+    glowPointsBalanceLabel: 'Your Available Balance:',
+    points: 'pts',
+    redeemGlowPoints: 'Redeem Glow Points',
+    redeemGlowPointsDesc: 'Redeem points for an immediate discount on your order',
+    glowPointsDiscount: 'Glow Points Reward Discount',
+    pointsEarnedSuccess: '🎉 +{points} Glow Points added to your account!',
+    newPointsBalance: 'New Glow Points Balance: {balance} points',
+    tierGlowInsider: 'Tier: Glow Insider Member',
+
+    // My Orders
+    myOrders: 'My Orders',
+    orderHistory: 'Order History & Status',
+    noOrdersFound: 'No orders found yet',
+    noOrdersDesc: 'Once you place an order, its real-time preparation and courier status will appear here.',
+    orderStatus: 'Order Status',
+    orderDate: 'Date',
+    trackingNumber: 'Tracking Ref',
+    viewOrderDetails: 'View Order Details',
+    signInToViewOrders: 'Sign in to view your orders',
+    signInToViewOrdersDesc: 'Connect with your Google account to access your full order history, live courier tracking, and past receipts.',
+    packageContents: 'Package Contents',
+    backToCheckout: 'Back to Checkout',
+    trackOrder: 'Track Package',
 
     // Sizing Guide
     sizingConcierge: 'Jewelry Sizing Concierge',
@@ -540,6 +616,12 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     resetFilters: 'إعادة ضبط الفلاتر',
     pureSteelBadge: 'ستانلس ستيل خالص',
     waterproofBadge: 'مقاوم للماء 100%',
+    lowStockOnly: 'متبقي {count} فقط',
+    lowStockBadge: 'كمية محدودة · متبقي {count} قطع فقط',
+    lowStockBadgeTitle: 'كمية محدودة · متبقي {count} فقط',
+    outOfStock: 'نفدت الكمية',
+    soldOut: 'تم بيع الكمية',
+    addToCart: 'أضف إلى السلة',
 
     // Product Modal / Quick View
     materialLabel: 'المعدن',
@@ -616,8 +698,11 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     cardSecurityNote: 'معاملة مشفرة وآمنة تماماً بتشفير بنكي 256 بت',
     applePaySelected: 'تم اختيار Apple Pay',
     applePayDesc: 'اضغطي على تأكيد الطلب للمصادقة على {amount} فوراً عبر بصمة الوجه أو الإصبع.',
-    codSelected: 'تم اختيار الدفع عند الاستلام',
-    codDesc: 'ادفعي بالضبط {amount} نقداً للمندوب فور وصول الشحنة إلى باب منزلك.',
+    codSubtitle: 'المبلغ الإجمالي المستحق عند الاستلام',
+    codSelected: 'الدفع عند الاستلام (المبلغ الإجمالي بالكامل)',
+    codDesc: 'ادفعي إجمالي المبلغ المطلوب بالكامل {amount} (شاملة ثمن المجوهرات ومصاريف الشحن) نقداً للمندوب فور وصول الشحنة إلى باب منزلك. لا يُطلب أي دفع مسبق.',
+    codTotalNote: 'المبلغ الإجمالي المطلوب سداده للمندوب عند الاستلام:',
+    codCashReminder: 'يرجى تجهيز كامل المبلغ المطلوب ({amount}) نقداً لتسليمه للمندوب عند استلام الشحنة.',
     instapaySelected: 'تفاصيل الدفع عبر InstaPay',
     instapayDesc: 'أكدي الطلب، ثم حولي {amount} عبر تطبيق إنستاباي، وسيتواصل معك فريق خدمة العملاء عبر واتساب لتأكيد الدفع.',
     confirmOrder: 'تأكيد الطلب',
@@ -628,6 +713,35 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     deliverTo: 'الشحن إلى',
     totalDue: 'المبلغ المطلوب',
     continueShopping: 'العودة للمتجر',
+
+    // Glow Points Rewards
+    glowPoints: 'نقاط التوهج',
+    glowPointsTitle: 'مكافآت نقاط التوهج (Glow Points)',
+    glowPointsEarnNotice: 'ستحصلين على +{points} نقطة توهج مع هذا الطلب',
+    glowPointsRateDesc: 'اكسبي 10 نقاط توهج مقابل كل 100 جنيه يتم إنفاقها على المجوهرات',
+    glowPointsBalanceLabel: 'رصيدك المتاح:',
+    points: 'نقطة',
+    redeemGlowPoints: 'استبدال نقاط التوهج',
+    redeemGlowPointsDesc: 'استبدلي نقاطك للحصول على خصم فوري على طلبك',
+    glowPointsDiscount: 'خصم نقاط التوهج',
+    pointsEarnedSuccess: '🎉 تمت إضافة +{points} نقطة توهج إلى رصيدك!',
+    newPointsBalance: 'رصيد نقاط التوهج الجديد: {balance} نقطة',
+    tierGlowInsider: 'المستوى: عضوة متألقة في نادي التوهج',
+
+    // My Orders
+    myOrders: 'طلباتي',
+    orderHistory: 'سجل ومتابعة الطلبات',
+    noOrdersFound: 'لا توجد طلبات سابقة',
+    noOrdersDesc: 'فور تأكيد أي طلب، ستظهر تفاصيل التجهيز والشحن مع المندوب ومتابعة التوصيل هنا.',
+    orderStatus: 'حالة الطلب',
+    orderDate: 'تاريخ الطلب',
+    trackingNumber: 'رقم الشحنة',
+    viewOrderDetails: 'عرض تفاصيل الطلب',
+    signInToViewOrders: 'سجلي الدخول لمتابعة طلباتك',
+    signInToViewOrdersDesc: 'سجلي الدخول بحساب Google للوصول إلى سجل طلباتك المحفوظة وحالة التوصيل الفورية.',
+    packageContents: 'محتويات الشحنة',
+    backToCheckout: 'العودة للدفع',
+    trackOrder: 'تتبع الشحنة',
 
     // Sizing Guide
     sizingConcierge: 'دليل مقاسات المجوهرات',

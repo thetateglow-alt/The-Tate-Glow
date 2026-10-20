@@ -32,6 +32,9 @@ export interface OrderEmailData {
   deliveryFee: number;
   total: number;
   bundleType?: string;
+  glowPointsEarned?: number;
+  glowPointsDiscount?: number;
+  newPointsBalance?: number;
 }
 
 /**
@@ -246,6 +249,15 @@ export async function sendOrderConfirmationEmail(order: OrderEmailData): Promise
           <div style="font-size: 13px; color: #78716c;">Order Reference:</div>
           <div style="font-size: 16px; font-weight: 700; color: #1c1917; font-family: monospace;">${order.orderId}</div>
           <div style="margin-top: 8px; font-size: 13px; color: #78716c;">Payment Method: <strong style="color: #1c1917;">${order.paymentMethod}</strong></div>
+          ${
+            order.paymentMethod.toLowerCase().includes('cash on delivery') || order.paymentMethod.includes('الدفع عند الاستلام')
+              ? `
+            <div style="margin-top: 12px; padding: 10px 14px; background: #fefce8; border: 1px solid #fde047; border-radius: 6px; font-size: 13px; color: #854d0e; line-height: 1.4;">
+              💵 <strong>Cash on Delivery (Full Total Due):</strong> The courier must collect the <strong>Total Amount of ${formatEGP(order.total)}</strong> in cash upon delivery (includes all jewelry items and delivery fee).
+            </div>
+          `
+              : ''
+          }
         </div>
 
         <div class="section-title">Order Details</div>
@@ -268,6 +280,16 @@ export async function sendOrderConfirmationEmail(order: OrderEmailData): Promise
           `
               : ''
           }
+          ${
+            order.glowPointsDiscount && order.glowPointsDiscount > 0
+              ? `
+            <div style="display: flex; justify-content: space-between; font-size: 13px; color: #b45309; font-weight: 600; margin-bottom: 6px;">
+              <span>Glow Points Redeemed:</span>
+              <span>-${formatEGP(order.glowPointsDiscount)}</span>
+            </div>
+          `
+              : ''
+          }
           <div style="display: flex; justify-content: space-between; font-size: 13px; color: #78716c; margin-bottom: 8px;">
             <span>Delivery:</span>
             <span>${order.deliveryFee === 0 ? 'FREE' : formatEGP(order.deliveryFee)}</span>
@@ -276,6 +298,16 @@ export async function sendOrderConfirmationEmail(order: OrderEmailData): Promise
             <span>Total:</span>
             <span>${formatEGP(order.total)}</span>
           </div>
+          ${
+            order.glowPointsEarned !== undefined
+              ? `
+            <div style="margin-top: 12px; padding: 10px 14px; background: #fefce8; border: 1px solid #fef08a; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #854d0e;">
+              <span>✨ <strong>Glow Points Earned:</strong></span>
+              <span style="font-weight: 700; color: #713f12;">+${order.glowPointsEarned.toLocaleString()} Points ${order.newPointsBalance !== undefined ? `(New Balance: ${order.newPointsBalance.toLocaleString()})` : ''}</span>
+            </div>
+          `
+              : ''
+          }
         </div>
 
         <div class="section-title">Delivery Address & Contact</div>
