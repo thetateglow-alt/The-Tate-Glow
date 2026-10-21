@@ -16,7 +16,9 @@ export interface Product {
   detailsAr?: string[];
   specs: {
     material: string;
+    materialAr?: string;
     finish: string;
+    finishAr?: string;
     waterproof: string;
     hypoallergenic: boolean;
     weight: string;
@@ -24,9 +26,12 @@ export interface Product {
   };
   isBestSeller?: boolean;
   isNew?: boolean;
+  featured?: boolean;
   rating: number;
   reviewCount: number;
   stock?: number;
+  status?: 'active' | 'archived' | 'draft';
+  createdAt?: string;
 }
 
 export interface CartItem {

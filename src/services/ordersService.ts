@@ -1,4 +1,4 @@
-import { collection, doc, setDoc, getDocs, orderBy, query } from 'firebase/firestore';
+import { collection, doc, setDoc, getDoc, updateDoc, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from './firebaseAuth';
 
 export type OrderStatus = 'confirmed' | 'processing' | 'shipped' | 'delivered';
@@ -83,17 +83,17 @@ export async function saveCustomerOrder(order: CustomerOrder, userId?: string): 
     console.warn('Could not cache order in localStorage:', err);
   }
 
-  // If user is authenticated, also save to Firestore
+  // If user is authenticated, save to per-user orders collection in Firestore
   if (userId) {
     try {
-      const orderRef = doc(db, 'users', userId, 'orders', order.id);
-      await setDoc(orderRef, {
+      const userRef = doc(db, 'users', userId, 'orders', order.id);
+      await setDoc(userRef, {
         ...order,
         userId,
         updatedAt: new Date().toISOString()
       }, { merge: true });
     } catch (err) {
-      console.warn('Failed to save order to Firestore (offline fallback used):', err);
+      console.warn('User orders subcollection save note:', err);
     }
   }
 }

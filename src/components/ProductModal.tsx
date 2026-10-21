@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Product } from '../types/jewelry';
 import { X, Heart, ShieldCheck, Droplets, Sparkles, Check, Ruler, Truck, Shield, Tag, AlertCircle } from 'lucide-react';
 import { formatEGP } from '../utils/pricing';
@@ -23,14 +23,20 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   onOpenSizeGuide,
   lang
 }) => {
-  if (!product) return null;
-
   const t = TRANSLATIONS[lang];
   const [selectedSize, setSelectedSize] = useState<string>(
-    product.specs.sizes[0] || 'Standard'
+    product?.specs?.sizes?.[0] || 'Standard'
   );
   const [quantity, setQuantity] = useState<number>(1);
   const [activeTab, setActiveTab] = useState<'details' | 'specs'>('details');
+
+  useEffect(() => {
+    if (product?.specs?.sizes?.[0]) {
+      setSelectedSize(product.specs.sizes[0]);
+    }
+  }, [product?.id]);
+
+  if (!product) return null;
 
   const displayName = lang === 'ar' && product.nameAr ? product.nameAr : product.name;
   const displayCategory = lang === 'ar' && product.categoryAr ? product.categoryAr : product.category;

@@ -1,18 +1,19 @@
 {
   "entities": {
-    "Order": {
-      "title": "Order",
-      "description": "Customer purchase order for jewelry items",
+    "UserOrder": {
+      "title": "UserOrder",
+      "description": "Customer purchase order for jewelry items with delivery in Egypt",
       "type": "object",
       "properties": {
         "id": { "type": "string", "description": "Order reference code (e.g. TG-123456)" },
         "userId": { "type": "string", "description": "Authenticated user UID" },
         "customerName": { "type": "string", "description": "Recipient full name" },
         "customerEmail": { "type": "string", "description": "Recipient contact email" },
-        "phone": { "type": "string", "description": "Courier contact phone number" },
+        "phone": { "type": "string", "description": "Courier contact phone number in Egypt" },
         "city": { "type": "string", "description": "Egyptian governorate / delivery city" },
-        "address": { "type": "string", "description": "Detailed street address, building, apt" },
-        "paymentMethod": { "type": "string", "description": "Selected payment method" },
+        "address": { "type": "string", "description": "Detailed street address, building, apartment" },
+        "paymentMethod": { "type": "string", "description": "Selected payment method (COD, Card, InstaPay)" },
+        "items": { "type": "array", "description": "Array of ordered products with quantities, sizes, prices" },
         "subtotal": { "type": "number", "description": "Jewelry items subtotal in EGP" },
         "discount": { "type": "number", "description": "Bundle or reward discount amount in EGP" },
         "deliveryFee": { "type": "number", "description": "Courier delivery fee in EGP" },
@@ -22,15 +23,18 @@
           "enum": ["confirmed", "processing", "shipped", "delivered"],
           "description": "Current order fulfillment status"
         },
-        "createdAt": { "type": "string", "description": "ISO date string when order was placed" }
+        "statusLabelEn": { "type": "string", "description": "Human-readable status in English" },
+        "statusLabelAr": { "type": "string", "description": "Human-readable status in Arabic" },
+        "createdAt": { "type": "string", "description": "ISO date string when order was placed" },
+        "updatedAt": { "type": "string", "description": "ISO date string of last update" }
       },
-      "required": ["id", "userId", "customerName", "phone", "city", "address", "paymentMethod", "total", "status", "createdAt"]
+      "required": ["id", "customerName", "phone", "city", "address", "paymentMethod", "items", "total", "status", "createdAt"]
     }
   },
   "firestore": {
     "/users/{userId}/orders/{orderId}": {
-      "schema": "Order",
-      "description": "Orders placed by authenticated users"
+      "schema": "UserOrder",
+      "description": "Per-user customer order history"
     }
   }
 }

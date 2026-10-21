@@ -102,7 +102,6 @@ export default function App() {
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
-
   // Authenticated User State (Firebase Auth & Google Workspace Gmail)
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 

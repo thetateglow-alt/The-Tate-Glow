@@ -30,8 +30,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   currentUser,
   onAuthChange,
 }) => {
-  if (!isOpen) return null;
-
   const t = TRANSLATIONS[lang];
   const [step, setStep] = useState<'form' | 'success'>('form');
   const [modalTab, setModalTab] = useState<'checkout' | 'orders'>('checkout');
@@ -298,6 +296,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     setEmailStatus('idle');
     onClose();
   };
+
+  if (!isOpen) return null;
 
   return (
     <div

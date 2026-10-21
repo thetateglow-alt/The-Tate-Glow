@@ -9,10 +9,10 @@ interface SizeGuideModalProps {
 }
 
 export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({ isOpen, onClose, lang }) => {
-  if (!isOpen) return null;
-
-  const t = TRANSLATIONS[lang];
   const [activeTab, setActiveTab] = useState<'rings' | 'necklaces' | 'bracelets'>('rings');
+  const t = TRANSLATIONS[lang];
+
+  if (!isOpen) return null;
 
   return (
     <div
