@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { User } from 'firebase/auth';
 import { CartItem } from '../types/jewelry';
-import { X, CheckCircle, ShieldCheck, Lock, CreditCard, Banknote, Sparkles, Clock, Mail, Send, Check, Award, Package, Calendar, MapPin, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
+import { X, CheckCircle, ShieldCheck, Lock, CreditCard, Banknote, Sparkles, Clock, Mail, Check, Award } from 'lucide-react';
 import { calculateBundleDiscount, formatEGP } from '../utils/pricing';
 import { BRAND_CONFIG } from '../data/products';
 import { Language, TRANSLATIONS } from '../i18n/translations';
 import { sendOrderConfirmationEmail } from '../services/gmailService';
 import { googleSignIn } from '../services/firebaseAuth';
-import { CustomerOrder, OrderStatus, saveCustomerOrder, fetchCustomerOrders, ORDER_STATUS_MAP } from '../services/ordersService';
+import { CustomerOrder, saveCustomerOrder } from '../services/ordersService';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -32,32 +32,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 }) => {
   const t = TRANSLATIONS[lang];
   const [step, setStep] = useState<'form' | 'success'>('form');
-  const [modalTab, setModalTab] = useState<'checkout' | 'orders'>('checkout');
-  const [orders, setOrders] = useState<CustomerOrder[]>([]);
-  const [isOrdersLoading, setIsOrdersLoading] = useState(false);
-  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
-  const [isSigningInOrders, setIsSigningInOrders] = useState(false);
-
-  const loadOrders = async () => {
-    setIsOrdersLoading(true);
-    try {
-      const fetched = await fetchCustomerOrders(currentUser?.uid);
-      setOrders(fetched);
-      if (fetched.length > 0 && !expandedOrderId) {
-        setExpandedOrderId(fetched[0].id);
-      }
-    } catch (err) {
-      console.warn('Error fetching orders:', err);
-    } finally {
-      setIsOrdersLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadOrders();
-  }, [currentUser?.uid, isOpen]);
-
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'cod' | 'instapay'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'cod'>('card');
   const [formData, setFormData] = useState({
     name: currentUser?.displayName || '',
     phone: '',
@@ -156,12 +131,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         ? `بطاقة بنكية ${last4 ? `(تنتهي بـ ${last4})` : ''}`
         : `Credit / Debit Card ${last4 ? `(ending in ${last4})` : ''}`;
     }
-    if (paymentMethod === 'cod') {
-      return lang === 'ar'
-        ? `الدفع عند الاستلام (المبلغ الإجمالي المستحق: ${formatEGP(total, lang)})`
-        : `Cash on Delivery (Total Amount Due: ${formatEGP(total, lang)})`;
-    }
-    return 'InstaPay';
+    return lang === 'ar'
+      ? `الدفع عند الاستلام (المبلغ الإجمالي المستحق: ${formatEGP(total, lang)})`
+      : `Cash on Delivery (Total Amount Due: ${formatEGP(total, lang)})`;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -212,7 +184,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       glowPointsEarned: earnedGlowPoints
     };
     saveCustomerOrder(newOrderRecord, currentUser?.uid);
-    setOrders(prev => [newOrderRecord, ...prev.filter(o => o.id !== newOrderRecord.id)]);
 
     // Auto-dispatch confirmation email to the store owner (thetateglow@gmail.com) and customer receipt
     sendOrderConfirmationEmail({
@@ -308,301 +279,24 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         className="relative bg-white rounded-lg shadow-2xl max-w-2xl w-full overflow-hidden border border-stone-200"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header with Segmented Navigation (Checkout / My Orders) */}
+        {/* Header */}
         <div className="p-4 sm:p-5 border-b border-stone-200 flex items-center justify-between bg-stone-50/80">
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <button
-              type="button"
-              onClick={() => setModalTab('checkout')}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer flex items-center gap-1.5 ${
-                modalTab === 'checkout'
-                  ? 'bg-stone-900 text-white shadow-xs'
-                  : 'bg-white text-stone-600 hover:text-stone-900 border border-stone-200 hover:bg-stone-100'
-              }`}
-            >
-              <Lock className="w-3.5 h-3.5" />
-              <span>{t.secureCheckout}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setModalTab('orders');
-                loadOrders();
-              }}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer flex items-center gap-1.5 ${
-                modalTab === 'orders'
-                  ? 'bg-stone-900 text-white shadow-xs'
-                  : 'bg-white text-stone-600 hover:text-stone-900 border border-stone-200 hover:bg-stone-100'
-              }`}
-            >
-              <Package className="w-3.5 h-3.5" />
-              <span>{t.myOrders}</span>
-              {orders.length > 0 && (
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                  modalTab === 'orders' ? 'bg-stone-700 text-white' : 'bg-stone-200 text-stone-800'
-                }`}>
-                  {orders.length}
-                </span>
-              )}
-            </button>
+          <div className="flex items-center gap-2">
+            <Lock className="w-4 h-4 text-stone-700" />
+            <h3 className="font-serif font-medium text-stone-900 text-base sm:text-lg tracking-tight">
+              {t.secureCheckout}
+            </h3>
           </div>
-
-          <div className="flex items-center gap-1.5">
-            {modalTab === 'orders' && (
-              <button
-                type="button"
-                onClick={loadOrders}
-                disabled={isOrdersLoading}
-                title="Refresh orders"
-                className="p-1.5 text-stone-500 hover:text-stone-900 rounded-full hover:bg-stone-200/60 transition-colors cursor-pointer"
-              >
-                <RefreshCw className={`w-4 h-4 ${isOrdersLoading ? 'animate-spin' : ''}`} />
-              </button>
-            )}
-            <button
-              onClick={handleCloseAndReset}
-              className="p-1.5 text-stone-400 hover:text-stone-900 rounded-full hover:bg-stone-200/60 transition-colors cursor-pointer"
-              aria-label="Close"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+          <button
+            onClick={handleCloseAndReset}
+            className="p-1.5 text-stone-400 hover:text-stone-900 rounded-full hover:bg-stone-200/60 transition-colors cursor-pointer"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        {modalTab === 'orders' ? (
-          /* My Orders Section */
-          <div className="p-6 sm:p-8 space-y-5 max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-              <div>
-                <h3 className="text-base sm:text-lg font-serif font-semibold text-stone-900 flex items-center gap-2">
-                  <span>{t.orderHistory}</span>
-                  {orders.length > 0 && (
-                    <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-stone-100 text-stone-800 border border-stone-200">
-                      {orders.length}
-                    </span>
-                  )}
-                </h3>
-                <p className="text-xs text-stone-500 mt-0.5">
-                  {currentUser ? (currentUser.displayName || currentUser.email) : t.orderHistory}
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setModalTab('checkout')}
-                className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold rounded border border-stone-300 transition-colors cursor-pointer flex items-center gap-1.5"
-              >
-                <Lock className="w-3.5 h-3.5 text-stone-600" />
-                <span>{t.backToCheckout}</span>
-              </button>
-            </div>
-
-            {/* Guest Sign-in prompt if unauthenticated */}
-            {!currentUser && (
-              <div className="p-3.5 bg-gradient-to-r from-amber-50 to-stone-50 rounded-lg border border-amber-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                <div>
-                  <p className="font-semibold text-stone-900 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-700" />
-                    <span>{t.signInToViewOrders}</span>
-                  </p>
-                  <p className="text-[11px] text-stone-600 mt-0.5">
-                    {t.signInToViewOrdersDesc}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    setIsSigningInOrders(true);
-                    try {
-                      const res = await googleSignIn();
-                      if (res) {
-                        onAuthChange(res.user);
-                        await loadOrders();
-                      }
-                    } catch (e) {
-                      console.warn(e);
-                    } finally {
-                      setIsSigningInOrders(false);
-                    }
-                  }}
-                  disabled={isSigningInOrders}
-                  className="px-3.5 py-1.5 bg-stone-900 hover:bg-stone-800 text-white rounded text-xs font-medium whitespace-nowrap transition-colors cursor-pointer self-start sm:self-auto shrink-0 shadow-xs"
-                >
-                  {isSigningInOrders ? 'Connecting...' : 'Sign in with Google'}
-                </button>
-              </div>
-            )}
-
-            {/* Orders list */}
-            {isOrdersLoading && orders.length === 0 ? (
-              <div className="py-12 text-center space-y-2">
-                <RefreshCw className="w-6 h-6 text-stone-400 animate-spin mx-auto" />
-                <p className="text-xs text-stone-500 font-medium">
-                  {lang === 'ar' ? 'جاري تحميل الطلبات...' : 'Loading your orders...'}
-                </p>
-              </div>
-            ) : orders.length === 0 ? (
-              <div className="py-12 text-center space-y-3 max-w-sm mx-auto">
-                <div className="w-12 h-12 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center mx-auto text-stone-400">
-                  <Package className="w-6 h-6 text-stone-400" />
-                </div>
-                <h4 className="text-sm font-semibold text-stone-900">{t.noOrdersFound}</h4>
-                <p className="text-xs text-stone-500 leading-relaxed">{t.noOrdersDesc}</p>
-                <button
-                  type="button"
-                  onClick={() => setModalTab('checkout')}
-                  className="mt-2 px-4 py-2 bg-stone-950 text-white rounded text-xs uppercase tracking-wider font-semibold hover:bg-stone-800 transition-colors cursor-pointer"
-                >
-                  {t.backToCheckout}
-                </button>
-              </div>
-            ) : (
-              orders.map((ord) => {
-                const statusMeta = ORDER_STATUS_MAP[ord.status] || ORDER_STATUS_MAP.confirmed;
-                const isExpanded = expandedOrderId === ord.id;
-
-                return (
-                  <div
-                    key={ord.id}
-                    className="bg-white rounded-lg border border-stone-200/90 shadow-2xs overflow-hidden transition-all hover:border-stone-300"
-                  >
-                    {/* Header */}
-                    <div
-                      onClick={() => setExpandedOrderId(isExpanded ? null : ord.id)}
-                      className="p-4 bg-stone-50/70 hover:bg-stone-50 cursor-pointer flex items-center justify-between gap-3 select-none"
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-mono text-xs font-bold text-stone-900">{ord.id}</span>
-                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${statusMeta.color}`}>
-                            {lang === 'ar' ? statusMeta.ar : statusMeta.en}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 text-[11px] text-stone-500">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3 text-stone-400" />
-                            {new Date(ord.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric'
-                            })}
-                          </span>
-                          <span>·</span>
-                          <span>{ord.items.reduce((acc, i) => acc + i.quantity, 0)} {t.items}</span>
-                        </div>
-                      </div>
-
-                      <div className="text-right rtl:text-left flex items-center gap-2">
-                        <div>
-                          <span className="text-xs font-bold text-stone-950 tabular-nums block">
-                            {formatEGP(ord.total, lang)}
-                          </span>
-                          <span className="text-[10px] text-stone-400 block truncate max-w-[120px]">
-                            {ord.paymentMethod}
-                          </span>
-                        </div>
-                        {isExpanded ? (
-                          <ChevronUp className="w-4 h-4 text-stone-400" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-stone-400" />
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Progress Tracker Bar */}
-                    <div className="px-4 py-2.5 bg-white border-t border-stone-100">
-                      <div className="relative flex items-center justify-between">
-                        <div className="absolute top-1/2 left-3 right-3 h-0.5 -translate-y-1/2 bg-stone-200 z-0" />
-                        <div
-                          className="absolute top-1/2 left-3 h-0.5 -translate-y-1/2 bg-amber-600 transition-all duration-500 z-0 rtl:left-auto rtl:right-3"
-                          style={{
-                            width: `${Math.min(100, Math.max(0, ((statusMeta.step - 1) / 3) * 100))}%`
-                          }}
-                        />
-
-                        {(['confirmed', 'processing', 'shipped', 'delivered'] as OrderStatus[]).map((st, idx) => {
-                          const meta = ORDER_STATUS_MAP[st];
-                          const isDone = statusMeta.step >= meta.step;
-                          const isCurrent = statusMeta.step === meta.step;
-
-                          return (
-                            <div key={st} className="relative z-10 flex flex-col items-center">
-                              <div
-                                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold transition-all ${
-                                  isDone
-                                    ? 'bg-amber-600 text-white shadow-2xs ring-2 ring-white'
-                                    : 'bg-white border-2 border-stone-300 text-stone-400'
-                                }`}
-                              >
-                                {isDone ? '✓' : idx + 1}
-                              </div>
-                              <span
-                                className={`text-[9px] mt-1 font-medium hidden sm:block ${
-                                  isCurrent ? 'text-amber-900 font-bold' : isDone ? 'text-stone-700' : 'text-stone-400'
-                                }`}
-                              >
-                                {lang === 'ar' ? meta.ar.split(' ')[0] : meta.en.split(' ')[0]}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Expanded Content */}
-                    {isExpanded && (
-                      <div className="p-4 border-t border-stone-100 bg-stone-50/40 text-xs space-y-3">
-                        <div>
-                          <span className="text-[11px] font-semibold text-stone-700 uppercase tracking-wider block mb-2">
-                            {t.packageContents}
-                          </span>
-                          <div className="space-y-2">
-                            {ord.items.map((item, idx) => (
-                              <div
-                                key={idx}
-                                className="flex items-center justify-between gap-3 bg-white p-2.5 rounded border border-stone-200/70"
-                              >
-                                <div className="flex items-center gap-2.5 min-w-0">
-                                  {item.image && (
-                                    <img
-                                      src={item.image}
-                                      alt={item.name}
-                                      className="w-9 h-9 object-cover rounded bg-stone-100 shrink-0"
-                                    />
-                                  )}
-                                  <div className="min-w-0">
-                                    <h5 className="font-medium text-stone-900 truncate text-xs">
-                                      {lang === 'ar' && item.nameAr ? item.nameAr : item.name}
-                                    </h5>
-                                    <p className="text-[11px] text-stone-500">
-                                      {item.selectedSize ? `${item.selectedSize} · ` : ''}Qty: {item.quantity}
-                                    </p>
-                                  </div>
-                                </div>
-                                <span className="font-semibold text-stone-900 tabular-nums text-xs shrink-0">
-                                  {formatEGP(item.price * item.quantity, lang)}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Destination */}
-                        <div className="bg-white p-3 rounded border border-stone-200/70 space-y-1">
-                          <span className="text-[11px] font-semibold text-stone-700 flex items-center gap-1.5">
-                            <MapPin className="w-3.5 h-3.5 text-stone-500" />
-                            {t.deliverTo}: {ord.customerName} ({ord.phone})
-                          </span>
-                          <p className="text-stone-600 text-[11px]">{ord.address}, {ord.city}</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </div>
-        ) : step === 'success' ? (
+        {step === 'success' ? (
           /* Order Confirmation Success Receipt State */
           <div className="p-8 text-center space-y-6">
             <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-200">
@@ -731,7 +425,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     disabled={emailStatus === 'sending'}
                     className="w-full py-2 px-3 bg-stone-900 hover:bg-stone-800 text-white rounded text-xs font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs disabled:opacity-50"
                   >
-                    <Send className="w-3.5 h-3.5" />
+                    <Mail className="w-3.5 h-3.5" />
                     <span>{emailStatus === 'sending' ? 'Dispatching via Gmail...' : 'Send Receipt to My Gmail'}</span>
                   </button>
                 </div>
@@ -751,15 +445,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               )}
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setModalTab('orders')}
-                className="w-full sm:w-auto px-6 py-3 bg-white border border-stone-300 text-stone-800 rounded text-xs uppercase tracking-[0.15em] font-semibold hover:bg-stone-50 transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs"
-              >
-                <Package className="w-4 h-4 text-stone-700" />
-                <span>{t.myOrders}</span>
-              </button>
+            <div className="flex items-center justify-center pt-2">
               <button
                 type="button"
                 onClick={handleCloseAndReset}
@@ -1006,20 +692,20 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               <h3 className="text-xs uppercase tracking-wider font-semibold text-stone-900 mb-3">
                 {t.paymentMethodHeading}
               </h3>
-              <div className="grid grid-cols-3 gap-2 sm:gap-2.5 text-xs mb-3">
+              <div className="grid grid-cols-2 gap-3 text-xs mb-3">
                 {/* Credit / Debit Card Option */}
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('card')}
-                  className={`py-3 px-2 sm:px-2.5 rounded-lg border flex flex-col items-center justify-center gap-1.5 cursor-pointer font-medium transition-colors text-center ${
+                  className={`py-3 px-3 rounded-lg border flex flex-col items-center justify-center gap-1.5 cursor-pointer font-medium transition-colors text-center ${
                     paymentMethod === 'card'
                       ? 'border-stone-900 bg-stone-900 text-white shadow-xs'
                       : 'border-stone-200 bg-white text-stone-700 hover:border-stone-400'
                   }`}
                 >
-                  <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-                  <span className="font-semibold text-[11px] sm:text-xs leading-tight">{t.creditDebitCard}</span>
-                  <span className={`text-[9px] sm:text-[10px] truncate max-w-full ${paymentMethod === 'card' ? 'text-stone-300' : 'text-stone-400'}`}>
+                  <CreditCard className="w-5 h-5 shrink-0" />
+                  <span className="font-semibold text-xs leading-tight">{t.creditDebitCard}</span>
+                  <span className={`text-[10px] truncate max-w-full ${paymentMethod === 'card' ? 'text-stone-300' : 'text-stone-400'}`}>
                     {t.creditDebitCardSubtitle}
                   </span>
                 </button>
@@ -1028,33 +714,16 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('cod')}
-                  className={`py-3 px-2 sm:px-2.5 rounded-lg border flex flex-col items-center justify-center gap-1.5 cursor-pointer font-medium transition-colors text-center ${
+                  className={`py-3 px-3 rounded-lg border flex flex-col items-center justify-center gap-1.5 cursor-pointer font-medium transition-colors text-center ${
                     paymentMethod === 'cod'
                       ? 'border-stone-900 bg-stone-900 text-white shadow-xs'
                       : 'border-stone-200 bg-white text-stone-700 hover:border-stone-400'
                   }`}
                 >
-                  <Banknote className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-                  <span className="font-semibold text-[11px] sm:text-xs leading-tight">{t.cashOnDelivery}</span>
-                  <span className={`text-[9px] sm:text-[10px] ${paymentMethod === 'cod' ? 'text-stone-300' : 'text-stone-400'}`}>
+                  <Banknote className="w-5 h-5 shrink-0" />
+                  <span className="font-semibold text-xs leading-tight">{t.cashOnDelivery}</span>
+                  <span className={`text-[10px] ${paymentMethod === 'cod' ? 'text-stone-300' : 'text-stone-400'}`}>
                     {t.codSubtitle}
-                  </span>
-                </button>
-
-                {/* InstaPay Option */}
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('instapay')}
-                  className={`py-3 px-2 sm:px-2.5 rounded-lg border flex flex-col items-center justify-center gap-1.5 cursor-pointer font-medium transition-colors text-center ${
-                    paymentMethod === 'instapay'
-                      ? 'border-stone-900 bg-stone-900 text-white shadow-xs'
-                      : 'border-stone-200 bg-white text-stone-700 hover:border-stone-400'
-                  }`}
-                >
-                  <Send className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-                  <span className="font-semibold text-[11px] sm:text-xs leading-tight">{t.instaPay}</span>
-                  <span className={`text-[9px] sm:text-[10px] ${paymentMethod === 'instapay' ? 'text-stone-300' : 'text-stone-400'}`}>
-                    {lang === 'ar' ? 'تحويل فوري' : 'Direct Mobile'}
                   </span>
                 </button>
               </div>
@@ -1191,15 +860,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         <span className="tabular-nums text-sm text-stone-950">{formatEGP(total, lang)}</span>
                       </div>
                     </div>
-                  </div>
-                )}
-
-                {paymentMethod === 'instapay' && (
-                  <div className="space-y-1">
-                    <p className="font-semibold text-stone-900">{t.instapaySelected}</p>
-                    <p className="text-[11px] text-stone-500 leading-relaxed">
-                      {t.instapayDesc.replace('{amount}', formatEGP(total, lang))}
-                    </p>
                   </div>
                 )}
               </div>

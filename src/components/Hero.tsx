@@ -5,11 +5,11 @@ import { Language, TRANSLATIONS } from '../i18n/translations';
 
 interface HeroProps {
   onShopClick: () => void;
-  onExploreSteel: () => void;
+  onExploreSteel?: () => void;
   lang: Language;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onShopClick, onExploreSteel, lang }) => {
+export const Hero: React.FC<HeroProps> = ({ onShopClick, lang }) => {
   const t = TRANSLATIONS[lang];
 
   return (
@@ -28,11 +28,11 @@ export const Hero: React.FC<HeroProps> = ({ onShopClick, onExploreSteel, lang })
               <span>{t.heroBadge}</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] leading-[1.12] font-serif font-normal text-stone-950 tracking-tight text-balance mb-4">
+            <h1 className="text-2xl sm:text-3xl lg:text-[2.25rem] leading-[1.25] font-serif font-normal text-stone-950 tracking-tight text-balance mb-3">
               {t.heroTitle}
             </h1>
 
-            <p className="text-base sm:text-lg text-stone-600 font-light leading-relaxed mb-8 max-w-lg">
+            <p className="text-xs sm:text-sm text-stone-600 font-light leading-relaxed mb-6 max-w-md">
               {t.heroSubtitle}
             </p>
 
@@ -44,13 +44,6 @@ export const Hero: React.FC<HeroProps> = ({ onShopClick, onExploreSteel, lang })
               >
                 <span>{t.exploreCapsule}</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
-              </button>
-
-              <button
-                onClick={onExploreSteel}
-                className="inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-white hover:bg-stone-100 text-stone-800 text-xs uppercase tracking-[0.16em] font-medium rounded-md transition-colors cursor-pointer whitespace-nowrap shrink-0 border border-stone-200"
-              >
-                <span>{t.whyPureSteel}</span>
               </button>
             </div>
 
