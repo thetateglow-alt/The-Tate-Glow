@@ -1,12 +1,10 @@
-FROM node:22-alpine AS build
+FROM node:22-alpine
 WORKDIR /app
 COPY package*.json ./
-RUN npm install --legacy-peer-deps
+RUN npm install
 COPY . .
 RUN npm run build
-
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-RUN printf 'server {\n listen 8080;\n root /usr/share/nginx/html;\n index index.html;\n location / { try_files $uri /index.html; }\n}\n' > /etc/nginx/conf.d/default.conf
+ENV NODE_ENV=production
+ENV PORT=8080
 EXPOSE 8080
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["npx", "tsx", "server.ts"]

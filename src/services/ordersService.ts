@@ -99,17 +99,57 @@ export interface CheckoutResponsePayload {
  * and sets status to 'pending payment' (or 'cod_pending').
  */
 export async function submitSecureCheckout(payload: CheckoutRequestPayload): Promise<CheckoutResponsePayload> {
-  const response = await fetch('/api/checkout', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  });
+  const endpointUrl = '/api/checkout';
+  let response: Response;
 
-  const data = await response.json();
-  if (!response.ok || !data.success) {
-    throw new Error(data.error || 'Server rejected checkout validation.');
+  try {
+    response = await fetch(endpointUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+  } catch (networkErr: any) {
+    throw new Error(`Connection error: ${networkErr.message || 'Unable to reach checkout server.'}`);
+  }
+
+  const contentType = response.headers.get('content-type') || '';
+  const isJson = contentType.includes('application/json');
+
+  if (!response.ok) {
+    let errorDetail = `Order request failed with status ${response.status} (${response.statusText})`;
+    if (isJson) {
+      try {
+        const errorJson = await response.json();
+        errorDetail = errorJson.error || errorJson.message || errorDetail;
+      } catch {
+        // Fallback to default message
+      }
+    } else {
+      const text = await response.text();
+      console.warn(`[Checkout] Non-JSON error response from ${endpointUrl}:`, text.slice(0, 300));
+      errorDetail = `Server returned an invalid HTML error response (${response.status}) instead of JSON. Ensure ${endpointUrl} is routed to the application server.`;
+    }
+    throw new Error(errorDetail);
+  }
+
+  if (!isJson) {
+    const text = await response.text();
+    console.warn(`[Checkout] Unexpected non-JSON response from ${endpointUrl}:`, text.slice(0, 300));
+    throw new Error(`Expected JSON response from checkout endpoint (${endpointUrl}), but received ${contentType || 'non-JSON content'}.`);
+  }
+
+  let data: CheckoutResponsePayload;
+  try {
+    data = await response.json();
+  } catch (jsonErr: any) {
+    throw new Error(`Failed to parse checkout server response: ${jsonErr.message}`);
+  }
+
+  if (!data.success) {
+    throw new Error(data.message || 'Server rejected checkout validation.');
   }
 
   // Cache order locally for instantaneous client receipts
