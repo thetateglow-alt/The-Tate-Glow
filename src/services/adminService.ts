@@ -33,16 +33,55 @@ import {
 
 export const STORE_OWNER_EMAIL = 'thetateglow@gmail.com';
 
-/**
- * Checks if user is an authorized admin
- */
-export async function checkIsAdmin(user: User | null): Promise<boolean> {
-  if (!user || !user.email) return false;
-  const email = user.email.toLowerCase().trim();
+export interface AdminStatusResult {
+  isAuthenticated: boolean;
+  isEmailVerified: boolean;
+  isAdmin: boolean;
+  email: string | null;
+  role?: string;
+  reason?: 'unauthenticated' | 'unverified_email' | 'unauthorized_role' | 'authorized';
+}
 
-  // Primary store owner is always authorized as superadmin
-  if (email === STORE_OWNER_EMAIL.toLowerCase()) {
-    return true;
+/**
+ * Checks detailed admin authentication and email verification status.
+ * Required by Firebase security rules: isAdmin() requires request.auth.token.email_verified == true.
+ */
+export async function getAdminAuthStatus(user: User | null): Promise<AdminStatusResult> {
+  if (!user || !user.email) {
+    return {
+      isAuthenticated: false,
+      isEmailVerified: false,
+      isAdmin: false,
+      email: null,
+      reason: 'unauthenticated'
+    };
+  }
+
+  const email = user.email.toLowerCase().trim();
+  const isOwner = email === STORE_OWNER_EMAIL.toLowerCase();
+
+  // Strict email verification check required by firestore.rules
+  if (!user.emailVerified) {
+    return {
+      isAuthenticated: true,
+      isEmailVerified: false,
+      isAdmin: false,
+      email,
+      role: isOwner ? 'superadmin' : undefined,
+      reason: 'unverified_email'
+    };
+  }
+
+  // Primary store owner with verified email is authorized as superadmin
+  if (isOwner) {
+    return {
+      isAuthenticated: true,
+      isEmailVerified: true,
+      isAdmin: true,
+      email,
+      role: 'superadmin',
+      reason: 'authorized'
+    };
   }
 
   try {
@@ -50,13 +89,35 @@ export async function checkIsAdmin(user: User | null): Promise<boolean> {
     const snap = await getDoc(adminDocRef);
     if (snap.exists()) {
       const data = snap.data() as AdminUser;
-      return ['superadmin', 'manager', 'staff'].includes(data.role);
+      const authorized = ['superadmin', 'manager', 'staff'].includes(data.role);
+      return {
+        isAuthenticated: true,
+        isEmailVerified: true,
+        isAdmin: authorized,
+        email,
+        role: data.role,
+        reason: authorized ? 'authorized' : 'unauthorized_role'
+      };
     }
   } catch (err) {
     console.warn('Admin check note:', err);
   }
 
-  return false;
+  return {
+    isAuthenticated: true,
+    isEmailVerified: true,
+    isAdmin: false,
+    email,
+    reason: 'unauthorized_role'
+  };
+}
+
+/**
+ * Checks if user is an authorized admin with verified email
+ */
+export async function checkIsAdmin(user: User | null): Promise<boolean> {
+  const status = await getAdminAuthStatus(user);
+  return status.isAdmin;
 }
 
 /**

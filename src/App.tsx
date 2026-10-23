@@ -545,6 +545,7 @@ export default function App() {
         onClose={() => setIsAdminOpen(false)}
         currentUser={currentUser}
         onProductsUpdated={loadCatalogProducts}
+        onAuthChange={setCurrentUser}
       />
     </div>
   );

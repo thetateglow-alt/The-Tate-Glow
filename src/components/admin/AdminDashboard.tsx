@@ -31,7 +31,13 @@ import {
   ArrowDownRight,
   Sparkles,
   Truck,
-  RotateCcw
+  RotateCcw,
+  Mail,
+  Send,
+  LogIn,
+  LogOut,
+  AlertCircle,
+  KeyRound
 } from 'lucide-react';
 import {
   AdminProduct,
@@ -67,8 +73,17 @@ import {
   removeAdminUser,
   fetchAuditLogs,
   calculateDashboardMetrics,
+  getAdminAuthStatus,
+  AdminStatusResult,
   STORE_OWNER_EMAIL
 } from '../../services/adminService';
+import {
+  auth,
+  googleSignIn,
+  logout,
+  sendVerificationEmail,
+  reloadCurrentUser
+} from '../../services/firebaseAuth';
 import { formatEGP } from '../../utils/pricing';
 import { JewelryCategory } from '../../types/jewelry';
 
@@ -77,6 +92,7 @@ interface AdminDashboardProps {
   onClose: () => void;
   currentUser: User | null;
   onProductsUpdated?: () => void;
+  onAuthChange?: (user: User | null) => void;
 }
 
 type AdminTab =
@@ -93,11 +109,29 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   isOpen,
   onClose,
   currentUser,
-  onProductsUpdated
+  onProductsUpdated,
+  onAuthChange
 }) => {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
   const [isLoading, setIsLoading] = useState(true);
   const [feedbackMsg, setFeedbackMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // User Authentication & Verification States
+  const [activeUser, setActiveUser] = useState<User | null>(currentUser || auth.currentUser);
+  const [authStatus, setAuthStatus] = useState<AdminStatusResult>({
+    isAuthenticated: false,
+    isEmailVerified: false,
+    isAdmin: false,
+    email: null,
+    reason: 'unauthenticated'
+  });
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isSendingVerification, setIsSendingVerification] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [verificationMessage, setVerificationMessage] = useState<string | null>(null);
+  const [verificationError, setVerificationError] = useState<string | null>(null);
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [isReloading, setIsReloading] = useState(false);
 
   // Core Data States
   const [products, setProducts] = useState<AdminProduct[]>([]);
@@ -136,11 +170,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     expiresDays: 60
   });
 
-  const adminEmail = currentUser?.email || STORE_OWNER_EMAIL;
+  const adminEmail = activeUser?.email || currentUser?.email || STORE_OWNER_EMAIL;
 
   const notify = (text: string, type: 'success' | 'error' = 'success') => {
     setFeedbackMsg({ text, type });
     setTimeout(() => setFeedbackMsg(null), 3500);
+  };
+
+  const evaluateAuth = async (userToTest?: User | null) => {
+    setIsCheckingAuth(true);
+    const u = userToTest !== undefined ? userToTest : (auth.currentUser || currentUser);
+    setActiveUser(u);
+    const status = await getAdminAuthStatus(u);
+    setAuthStatus(status);
+    setIsCheckingAuth(false);
+    return status;
   };
 
   const loadData = async () => {
@@ -175,9 +219,150 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      loadData();
+      evaluateAuth(currentUser || auth.currentUser).then((status) => {
+        if (status.isAdmin && status.isEmailVerified) {
+          loadData();
+        }
+      });
     }
-  }, [isOpen]);
+  }, [isOpen, currentUser]);
+
+  /**
+   * Action: Send Firebase verification email using sendEmailVerification.
+   * Displays clear notice to check inbox and sign in again.
+   */
+  const handleSendVerificationEmail = async () => {
+    const targetUser = activeUser || auth.currentUser;
+    if (!targetUser) {
+      setVerificationError('No user account is currently signed in.');
+      return;
+    }
+
+    setIsSendingVerification(true);
+    setVerificationError(null);
+    try {
+      await sendVerificationEmail(targetUser);
+      setVerificationSent(true);
+      setVerificationMessage(
+        `Verification email sent to ${targetUser.email}! Please check your inbox (and spam/junk folder) for the verification link, verify your email address, and then sign in again.`
+      );
+      notify('Verification email sent successfully');
+    } catch (err: any) {
+      console.error('Send verification email error:', err);
+      const msg = err.code === 'auth/too-many-requests'
+        ? 'Too many verification attempts. Please wait a moment before requesting another email.'
+        : err.message || 'Failed to send verification email. Please try again.';
+      setVerificationError(msg);
+      notify(msg, 'error');
+    } finally {
+      setIsSendingVerification(false);
+    }
+  };
+
+  /**
+   * Action: Sign out and prompt Google Sign-In again to refresh token with email_verified: true
+   */
+  const handleSignOutAndSignInAgain = async () => {
+    setIsSigningIn(true);
+    setVerificationError(null);
+    try {
+      await logout();
+      setActiveUser(null);
+      onAuthChange?.(null);
+      setVerificationSent(false);
+      setVerificationMessage(null);
+      const res = await googleSignIn();
+      if (res?.user) {
+        setActiveUser(res.user);
+        onAuthChange?.(res.user);
+        const status = await evaluateAuth(res.user);
+        if (status.isAdmin && status.isEmailVerified) {
+          notify(`Welcome, ${res.user.email}! Verified administrator access granted.`);
+          loadData();
+        } else if (!status.isEmailVerified) {
+          notify('Signed in, but email remains unverified.', 'error');
+        }
+      }
+    } catch (err: any) {
+      console.error('Sign in again error:', err);
+      notify(err.message || 'Sign in was cancelled or failed.', 'error');
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
+
+  /**
+   * Action: Refresh user account status without full logout/login
+   */
+  const handleReloadAndVerify = async () => {
+    setIsReloading(true);
+    setVerificationError(null);
+    try {
+      const reloaded = await reloadCurrentUser(activeUser || auth.currentUser);
+      if (reloaded) {
+        setActiveUser(reloaded);
+        onAuthChange?.(reloaded);
+        const status = await evaluateAuth(reloaded);
+        if (status.isEmailVerified && status.isAdmin) {
+          notify('Email verified successfully! Access granted.');
+          loadData();
+        } else if (!status.isEmailVerified) {
+          notify('Email is still unverified. Please check your inbox and click the verification link first, then sign in again.', 'error');
+        } else if (!status.isAdmin) {
+          notify('Email is verified, but this account is not assigned an admin role.', 'error');
+        }
+      } else {
+        notify('Could not refresh account status. Please sign in again.', 'error');
+      }
+    } catch (err: any) {
+      notify(err.message || 'Failed to refresh user credentials.', 'error');
+    } finally {
+      setIsReloading(false);
+    }
+  };
+
+  /**
+   * Action: Initial Admin Portal sign in with Google
+   */
+  const handleInitialSignIn = async () => {
+    setIsSigningIn(true);
+    setVerificationError(null);
+    try {
+      const res = await googleSignIn();
+      if (res?.user) {
+        setActiveUser(res.user);
+        onAuthChange?.(res.user);
+        const status = await evaluateAuth(res.user);
+        if (status.isAdmin && status.isEmailVerified) {
+          notify(`Signed in as ${res.user.email}`);
+          loadData();
+        }
+      }
+    } catch (err: any) {
+      console.error('Admin sign-in error:', err);
+      notify(err.message || 'Sign in failed.', 'error');
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
+
+  /**
+   * Action: Sign out of administrator account
+   */
+  const handleSignOut = async () => {
+    try {
+      await logout();
+      setActiveUser(null);
+      onAuthChange?.(null);
+      setVerificationSent(false);
+      setVerificationMessage(null);
+      setVerificationError(null);
+      await evaluateAuth(null);
+      notify('Signed out successfully');
+    } catch (err: any) {
+      notify(err.message || 'Sign out failed.', 'error');
+    }
+  };
 
   // Derived Metrics
   const metrics: DashboardMetrics = useMemo(() => {
@@ -403,17 +588,34 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </span>
             <span className="text-xs text-stone-400 hidden sm:inline">
               · Authenticated as <strong className="text-stone-200">{adminEmail}</strong>
+              {authStatus.isAdmin && authStatus.isEmailVerified && (
+                <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono font-medium">
+                  Verified
+                </span>
+              )}
             </span>
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={loadData}
-              title="Refresh Data"
-              className="p-2 text-stone-400 hover:text-white rounded-md hover:bg-stone-800 transition-colors cursor-pointer"
-            >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-            </button>
+            {authStatus.isAdmin && (
+              <button
+                onClick={loadData}
+                title="Refresh Data"
+                className="p-2 text-stone-400 hover:text-white rounded-md hover:bg-stone-800 transition-colors cursor-pointer"
+              >
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              </button>
+            )}
+            {activeUser && (
+              <button
+                onClick={handleSignOut}
+                title="Sign Out"
+                className="p-2 text-stone-400 hover:text-white rounded-md hover:bg-stone-800 transition-colors cursor-pointer flex items-center gap-1.5 text-xs"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden md:inline">Sign Out</span>
+              </button>
+            )}
             <button
               onClick={onClose}
               className="p-2 text-stone-400 hover:text-white rounded-md hover:bg-stone-800 transition-colors cursor-pointer"
@@ -434,8 +636,192 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         )}
 
-        {/* Dashboard Shell with Sidebar */}
-        <div className="flex-1 flex overflow-hidden">
+        {/* If user is not authorized or email is unverified, show the Admin Login & Email Verification Screen */}
+        {!authStatus.isAdmin ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-6 bg-[#FAF8F5] overflow-y-auto">
+            <div className="w-full max-w-lg bg-white rounded-xl shadow-xl border border-stone-200 p-8 text-center space-y-6">
+              
+              {isCheckingAuth ? (
+                <div className="py-12 space-y-4">
+                  <RefreshCw className="w-8 h-8 text-stone-500 animate-spin mx-auto" />
+                  <p className="text-xs text-stone-500 uppercase tracking-widest font-mono">
+                    Verifying administrative credentials...
+                  </p>
+                </div>
+              ) : authStatus.reason === 'unverified_email' ? (
+                /* ======================================================== */
+                /* 1. SIGNED IN BUT EMAIL UNVERIFIED (USER REQUEST)         */
+                /* ======================================================== */
+                <div className="space-y-6">
+                  {/* Warning Header Icon */}
+                  <div className="w-16 h-16 mx-auto rounded-full bg-amber-50 border border-amber-300 flex items-center justify-center text-amber-900 shadow-xs">
+                    <Mail className="w-8 h-8 text-amber-800" />
+                  </div>
+
+                  <div>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase bg-amber-100 text-amber-950 border border-amber-300 mb-2">
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-800 shrink-0" />
+                      Email Verification Required
+                    </span>
+                    <h2 className="font-serif text-2xl font-bold text-stone-900 tracking-tight">
+                      Verify Your Email Address
+                    </h2>
+                    <p className="text-xs text-stone-600 mt-2 leading-relaxed">
+                      You are signed in as <strong className="font-mono text-stone-900">{activeUser?.email}</strong>. Before accessing store operations, customer data, and physical inventory, your email address must be verified.
+                    </p>
+                  </div>
+
+                  {/* Security Policy Badge */}
+                  <div className="p-3.5 bg-stone-50 rounded-lg border border-stone-200 text-left text-xs space-y-1.5 text-stone-600">
+                    <div className="flex items-center gap-1.5 font-semibold text-stone-900">
+                      <Shield className="w-4 h-4 text-stone-700 shrink-0" />
+                      <span>Firebase Security Rule Enforcement</span>
+                    </div>
+                    <p className="text-[11px] leading-relaxed text-stone-500">
+                      Administrative operations in Firestore require <code className="bg-stone-200/80 px-1 py-0.5 rounded text-stone-900 font-mono text-[10px]">request.auth.token.email_verified == true</code>. Unverified accounts cannot perform administrative tasks.
+                    </p>
+                  </div>
+
+                  {/* Dynamic Success Notice with the Clear Message Required by User */}
+                  {verificationSent && (
+                    <div className="p-4 bg-emerald-50/90 border border-emerald-300 rounded-lg text-left text-xs space-y-2 text-emerald-950 shadow-xs">
+                      <div className="flex items-center gap-2 font-bold text-emerald-900">
+                        <CheckCircle className="w-4 h-4 text-emerald-700 shrink-0" />
+                        <span>Verification email dispatched</span>
+                      </div>
+                      <p className="leading-relaxed text-[11px] text-emerald-900 font-medium">
+                        {verificationMessage || `Verification email sent! Please check your inbox (and spam folder) for the verification link, click to verify your email, and then sign in again.`}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Error Notice */}
+                  {verificationError && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-left text-xs text-red-800 flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                      <span>{verificationError}</span>
+                    </div>
+                  )}
+
+                  {/* Primary Action Button: "Send verification email" */}
+                  <div className="space-y-3 pt-1">
+                    <button
+                      type="button"
+                      onClick={handleSendVerificationEmail}
+                      disabled={isSendingVerification}
+                      className="w-full py-3.5 px-4 bg-stone-950 hover:bg-stone-800 text-white rounded text-xs uppercase tracking-[0.15em] font-medium transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer disabled:opacity-50"
+                    >
+                      {isSendingVerification ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          <span>Sending verification email...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" />
+                          <span>{verificationSent ? 'Resend verification email' : 'Send verification email'}</span>
+                        </>
+                      )}
+                    </button>
+
+                    {/* Secondary Actions: Sign in again after clicking verification link */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={handleSignOutAndSignInAgain}
+                        disabled={isSigningIn}
+                        className="py-2.5 px-3 bg-amber-600 hover:bg-amber-700 text-white rounded text-xs font-semibold tracking-wider uppercase transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:opacity-50"
+                        title="Sign out and sign in again to receive a refreshed token with email_verified: true"
+                      >
+                        {isSigningIn ? <RefreshCw className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />}
+                        <span>Sign In Again</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleReloadAndVerify}
+                        disabled={isReloading}
+                        className="py-2.5 px-3 bg-white hover:bg-stone-50 text-stone-800 border border-stone-300 rounded text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                        title="Refresh account status if you already clicked the link in your email"
+                      >
+                        {isReloading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <RotateCcw className="w-4 h-4" />}
+                        <span>I Verified — Check Status</span>
+                      </button>
+                    </div>
+
+                    <div className="pt-2 border-t border-stone-200">
+                      <button
+                        type="button"
+                        onClick={handleSignOut}
+                        className="text-xs text-stone-500 hover:text-stone-900 underline transition-colors cursor-pointer"
+                      >
+                        Sign out and switch to another account
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : authStatus.reason === 'unauthenticated' ? (
+                /* ======================================================== */
+                /* 2. NOT SIGNED IN                                         */
+                /* ======================================================== */
+                <div className="space-y-6">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-stone-100 border border-stone-300 flex items-center justify-center text-stone-900 shadow-xs">
+                    <Lock className="w-8 h-8 text-stone-800" />
+                  </div>
+                  <div>
+                    <h2 className="font-serif text-2xl font-bold text-stone-900 tracking-tight">
+                      Admin Portal Login
+                    </h2>
+                    <p className="text-xs text-stone-600 mt-2 leading-relaxed">
+                      Sign in with your authorized store administrator credentials to access real-time metrics, product management, inventory controls, and orders.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleInitialSignIn}
+                    disabled={isSigningIn}
+                    className="w-full py-3.5 px-4 bg-stone-950 hover:bg-stone-800 text-white rounded text-xs uppercase tracking-[0.15em] font-medium transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer disabled:opacity-50"
+                  >
+                    {isSigningIn ? <RefreshCw className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />}
+                    <span>Sign In with Google</span>
+                  </button>
+                  <p className="text-[11px] text-stone-400">
+                    Administrator access is restricted to verified store accounts (@thetateglow.com).
+                  </p>
+                </div>
+              ) : (
+                /* ======================================================== */
+                /* 3. SIGNED IN & VERIFIED BUT NON-ADMIN ROLE               */
+                /* ======================================================== */
+                <div className="space-y-6">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-red-50 border border-red-300 flex items-center justify-center text-red-900 shadow-xs">
+                    <AlertCircle className="w-8 h-8 text-red-700" />
+                  </div>
+                  <div>
+                    <h2 className="font-serif text-2xl font-bold text-stone-900 tracking-tight">
+                      Access Restricted
+                    </h2>
+                    <p className="text-xs text-stone-600 mt-2 leading-relaxed">
+                      The account <strong className="font-mono text-stone-900">{activeUser?.email}</strong> is verified, but has not been granted administrator privileges for The Taté Glow.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSignOutAndSignInAgain}
+                    disabled={isSigningIn}
+                    className="w-full py-3.5 px-4 bg-stone-950 hover:bg-stone-800 text-white rounded text-xs uppercase tracking-[0.15em] font-medium transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-50"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    <span>Sign In with Different Account</span>
+                  </button>
+                </div>
+              )}
+
+            </div>
+          </div>
+        ) : (
+          /* Dashboard Shell with Sidebar */
+          <div className="flex-1 flex overflow-hidden">
           {/* Navigation Sidebar */}
           <aside className="w-56 bg-stone-950 text-stone-300 p-3 flex flex-col gap-1 border-r border-stone-800 shrink-0 overflow-y-auto">
             {[
@@ -1532,6 +1918,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
           </main>
         </div>
+        )}
       </div>
 
       {/* ======================================================== */}

@@ -5,6 +5,7 @@ import {
   GoogleAuthProvider,
   onAuthStateChanged,
   User,
+  sendEmailVerification,
 } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
@@ -54,11 +55,8 @@ export const initAuth = (
 ) => {
   return onAuthStateChanged(auth, async (user: User | null) => {
     if (user) {
-      if (cachedAccessToken) {
-        if (onAuthSuccess) onAuthSuccess(user, cachedAccessToken);
-      } else if (!isSigningIn) {
-        cachedAccessToken = null;
-        if (onAuthFailure) onAuthFailure();
+      if (onAuthSuccess) {
+        onAuthSuccess(user, cachedAccessToken || '');
       }
     } else {
       cachedAccessToken = null;
@@ -94,4 +92,28 @@ export const getAccessToken = async (): Promise<string | null> => {
 export const logout = async () => {
   await auth.signOut();
   cachedAccessToken = null;
+};
+
+/**
+ * Sends a Firebase verification email to the signed-in user.
+ * Uses Firebase sendEmailVerification.
+ */
+export const sendVerificationEmail = async (user?: User | null): Promise<void> => {
+  const targetUser = user || auth.currentUser;
+  if (!targetUser) {
+    throw new Error('No user is currently signed in to receive a verification email.');
+  }
+  await sendEmailVerification(targetUser);
+};
+
+/**
+ * Reloads the current user's profile to retrieve refreshed token/emailVerified state.
+ */
+export const reloadCurrentUser = async (user?: User | null): Promise<User | null> => {
+  const targetUser = user || auth.currentUser;
+  if (targetUser) {
+    await targetUser.reload();
+    return auth.currentUser;
+  }
+  return null;
 };
