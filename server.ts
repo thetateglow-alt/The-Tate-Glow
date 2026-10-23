@@ -216,12 +216,27 @@ async function sendNewOrderEmailNotification(order: {
   total: number;
   paymentMethod: string; // 'COD' or 'Card'
 }) {
-  const gmailUser = process.env.GMAIL_USER;
-  const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
+  const rawUser = process.env.GMAIL_USER || '';
+  const rawPass = process.env.GMAIL_APP_PASSWORD || '';
+
+  const gmailUser = rawUser.trim().replace(/^["']|["']$/g, '');
+  // Google App Passwords are 16 letters, often copied with spaces like "abcd efgh ijkl mnop"
+  const gmailAppPassword = rawPass.replace(/\s+/g, '').replace(/^["']|["']$/g, '').trim();
 
   if (!gmailUser || !gmailAppPassword) {
     console.warn(
       '[Nodemailer] Email notification skipped: GMAIL_USER or GMAIL_APP_PASSWORD environment variables are not configured.'
+    );
+    return;
+  }
+
+  // Pre-validate App Password format. Real Google App Passwords are strictly 16 alphabetical letters.
+  // Using a personal account password or dummy string will fail with 535-5.7.8 from Google.
+  if (gmailAppPassword.includes('xxxx') || gmailAppPassword.length !== 16) {
+    console.warn(
+      `[Nodemailer] Warning: GMAIL_APP_PASSWORD appears invalid (${gmailAppPassword.length} characters). ` +
+      `Google App Passwords are strictly 16 characters generated via Google Account Security (e.g., "abcd efgh ijkl mnop"). ` +
+      `Regular account passwords are rejected with 535-5.7.8 by Google SMTP. Order notification email skipped.`
     );
     return;
   }
@@ -703,8 +718,17 @@ app.post('/api/checkout', async (req, res) => {
         paymentMethod: isCod ? 'COD (Cash on Delivery)' : 'Card (Credit / Debit Card)'
       });
     } catch (emailError: any) {
-      console.error('[Nodemailer Error] Failed to send new order notification email:', emailError.message || emailError);
-      // If the email fails, log the error but still complete the order
+      const errMsg = emailError?.message || String(emailError);
+      if (errMsg.includes('535') || errMsg.includes('Username and Password not accepted') || emailError?.code === 'EAUTH') {
+        console.warn(
+          '[Nodemailer] Gmail SMTP authentication rejected (535-5.7.8): ' +
+          'Google requires a 16-character App Password (not your personal Gmail password) from https://myaccount.google.com/apppasswords. ' +
+          'Customer order completed successfully.'
+        );
+      } else {
+        console.warn('[Nodemailer] Order notification email could not be delivered:', errMsg);
+      }
+      // If the email fails, log the warning but still complete the order
     }
 
     return res.status(200).json({
