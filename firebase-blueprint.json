@@ -1,40 +1,219 @@
 {
   "entities": {
-    "UserOrder": {
-      "title": "UserOrder",
-      "description": "Customer purchase order for jewelry items with delivery in Egypt",
+    "Product": {
+      "title": "Product",
+      "description": "Jewelry catalog item cast in 316L stainless steel",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique product identifier" },
+        "sku": { "type": "string", "description": "Unique Stock Keeping Unit (e.g. TG-AURA-01)" },
+        "name": { "type": "string", "description": "Product display name in English" },
+        "nameAr": { "type": "string", "description": "Product display name in Arabic" },
+        "category": { "type": "string", "enum": ["necklace", "bracelet", "ring", "earrings"] },
+        "price": { "type": "number", "description": "Current selling price in EGP" },
+        "originalPrice": { "type": "number", "description": "Strikethrough reference price in EGP" },
+        "costPrice": { "type": "number", "description": "Manufacturing cost price for margin calculation" },
+        "stock": { "type": "number", "description": "Total units available in physical inventory" },
+        "status": { "type": "string", "enum": ["published", "draft", "archived"] },
+        "image": { "type": "string", "description": "Primary product image URL" },
+        "images": { "type": "array", "description": "Gallery image URLs" },
+        "description": { "type": "string" },
+        "descriptionAr": { "type": "string" },
+        "specs": { "type": "object", "description": "Metallurgy specifications and sizing" },
+        "variants": { "type": "array", "description": "Size and dimension variants" },
+        "featured": { "type": "boolean" },
+        "isBestSeller": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "sku", "name", "category", "price", "stock", "status"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer purchase transaction record",
       "type": "object",
       "properties": {
         "id": { "type": "string", "description": "Order reference code (e.g. TG-123456)" },
-        "userId": { "type": "string", "description": "Authenticated user UID" },
-        "customerName": { "type": "string", "description": "Recipient full name" },
-        "customerEmail": { "type": "string", "description": "Recipient contact email" },
-        "phone": { "type": "string", "description": "Courier contact phone number in Egypt" },
-        "city": { "type": "string", "description": "Egyptian governorate / delivery city" },
-        "address": { "type": "string", "description": "Detailed street address, building, apartment" },
-        "paymentMethod": { "type": "string", "description": "Selected payment method (COD, Card, InstaPay)" },
-        "items": { "type": "array", "description": "Array of ordered products with quantities, sizes, prices" },
-        "subtotal": { "type": "number", "description": "Jewelry items subtotal in EGP" },
-        "discount": { "type": "number", "description": "Bundle or reward discount amount in EGP" },
-        "deliveryFee": { "type": "number", "description": "Courier delivery fee in EGP" },
-        "total": { "type": "number", "description": "Total amount due in EGP" },
-        "status": {
-          "type": "string",
-          "enum": ["confirmed", "processing", "shipped", "delivered"],
-          "description": "Current order fulfillment status"
-        },
-        "statusLabelEn": { "type": "string", "description": "Human-readable status in English" },
-        "statusLabelAr": { "type": "string", "description": "Human-readable status in Arabic" },
-        "createdAt": { "type": "string", "description": "ISO date string when order was placed" },
-        "updatedAt": { "type": "string", "description": "ISO date string of last update" }
+        "userId": { "type": "string", "description": "Authenticated customer UID if logged in" },
+        "customerName": { "type": "string" },
+        "customerEmail": { "type": "string" },
+        "phone": { "type": "string" },
+        "city": { "type": "string" },
+        "address": { "type": "string" },
+        "items": { "type": "array", "description": "Ordered line items with quantities and prices" },
+        "subtotal": { "type": "number" },
+        "discount": { "type": "number" },
+        "discountCode": { "type": "string" },
+        "deliveryFee": { "type": "number" },
+        "total": { "type": "number" },
+        "paymentMethod": { "type": "string" },
+        "paymentStatus": { "type": "string", "enum": ["paid", "pending", "cod_pending", "refunded"] },
+        "fulfillmentStatus": { "type": "string", "enum": ["unfulfilled", "processing", "shipped", "delivered", "cancelled"] },
+        "trackingNumber": { "type": "string" },
+        "shippingCarrier": { "type": "string" },
+        "glowPointsEarned": { "type": "number" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
       },
-      "required": ["id", "customerName", "phone", "city", "address", "paymentMethod", "items", "total", "status", "createdAt"]
+      "required": ["id", "customerName", "phone", "city", "address", "items", "total", "paymentStatus", "fulfillmentStatus", "createdAt"]
+    },
+    "InventoryItem": {
+      "title": "InventoryItem",
+      "description": "Stock balance and alert thresholds",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string" },
+        "sku": { "type": "string" },
+        "stock": { "type": "number" },
+        "lowStockThreshold": { "type": "number" },
+        "status": { "type": "string", "enum": ["in_stock", "low_stock", "out_of_stock"] },
+        "lastRestockedAt": { "type": "string" }
+      },
+      "required": ["productId", "stock"]
+    },
+    "InventoryLog": {
+      "title": "InventoryLog",
+      "description": "Transactional audit record for every stock change",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "productId": { "type": "string" },
+        "sku": { "type": "string" },
+        "type": { "type": "string", "enum": ["order_placed", "restock", "inventory_correction", "damaged_goods", "sample_gift", "return_cancellation"] },
+        "quantityChange": { "type": "number" },
+        "previousStock": { "type": "number" },
+        "newStock": { "type": "number" },
+        "reason": { "type": "string" },
+        "orderId": { "type": "string" },
+        "adminEmail": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "productId", "type", "quantityChange", "previousStock", "newStock", "createdAt"]
+    },
+    "Customer": {
+      "title": "Customer",
+      "description": "Customer spending and loyalty profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "city": { "type": "string" },
+        "address": { "type": "string" },
+        "totalOrders": { "type": "number" },
+        "totalSpent": { "type": "number" },
+        "glowPoints": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "vip", "blocked"] },
+        "createdAt": { "type": "string" },
+        "lastOrderAt": { "type": "string" }
+      },
+      "required": ["id", "name", "totalOrders", "totalSpent", "createdAt"]
+    },
+    "Discount": {
+      "title": "Discount",
+      "description": "Promotional coupon code rules",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "code": { "type": "string" },
+        "discountType": { "type": "string", "enum": ["percentage", "fixed"] },
+        "value": { "type": "number" },
+        "minPurchase": { "type": "number" },
+        "usedCount": { "type": "number" },
+        "active": { "type": "boolean" },
+        "startsAt": { "type": "string" },
+        "expiresAt": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "code", "discountType", "value", "active", "createdAt"]
+    },
+    "HomepageContent": {
+      "title": "HomepageContent",
+      "description": "Customizable storefront copy and banners",
+      "type": "object",
+      "properties": {
+        "announcementBar": { "type": "object" },
+        "hero": { "type": "object" },
+        "brandStory": { "type": "object" },
+        "featuredCategoryIds": { "type": "array" },
+        "featuredProductIds": { "type": "array" },
+        "updatedAt": { "type": "string" },
+        "updatedBy": { "type": "string" }
+      }
+    },
+    "AdminUser": {
+      "title": "AdminUser",
+      "description": "Authorized administrative user credentials",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string", "enum": ["superadmin", "manager", "staff"] },
+        "permissions": { "type": "array" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "email", "role", "createdAt"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Administrative actions audit trail",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "adminEmail": { "type": "string" },
+        "action": { "type": "string" },
+        "resource": { "type": "string" },
+        "resourceId": { "type": "string" },
+        "details": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "adminEmail", "action", "resource", "timestamp"]
     }
   },
   "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Published and draft jewelry pieces"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Central customer orders ledger"
+    },
+    "/inventory/{productId}": {
+      "schema": "InventoryItem",
+      "description": "Live stock levels"
+    },
+    "/inventoryLogs/{logId}": {
+      "schema": "InventoryLog",
+      "description": "Movement history logs"
+    },
+    "/customers/{customerId}": {
+      "schema": "Customer",
+      "description": "Customer relationship directory"
+    },
+    "/discounts/{code}": {
+      "schema": "Discount",
+      "description": "Discount coupon rules"
+    },
+    "/homepageContent/{configId}": {
+      "schema": "HomepageContent",
+      "description": "Storefront marketing copy"
+    },
+    "/adminUsers/{email}": {
+      "schema": "AdminUser",
+      "description": "Admin access control list"
+    },
+    "/auditLogs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Security audit logs"
+    },
     "/users/{userId}/orders/{orderId}": {
-      "schema": "UserOrder",
-      "description": "Per-user customer order history"
+      "schema": "Order",
+      "description": "Per-user order history"
     }
   }
 }

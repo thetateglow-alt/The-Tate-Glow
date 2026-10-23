@@ -63,39 +63,90 @@ export const ORDER_STATUS_MAP: Record<OrderStatus, { en: string; ar: string; col
   }
 };
 
+export interface CheckoutRequestPayload {
+  items: { productId: string; selectedSize?: string; quantity: number }[];
+  customer: {
+    name: string;
+    email: string;
+    phone: string;
+    city: string;
+    address: string;
+  };
+  paymentMethodRequested: 'card' | 'cod';
+  discountCode?: string;
+  redeemGlowPoints?: number;
+  userId?: string;
+}
+
+export interface CheckoutResponsePayload {
+  success: boolean;
+  orderId: string;
+  subtotal: number;
+  discount: number;
+  deliveryFee: number;
+  total: number;
+  paymentStatus: string;
+  fulfillmentStatus: string;
+  glowPointsEarned: number;
+  bundleType?: string;
+  message?: string;
+}
+
 /**
- * Save an order to Firestore and localStorage
+ * Submit order securely to the server/Cloud Function.
+ * The browser NEVER sends prices, totals, or payment statuses.
+ * The server validates product prices against Firestore, locks stock transactionally,
+ * and sets status to 'pending payment' (or 'cod_pending').
  */
-export async function saveCustomerOrder(order: CustomerOrder, userId?: string): Promise<void> {
-  // Always persist locally first for instant, offline resilience
+export async function submitSecureCheckout(payload: CheckoutRequestPayload): Promise<CheckoutResponsePayload> {
+  const response = await fetch('/api/checkout', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await response.json();
+  if (!response.ok || !data.success) {
+    throw new Error(data.error || 'Server rejected checkout validation.');
+  }
+
+  // Cache order locally for instantaneous client receipts
   try {
-    const storageKey = userId ? `tate_glow_orders_${userId}` : 'tate_glow_orders_guest';
+    const storageKey = payload.userId ? `tate_glow_orders_${payload.userId}` : 'tate_glow_orders_guest';
     const existingRaw = localStorage.getItem(storageKey);
-    const existing: CustomerOrder[] = existingRaw ? JSON.parse(existingRaw) : [];
-    const updated = [order, ...existing.filter(o => o.id !== order.id)];
-    localStorage.setItem(storageKey, JSON.stringify(updated));
+    const existing: any[] = existingRaw ? JSON.parse(existingRaw) : [];
+    const clientOrderSummary = {
+      id: data.orderId,
+      userId: payload.userId,
+      customerName: payload.customer.name,
+      customerEmail: payload.customer.email,
+      phone: payload.customer.phone,
+      city: payload.customer.city,
+      address: payload.customer.address,
+      paymentMethod: payload.paymentMethodRequested === 'cod' ? 'Cash on Delivery' : 'Credit / Debit Card',
+      items: payload.items,
+      subtotal: data.subtotal,
+      discount: data.discount,
+      deliveryFee: data.deliveryFee,
+      total: data.total,
+      status: 'confirmed',
+      paymentStatus: data.paymentStatus,
+      fulfillmentStatus: data.fulfillmentStatus,
+      createdAt: new Date().toISOString(),
+      glowPointsEarned: data.glowPointsEarned
+    };
+    localStorage.setItem(storageKey, JSON.stringify([clientOrderSummary, ...existing.filter(o => o.id !== data.orderId)]));
 
-    // Also update global recent orders list
     const globalRaw = localStorage.getItem('tate_glow_recent_orders');
-    const globalOrders: CustomerOrder[] = globalRaw ? JSON.parse(globalRaw) : [];
-    localStorage.setItem('tate_glow_recent_orders', JSON.stringify([order, ...globalOrders.filter(o => o.id !== order.id)].slice(0, 20)));
+    const globalOrders: any[] = globalRaw ? JSON.parse(globalRaw) : [];
+    localStorage.setItem('tate_glow_recent_orders', JSON.stringify([clientOrderSummary, ...globalOrders.filter(o => o.id !== data.orderId)].slice(0, 20)));
   } catch (err) {
-    console.warn('Could not cache order in localStorage:', err);
+    console.warn('Local storage cache note:', err);
   }
 
-  // If user is authenticated, save to per-user orders collection in Firestore
-  if (userId) {
-    try {
-      const userRef = doc(db, 'users', userId, 'orders', order.id);
-      await setDoc(userRef, {
-        ...order,
-        userId,
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
-    } catch (err) {
-      console.warn('User orders subcollection save note:', err);
-    }
-  }
+  return data;
 }
 
 /**

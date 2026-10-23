@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { User } from 'firebase/auth';
 import { CartItem } from '../types/jewelry';
-import { X, CheckCircle, ShieldCheck, Lock, CreditCard, Banknote, Sparkles, Clock, Mail, Check, Award } from 'lucide-react';
+import { X, CheckCircle, ShieldCheck, Lock, CreditCard, Banknote, Sparkles, Clock, Mail, Check, Award, Tag } from 'lucide-react';
 import { calculateBundleDiscount, formatEGP } from '../utils/pricing';
 import { BRAND_CONFIG } from '../data/products';
 import { Language, TRANSLATIONS } from '../i18n/translations';
 import { sendOrderConfirmationEmail } from '../services/gmailService';
 import { googleSignIn } from '../services/firebaseAuth';
-import { CustomerOrder, saveCustomerOrder } from '../services/ordersService';
+import { CustomerOrder, submitSecureCheckout } from '../services/ordersService';
+import { validateDiscountCode } from '../services/adminService';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -48,6 +49,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmedOrderId, setConfirmedOrderId] = useState<string>('');
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   
   // Gmail confirmation receipt options
   const [sendGmailReceipt, setSendGmailReceipt] = useState(true);
@@ -68,6 +70,38 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [pointsToRedeem, setPointsToRedeem] = useState(100);
   const [confirmedPointsEarned, setConfirmedPointsEarned] = useState(0);
   const [confirmedNewBalance, setConfirmedNewBalance] = useState(0);
+
+  // Promo / Discount Code
+  const [promoCodeInput, setPromoCodeInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<{ code: string; discountAmount: number } | null>(null);
+  const [promoFeedback, setPromoFeedback] = useState<{ valid: boolean; message: string } | null>(null);
+  const [isValidatingPromo, setIsValidatingPromo] = useState(false);
+
+  const handleApplyPromo = async () => {
+    if (!promoCodeInput.trim()) return;
+    setIsValidatingPromo(true);
+    setPromoFeedback(null);
+    try {
+      const res = await validateDiscountCode(promoCodeInput, subtotal);
+      if (res.valid) {
+        setAppliedPromo({ code: promoCodeInput.trim().toUpperCase(), discountAmount: res.discountAmount });
+        setPromoFeedback({ valid: true, message: res.message });
+      } else {
+        setAppliedPromo(null);
+        setPromoFeedback({ valid: false, message: res.message });
+      }
+    } catch {
+      setPromoFeedback({ valid: false, message: 'Could not validate promo code' });
+    } finally {
+      setIsValidatingPromo(false);
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setPromoCodeInput('');
+    setPromoFeedback(null);
+  };
 
   useEffect(() => {
     if (currentUser) {
@@ -110,7 +144,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     (acc, i) => acc + i.product.price * i.quantity,
     0
   );
-  const finalSubtotal = Math.max(0, subtotal - bundle.discountAmount);
+  const promoDiscount = appliedPromo ? appliedPromo.discountAmount : 0;
+  const finalSubtotal = Math.max(0, subtotal - bundle.discountAmount - promoDiscount);
 
   // 10 points for every 100 EGP spent on jewelry (10 pts / 100 EGP)
   const earnedGlowPoints = items.length === 0 ? 0 : Math.round((finalSubtotal / 100) * 10);
@@ -136,84 +171,77 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       : `Cash on Delivery (Total Amount Due: ${formatEGP(total, lang)})`;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setCheckoutError(null);
 
-    const generatedId = `TG-${Math.floor(100000 + Math.random() * 900000)}`;
-    setConfirmedOrderId(generatedId);
-
-    // Calculate new Glow Points balance
-    const newBalance = Math.max(0, userPoints - activePointsRedeemed) + earnedGlowPoints;
-    setConfirmedPointsEarned(earnedGlowPoints);
-    setConfirmedNewBalance(newBalance);
     try {
-      localStorage.setItem('tate_glow_points_balance', String(newBalance));
-    } catch (e) {
-      console.warn('Could not save points:', e);
-    }
-    setUserPoints(newBalance);
+      const serverResult = await submitSecureCheckout({
+        items: items.map(i => ({
+          productId: i.product.id,
+          selectedSize: i.selectedSize,
+          quantity: i.quantity
+        })),
+        customer: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          city: formData.city,
+          address: formData.address
+        },
+        paymentMethodRequested: paymentMethod,
+        discountCode: appliedPromo?.code,
+        redeemGlowPoints: redeemPoints ? activePointsRedeemed : 0,
+        userId: currentUser?.uid
+      });
 
-    // Save order to Firestore and local storage for order history & tracking
-    const newOrderRecord: CustomerOrder = {
-      id: generatedId,
-      userId: currentUser?.uid,
-      customerName: formData.name,
-      customerEmail: formData.email,
-      phone: formData.phone,
-      city: formData.city,
-      address: formData.address,
-      paymentMethod: getPaymentMethodLabel(),
-      items: items.map(i => ({
-        productId: i.product.id,
-        name: i.product.name,
-        nameAr: i.product.nameAr,
-        price: i.product.price,
-        quantity: i.quantity,
-        selectedSize: i.selectedSize,
-        image: i.product.image
-      })),
-      subtotal,
-      discount: bundle.discountAmount,
-      deliveryFee: shipping,
-      total,
-      status: 'confirmed',
-      statusLabelEn: 'Order Confirmed',
-      statusLabelAr: 'تم تأكيد الطلب',
-      createdAt: new Date().toISOString(),
-      glowPointsEarned: earnedGlowPoints
-    };
-    saveCustomerOrder(newOrderRecord, currentUser?.uid);
+      const generatedId = serverResult.orderId;
+      setConfirmedOrderId(generatedId);
 
-    // Auto-dispatch confirmation email to the store owner (thetateglow@gmail.com) and customer receipt
-    sendOrderConfirmationEmail({
-      orderId: generatedId,
-      customerName: formData.name,
-      customerEmail: formData.email,
-      phone: formData.phone,
-      city: formData.city,
-      address: formData.address,
-      paymentMethod: getPaymentMethodLabel(),
-      items,
-      subtotal,
-      discount: bundle.discountAmount,
-      deliveryFee: shipping,
-      total,
-      bundleType: bundle.discountAmount > 0 ? (lang === 'ar' ? 'عرض حزم التوهج' : 'Special Glow Bundle Offer') : undefined,
-      glowPointsEarned: earnedGlowPoints,
-      glowPointsDiscount: glowPointsDiscount > 0 ? glowPointsDiscount : undefined,
-      newPointsBalance: newBalance,
-    }).then(() => {
-      setEmailStatus('sent');
-    }).catch((err) => {
-      console.warn('Order confirmation email notice:', err);
-    });
+      // Calculate new Glow Points balance
+      const newBalance = Math.max(0, userPoints - activePointsRedeemed) + serverResult.glowPointsEarned;
+      setConfirmedPointsEarned(serverResult.glowPointsEarned);
+      setConfirmedNewBalance(newBalance);
+      try {
+        localStorage.setItem('tate_glow_points_balance', String(newBalance));
+      } catch (e) {
+        console.warn('Could not save points:', e);
+      }
+      setUserPoints(newBalance);
 
-    setTimeout(() => {
-      setIsSubmitting(false);
+      // Auto-dispatch confirmation email with verified server figures
+      sendOrderConfirmationEmail({
+        orderId: generatedId,
+        customerName: formData.name,
+        customerEmail: formData.email,
+        phone: formData.phone,
+        city: formData.city,
+        address: formData.address,
+        paymentMethod: getPaymentMethodLabel(),
+        items,
+        subtotal: serverResult.subtotal,
+        discount: serverResult.discount,
+        deliveryFee: serverResult.deliveryFee,
+        total: serverResult.total,
+        bundleType: serverResult.bundleType,
+        glowPointsEarned: serverResult.glowPointsEarned,
+        glowPointsDiscount: glowPointsDiscount > 0 ? glowPointsDiscount : undefined,
+        newPointsBalance: newBalance,
+      }).then(() => {
+        setEmailStatus('sent');
+      }).catch((err) => {
+        console.warn('Order confirmation email notice:', err);
+      });
+
       setStep('success');
       onOrderSuccess();
-    }, 1200);
+    } catch (err: any) {
+      console.error('Secure checkout error:', err);
+      setCheckoutError(err.message || 'Checkout failed. Please check stock and try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSendGmailReceipt = async () => {
@@ -476,12 +504,62 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 </div>
               )}
 
+              {appliedPromo && (
+                <div className="flex justify-between text-emerald-800 font-medium text-[11px]">
+                  <span className="flex items-center gap-1">
+                    <Tag className="w-3 h-3 text-emerald-700" />
+                    <span>Promo ({appliedPromo.code}):</span>
+                  </span>
+                  <span className="tabular-nums">-{formatEGP(appliedPromo.discountAmount, lang)}</span>
+                </div>
+              )}
+
               {glowPointsDiscount > 0 && (
                 <div className="flex justify-between text-amber-900 font-medium text-[11px]">
                   <span>{t.glowPointsDiscount} ({activePointsRedeemed} {t.points})</span>
                   <span className="tabular-nums">-{formatEGP(glowPointsDiscount, lang)}</span>
                 </div>
               )}
+
+              {/* Promo Code Input Box */}
+              <div className="pt-2 border-t border-stone-200/60">
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Tag className="w-3.5 h-3.5 text-stone-400 absolute left-2.5 top-2.5 rtl:left-auto rtl:right-2.5 pointer-events-none" />
+                    <input
+                      type="text"
+                      placeholder={lang === 'ar' ? 'كود الخصم (مثال: GLOW10)' : 'Discount Code (e.g. GLOW10)'}
+                      value={promoCodeInput}
+                      onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase())}
+                      disabled={Boolean(appliedPromo)}
+                      className="w-full border border-stone-300 rounded px-3 py-1.5 pl-8 rtl:pr-8 rtl:pl-3 text-xs uppercase font-mono font-semibold text-stone-900 bg-white placeholder:text-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-900"
+                    />
+                  </div>
+                  {appliedPromo ? (
+                    <button
+                      type="button"
+                      onClick={handleRemovePromo}
+                      className="px-3 py-1.5 text-xs text-red-600 hover:text-red-800 font-medium cursor-pointer"
+                    >
+                      {lang === 'ar' ? 'إزالة' : 'Remove'}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleApplyPromo}
+                      disabled={isValidatingPromo || !promoCodeInput.trim()}
+                      className="px-4 py-1.5 bg-stone-900 text-white rounded text-xs font-semibold hover:bg-stone-800 disabled:opacity-40 cursor-pointer shadow-2xs"
+                    >
+                      {isValidatingPromo ? '...' : (lang === 'ar' ? 'تطبيق' : 'Apply')}
+                    </button>
+                  )}
+                </div>
+                {promoFeedback && (
+                  <p className={`text-[11px] mt-1 font-medium ${promoFeedback.valid ? 'text-emerald-700' : 'text-red-600'}`}>
+                    {promoFeedback.message}
+                  </p>
+                )}
+              </div>
 
               {reservationTime && (
                 <div className="flex items-center justify-between text-[11px] pt-2 border-t border-stone-200/60">
@@ -864,6 +942,20 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 )}
               </div>
             </div>
+
+            {/* Server Error Alert */}
+            {checkoutError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-800 text-xs flex items-center justify-between">
+                <span>{checkoutError}</span>
+                <button
+                  type="button"
+                  onClick={() => setCheckoutError(null)}
+                  className="text-red-500 hover:text-red-700 font-bold ml-2"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
 
             {/* Submit Action Button */}
             <button

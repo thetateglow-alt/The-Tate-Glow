@@ -15,11 +15,13 @@ import { ReviewsSection } from './components/ReviewsSection';
 import { Footer } from './components/Footer';
 import { PRODUCTS, BRAND_CONFIG } from './data/products';
 import { Product, JewelryCategory, CartItem } from './types/jewelry';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ShieldCheck } from 'lucide-react';
 import { calculateBundleDiscount } from './utils/pricing';
 import { useCartReservation } from './hooks/useCartReservation';
 import { Language, TRANSLATIONS } from './i18n/translations';
 import { initAuth } from './services/firebaseAuth';
+import { AdminDashboard } from './components/admin/AdminDashboard';
+import { initializeStoreBackend, fetchAdminProducts, checkIsAdmin } from './services/adminService';
 
 export default function App() {
   // Language State: Customer can choose English or Arabic
@@ -100,22 +102,57 @@ export default function App() {
   const [isScienceOpen, setIsScienceOpen] = useState(false);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [isAdminAuthorized, setIsAdminAuthorized] = useState(false);
+
+  // Live Catalog Products State (synced from Firestore)
+  const [catalogProducts, setCatalogProducts] = useState<Product[]>(PRODUCTS);
+
   // Authenticated User State (Firebase Auth & Google Workspace Gmail)
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  const loadCatalogProducts = async () => {
+    try {
+      const prods = await fetchAdminProducts();
+      if (prods && prods.length > 0) {
+        setCatalogProducts(prods.filter((p) => p.status !== 'archived'));
+      }
+    } catch (e) {
+      console.warn('Catalog sync note:', e);
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = initAuth(
       (user) => {
         setCurrentUser(user);
+        checkIsAdmin(user).then(setIsAdminAuthorized);
       },
       () => {
         setCurrentUser(null);
+        setIsAdminAuthorized(false);
       }
     );
+
+    // Priming database and catalog sync
+    initializeStoreBackend().then(() => {
+      loadCatalogProducts();
+    });
+
+    // Keyboard shortcut for quick admin access (Ctrl+Shift+A or Alt+A)
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) || (e.altKey && (e.key === 'a' || e.key === 'A'))) {
+        e.preventDefault();
+        setIsAdminOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
     return () => {
       if (typeof unsubscribe === 'function') {
         unsubscribe();
       }
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
@@ -147,9 +184,9 @@ export default function App() {
     }, 2500);
   };
 
-  // Filtered and Sorted Products
+  // Filtered and Sorted Products from live catalog
   const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter((product) => {
+    return catalogProducts.filter((product) => {
       // Category filter
       if (activeCategory !== 'all' && product.category !== activeCategory) {
         return false;
@@ -243,8 +280,8 @@ export default function App() {
   };
 
   const wishlistProducts = useMemo(() => {
-    return PRODUCTS.filter((p) => wishlist.includes(p.id));
-  }, [wishlist]);
+    return catalogProducts.filter((p) => wishlist.includes(p.id));
+  }, [wishlist, catalogProducts]);
 
   const scrollToCatalog = () => {
     const el = document.getElementById('catalog-section');
@@ -424,7 +461,20 @@ export default function App() {
         onOpenSizeGuide={() => setIsSizeGuideOpen(true)}
         lang={lang}
         onToggleLanguage={toggleLanguage}
+        onOpenAdmin={() => setIsAdminOpen(true)}
       />
+
+      {/* Discreet Admin Floating Button when logged in as admin */}
+      {isAdminAuthorized && (
+        <button
+          onClick={() => setIsAdminOpen(true)}
+          className="fixed bottom-6 left-6 rtl:left-auto rtl:right-6 z-40 bg-stone-950 text-amber-300 border border-amber-400/50 px-3.5 py-2 rounded-full shadow-xl flex items-center gap-2 text-xs font-semibold hover:bg-stone-900 transition-all cursor-pointer backdrop-blur-md"
+          title="Open Admin Dashboard (Alt+A or Ctrl+Shift+A)"
+        >
+          <ShieldCheck className="w-4 h-4 text-amber-400" />
+          <span>Admin Portal</span>
+        </button>
+      )}
 
       {/* Modals & Slide-overs */}
       <ProductModal
@@ -461,6 +511,7 @@ export default function App() {
         onOrderSuccess={() => {
           setCart([]);
           renewReservation();
+          loadCatalogProducts();
         }}
         lang={lang}
         currentUser={currentUser}
@@ -486,6 +537,14 @@ export default function App() {
         onRemoveFromWishlist={handleToggleWishlist}
         onAddToCart={(p) => handleAddToCart(p)}
         lang={lang}
+      />
+
+      {/* Admin Dashboard Workspace */}
+      <AdminDashboard
+        isOpen={isAdminOpen}
+        onClose={() => setIsAdminOpen(false)}
+        currentUser={currentUser}
+        onProductsUpdated={loadCatalogProducts}
       />
     </div>
   );

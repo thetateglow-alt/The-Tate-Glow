@@ -10,6 +10,7 @@ interface FooterProps {
   onOpenSizeGuide: () => void;
   lang: Language;
   onToggleLanguage: () => void;
+  onOpenAdmin?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
@@ -17,7 +18,8 @@ export const Footer: React.FC<FooterProps> = ({
   onOpenScience,
   onOpenSizeGuide,
   lang,
-  onToggleLanguage
+  onToggleLanguage,
+  onOpenAdmin
 }) => {
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -206,11 +208,25 @@ export const Footer: React.FC<FooterProps> = ({
 
         </div>
 
-        {/* Bottom Bar: Copyright & Payment Methods */}
+        {/* Bottom Bar: Copyright & Staff Access */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500 font-light">
-          <p>
-            © {new Date().getFullYear()} {t.copyrightNotice}
-          </p>
+          <div className="flex items-center gap-3">
+            <p>
+              © {new Date().getFullYear()} {t.copyrightNotice}
+            </p>
+            {onOpenAdmin && (
+              <>
+                <span className="text-stone-700">·</span>
+                <button
+                  type="button"
+                  onClick={onOpenAdmin}
+                  className="text-stone-500 hover:text-stone-300 transition-colors cursor-pointer text-[11px] underline underline-offset-4"
+                >
+                  Admin Portal
+                </button>
+              </>
+            )}
+          </div>
 
           <p className="text-stone-400 text-center sm:text-right rtl:sm:text-left">
             {t.footerDeliveryNotice}

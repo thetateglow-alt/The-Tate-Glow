@@ -30,7 +30,7 @@ export interface Product {
   rating: number;
   reviewCount: number;
   stock?: number;
-  status?: 'active' | 'archived' | 'draft';
+  status?: 'published' | 'active' | 'archived' | 'draft';
   createdAt?: string;
 }
 
