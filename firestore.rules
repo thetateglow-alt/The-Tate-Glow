@@ -21,24 +21,25 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // 2. Orders: Customers can ONLY read their own orders; writes are strictly admin/server only
-    // (Orders are created server-side via Cloud Function with validated pricing and stock locks)
+    // 2. Orders: Customers can create orders directly (GitHub Pages client-side mode).
+    // Customers can read their own orders; Admins can read, update, and delete all orders.
     match /orders/{orderId} {
+      allow create: if true;
       allow read: if isAdmin() || (isAuthenticated() && (
         resource.data.userId == request.auth.uid ||
         resource.data.customerEmail == request.auth.token.email
       ));
-      allow write: if isAdmin();
+      allow update, delete: if isAdmin();
     }
 
-    // 3. User subcollection order history: customer can only read their own orders; writes via admin/server
+    // 3. User subcollection order history: customer can create and read their own orders; update/delete by admin
     match /users/{userId}/orders/{orderId} {
+      allow create: if isAuthenticated() && request.auth.uid == userId;
       allow read: if isAdmin() || (isAuthenticated() && request.auth.uid == userId);
-      allow write: if isAdmin();
+      allow update, delete: if isAdmin();
     }
 
     // 4. Physical Inventory: Public read for stock availability; ONLY admins can write
-    // (Inventory decrements during checkout occur server-side in Cloud Function transaction)
     match /inventory/{productId} {
       allow read: if true;
       allow write: if isAdmin();
@@ -49,13 +50,14 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
-    // 6. Customers: Customers can ONLY read their own record; ONLY admins can write
+    // 6. Customers: Customers can create their profile during checkout; read their own record; admin write
     match /customers/{customerId} {
+      allow create: if true;
       allow read: if isAdmin() || (isAuthenticated() && (
         resource.data.uid == request.auth.uid ||
         resource.data.email == request.auth.token.email
       ));
-      allow write: if isAdmin();
+      allow update, delete: if isAdmin();
     }
 
     // 7. Discounts: Public read for promo validation; ONLY admins can write

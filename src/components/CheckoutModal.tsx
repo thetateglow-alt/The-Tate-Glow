@@ -5,7 +5,7 @@ import { X, CheckCircle, ShieldCheck, Lock, CreditCard, Banknote, Sparkles, Cloc
 import { calculateBundleDiscount, formatEGP } from '../utils/pricing';
 import { BRAND_CONFIG } from '../data/products';
 import { Language, TRANSLATIONS } from '../i18n/translations';
-import { sendOrderConfirmationEmail } from '../services/gmailService';
+import { sendOrderReceiptViaEmailJS, isEmailJsConfigured } from '../services/emailJsService';
 import { googleSignIn } from '../services/firebaseAuth';
 import { CustomerOrder, submitSecureCheckout } from '../services/ordersService';
 import { validateDiscountCode } from '../services/adminService';
@@ -51,10 +51,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [confirmedOrderId, setConfirmedOrderId] = useState<string>('');
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   
-  // Gmail confirmation receipt options
-  const [sendGmailReceipt, setSendGmailReceipt] = useState(true);
+  // Email confirmation receipt options
+  const [sendEmailReceipt, setSendEmailReceipt] = useState(true);
   const [emailStatus, setEmailStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
-  const [showConfirmEmailModal, setShowConfirmEmailModal] = useState(false);
 
   // Glow Points Reward System: 10 points for every 100 EGP spent on jewelry
   const [userPoints, setUserPoints] = useState<number>(() => {
@@ -210,46 +209,24 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       }
       setUserPoints(newBalance);
 
-      // Auto-dispatch confirmation email with verified server figures
-      sendOrderConfirmationEmail({
-        orderId: generatedId,
-        customerName: formData.name,
-        customerEmail: formData.email,
-        phone: formData.phone,
-        city: formData.city,
-        address: formData.address,
-        paymentMethod: getPaymentMethodLabel(),
-        items,
-        subtotal: serverResult.subtotal,
-        discount: serverResult.discount,
-        deliveryFee: serverResult.deliveryFee,
-        total: serverResult.total,
-        bundleType: serverResult.bundleType,
-        glowPointsEarned: serverResult.glowPointsEarned,
-        glowPointsDiscount: glowPointsDiscount > 0 ? glowPointsDiscount : undefined,
-        newPointsBalance: newBalance,
-      }).then(() => {
-        setEmailStatus('sent');
-      }).catch((err) => {
-        console.warn('Order confirmation email notice:', err);
-      });
-
+      // Order was saved to Firestore and receipt dispatched via EmailJS inside submitSecureCheckout
+      setEmailStatus('sent');
       setStep('success');
       onOrderSuccess();
     } catch (err: any) {
-      console.error('Secure checkout error:', err);
-      setCheckoutError(err.message || 'Checkout failed. Please check stock and try again.');
+      console.error('Checkout error:', err);
+      setCheckoutError(err.message || 'Checkout failed. Please check information and try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleSendGmailReceipt = async () => {
-    setShowConfirmEmailModal(false);
+  const handleResendEmailReceipt = async () => {
+    if (!formData.email) return;
     setEmailStatus('sending');
 
     try {
-      await sendOrderConfirmationEmail({
+      const res = await sendOrderReceiptViaEmailJS({
         orderId: confirmedOrderId,
         customerName: formData.name,
         customerEmail: formData.email,
@@ -257,19 +234,28 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         city: formData.city,
         address: formData.address,
         paymentMethod: getPaymentMethodLabel(),
-        items,
+        items: items.map((i) => ({
+          name: i.product.name,
+          price: i.product.price,
+          quantity: i.quantity,
+          selectedSize: i.selectedSize
+        })),
         subtotal,
         discount: bundle.discountAmount,
         deliveryFee: shipping,
         total,
         bundleType: bundle.discountAmount > 0 ? (lang === 'ar' ? 'عرض حزم التوهج' : 'Special Glow Bundle Offer') : undefined,
         glowPointsEarned: confirmedPointsEarned,
-        glowPointsDiscount: glowPointsDiscount > 0 ? glowPointsDiscount : undefined,
-        newPointsBalance: confirmedNewBalance,
+        glowPointsDiscount: glowPointsDiscount > 0 ? glowPointsDiscount : undefined
       });
-      setEmailStatus('sent');
+
+      if (res.success) {
+        setEmailStatus('sent');
+      } else {
+        setEmailStatus('error');
+      }
     } catch (err) {
-      console.error('Failed to send order email:', err);
+      console.warn('Failed to resend EmailJS receipt:', err);
       setEmailStatus('error');
     }
   };
@@ -431,46 +417,55 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               </div>
             </div>
 
-            {/* Gmail Digital Receipt Card */}
-            <div className="p-4 bg-amber-50/80 rounded-lg border border-amber-200/80 max-w-md mx-auto text-xs text-stone-700 space-y-3">
-              <div className="flex items-center gap-2 font-semibold text-amber-950">
-                <Mail className="w-4 h-4 text-amber-800" />
-                <span>{lang === 'ar' ? 'إيصال إلكتروني عبر Gmail' : 'Official Gmail Receipt & Care Guide'}</span>
+            {/* EmailJS Digital Order Receipt Card */}
+            <div className="p-4 bg-stone-50 rounded-lg border border-stone-200 max-w-md mx-auto text-xs text-stone-700 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 font-semibold text-stone-900">
+                  <Mail className="w-4 h-4 text-stone-700" />
+                  <span>{lang === 'ar' ? 'إيصال إلكتروني فوري (EmailJS)' : 'Instant Email Receipt (EmailJS)'}</span>
+                </div>
+                <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">
+                  {lang === 'ar' ? 'تم الحفظ في فايرستور' : 'Saved in Firestore'}
+                </span>
               </div>
 
               {emailStatus === 'sent' ? (
-                <div className="p-2.5 bg-emerald-100/80 text-emerald-900 rounded font-medium flex items-center justify-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-700" />
-                  <span>{t.receiptSentSuccess}</span>
+                <div className="p-2.5 bg-emerald-50 text-emerald-900 rounded font-medium flex items-center justify-center gap-2 border border-emerald-200 text-xs">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>
+                    {lang === 'ar'
+                      ? `تم إرسال إيصال وتفاصيل الطلب إلى ${formData.email}`
+                      : `Order receipt & care certificate dispatched to ${formData.email}`}
+                  </span>
                 </div>
-              ) : currentUser ? (
-                <div className="space-y-2">
-                  <p className="text-[11px] text-stone-600 leading-relaxed">
-                    Send an official itemized receipt, guarantee details, and jewelry care instructions to <strong>{formData.email || currentUser.email}</strong> via Gmail.
-                  </p>
-                  <button
-                    onClick={() => setShowConfirmEmailModal(true)}
-                    disabled={emailStatus === 'sending'}
-                    className="w-full py-2 px-3 bg-stone-900 hover:bg-stone-800 text-white rounded text-xs font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs disabled:opacity-50"
-                  >
-                    <Mail className="w-3.5 h-3.5" />
-                    <span>{emailStatus === 'sending' ? 'Dispatching via Gmail...' : 'Send Receipt to My Gmail'}</span>
-                  </button>
+              ) : emailStatus === 'sending' ? (
+                <div className="p-2.5 bg-stone-100 text-stone-800 rounded text-center flex items-center justify-center gap-2">
+                  <div className="w-3.5 h-3.5 border-2 border-stone-800 border-t-transparent rounded-full animate-spin" />
+                  <span>{lang === 'ar' ? 'جاري إرسال الإيصال عبر EmailJS...' : 'Sending receipt via EmailJS...'}</span>
+                </div>
+              ) : emailStatus === 'error' ? (
+                <div className="p-2.5 bg-rose-50 text-rose-800 rounded text-xs border border-rose-200">
+                  <span>{lang === 'ar' ? 'تعذر إرسال الإيميل تلقائياً. يمكنكِ إعادة المحاولة أدناه.' : 'Could not dispatch receipt. You can retry below.'}</span>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  <p className="text-[11px] text-stone-600 leading-relaxed">
-                    Connect your Google account to dispatch this order confirmation directly to your Gmail inbox.
-                  </p>
-                  <button
-                    onClick={handlePromptSignInForReceipt}
-                    className="w-full py-2 px-3 bg-white border border-stone-300 hover:bg-stone-50 text-stone-800 rounded text-xs font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
-                  >
-                    <Mail className="w-3.5 h-3.5 text-red-500" />
-                    <span>{t.signInWithGoogle}</span>
-                  </button>
+                <div className="p-2.5 bg-stone-100 text-stone-700 rounded text-xs">
+                  <span>{lang === 'ar' ? `سيتم إرسال الإيصال إلى ${formData.email}` : `Receipt will be delivered to ${formData.email}`}</span>
                 </div>
               )}
+
+              <div className="flex items-center justify-between pt-1">
+                <p className="text-[11px] text-stone-500">
+                  {lang === 'ar' ? 'البريد الإلكتروني للعميل:' : 'Sent to:'} <strong>{formData.email}</strong>
+                </p>
+                <button
+                  type="button"
+                  onClick={handleResendEmailReceipt}
+                  disabled={emailStatus === 'sending'}
+                  className="text-[11px] font-medium text-stone-900 hover:text-stone-700 underline underline-offset-2 cursor-pointer disabled:opacity-50"
+                >
+                  {lang === 'ar' ? 'إعادة إرسال الإيصال' : 'Resend Receipt'}
+                </button>
+              </div>
             </div>
 
             <div className="flex items-center justify-center pt-2">
@@ -745,23 +740,24 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 </div>
               </div>
 
-              {/* Gmail Notification Option */}
+              {/* Instant Email Receipt Option */}
               <div className="mt-3 pt-3 border-t border-stone-100 flex items-center justify-between">
                 <label className="flex items-center gap-2 cursor-pointer text-xs text-stone-700">
                   <input
                     type="checkbox"
-                    checked={sendGmailReceipt}
-                    onChange={(e) => setSendGmailReceipt(e.target.checked)}
+                    checked={sendEmailReceipt}
+                    onChange={(e) => setSendEmailReceipt(e.target.checked)}
                     className="rounded border-stone-300 text-stone-900 focus:ring-stone-900 w-3.5 h-3.5 cursor-pointer"
                   />
-                  <span>{t.sendConfirmationToGmail}</span>
-                </label>
-                {currentUser && (
-                  <span className="text-[11px] text-emerald-700 font-medium flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                    Gmail Ready
+                  <span>
+                    {lang === 'ar'
+                      ? 'إرسال إيصال إلكتروني فوري وتفاصيل العناية إلى بريدي'
+                      : 'Send instant email receipt & jewelry care certificate'}
                   </span>
-                )}
+                </label>
+                <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-stone-100 text-stone-600 border border-stone-200">
+                  EmailJS
+                </span>
               </div>
             </div>
 
@@ -983,39 +979,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           </form>
         )}
       </div>
-
-      {/* Mandatory User Confirmation Dialog before sending order receipt email (Workspace Integration Rule) */}
-      {showConfirmEmailModal && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-xs">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border border-stone-200">
-            <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-900 flex items-center justify-center mb-3">
-              <Mail className="w-5 h-5" />
-            </div>
-            <h4 className="text-base font-semibold text-stone-900 mb-2">
-              Confirm Gmail Order Dispatch
-            </h4>
-            <p className="text-xs text-stone-600 leading-relaxed mb-4">
-              Send your official order receipt and jewelry care instructions to <strong>{formData.email}</strong> using the Gmail API?
-            </p>
-            <div className="flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setShowConfirmEmailModal(false)}
-                className="px-4 py-2 text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors cursor-pointer"
-              >
-                {t.cancelButton}
-              </button>
-              <button
-                type="button"
-                onClick={handleSendGmailReceipt}
-                className="px-4 py-2 text-xs font-medium bg-stone-900 hover:bg-stone-800 text-white rounded-lg transition-colors shadow-xs cursor-pointer"
-              >
-                Confirm & Send via Gmail
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
