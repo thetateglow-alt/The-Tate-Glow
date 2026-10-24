@@ -2,7 +2,8 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { initializeApp, getApps, getApp, App } from 'firebase-admin/app';
+import { initializeApp, getApps, getApp } from 'firebase-admin/app';
+import type { App } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import nodemailer from 'nodemailer';
 
@@ -202,6 +203,72 @@ async function getAuthoritativeDiscount(code: string): Promise<ServerDiscount | 
  * Never put these secrets in frontend code.
  * If sending fails, the error is logged and the customer order is still completed.
  */
+/**
+ * Sanitizes and validates Gmail SMTP credentials from environment variables.
+ * 
+ * - Strips all internal and external whitespace (spaces, tabs, newlines, non-breaking spaces)
+ * - Strips leading/trailing quotes (single, double, backticks)
+ * - Normalizes the App Password to lowercase
+ * - Enforces the strict 16-character alphabetical format required by Google App Passwords (/^[a-z]{16}$/)
+ * - Rejects placeholder values
+ */
+export function sanitizeAndValidateGmailCredentials(
+  rawUser: string | undefined = process.env.GMAIL_USER,
+  rawPass: string | undefined = process.env.GMAIL_APP_PASSWORD
+): { user: string; pass: string } | null {
+  if (!rawUser || !rawPass) {
+    console.warn(
+      '[Nodemailer] Email notification skipped: GMAIL_USER or GMAIL_APP_PASSWORD environment variables are not configured.'
+    );
+    return null;
+  }
+
+  // Strip whitespace and quotes from GMAIL_USER
+  const user = rawUser
+    .replace(/[\s\uFEFF\xA0]+/g, '')
+    .replace(/^["'`]|["'`]$/g, '')
+    .trim()
+    .toLowerCase();
+
+  // Strip all whitespace and surrounding quotes from GMAIL_APP_PASSWORD
+  const pass = rawPass
+    .replace(/[\s\uFEFF\xA0]+/g, '')
+    .replace(/^["'`]|["'`]$/g, '')
+    .trim()
+    .toLowerCase();
+
+  if (!user || !pass) {
+    console.warn('[Nodemailer] Email notification skipped: GMAIL_USER or GMAIL_APP_PASSWORD is empty after sanitization.');
+    return null;
+  }
+
+  // Filter placeholder text
+  if (
+    pass.includes('xxxx') ||
+    pass.includes('password') ||
+    pass.includes('placeholder') ||
+    pass.includes('dummy') ||
+    pass.includes('my_app_password')
+  ) {
+    console.warn('[Nodemailer] Notification skipped: GMAIL_APP_PASSWORD contains placeholder text.');
+    return null;
+  }
+
+  // Enforce the 16-character format required by Google App Passwords (strictly [a-z]{16})
+  const is16Alpha = /^[a-z]{16}$/.test(pass);
+  if (!is16Alpha) {
+    console.warn(
+      `[Nodemailer] Warning: GMAIL_APP_PASSWORD does not match the required 16-character format ` +
+      `(received ${pass.length} chars: ${pass.length !== 16 ? `expected 16, got ${pass.length}` : 'contains non-alphabetical characters'}). ` +
+      `Google App Passwords are strictly 16 alphabetical letters generated via Google Account Security (e.g. "abcd efgh ijkl mnop"). ` +
+      `Notification email skipped to prevent SMTP authentication errors.`
+    );
+    return null;
+  }
+
+  return { user, pass };
+}
+
 async function sendNewOrderEmailNotification(order: {
   orderId: string;
   createdAt: string;
@@ -216,36 +283,16 @@ async function sendNewOrderEmailNotification(order: {
   total: number;
   paymentMethod: string; // 'COD' or 'Card'
 }) {
-  const rawUser = process.env.GMAIL_USER || '';
-  const rawPass = process.env.GMAIL_APP_PASSWORD || '';
-
-  const gmailUser = rawUser.trim().replace(/^["']|["']$/g, '');
-  // Google App Passwords are 16 letters, often copied with spaces like "abcd efgh ijkl mnop"
-  const gmailAppPassword = rawPass.replace(/\s+/g, '').replace(/^["']|["']$/g, '').trim();
-
-  if (!gmailUser || !gmailAppPassword) {
-    console.warn(
-      '[Nodemailer] Email notification skipped: GMAIL_USER or GMAIL_APP_PASSWORD environment variables are not configured.'
-    );
-    return;
-  }
-
-  // Pre-validate App Password format. Real Google App Passwords are strictly 16 alphabetical letters.
-  // Using a personal account password or dummy string will fail with 535-5.7.8 from Google.
-  if (gmailAppPassword.includes('xxxx') || gmailAppPassword.length !== 16) {
-    console.warn(
-      `[Nodemailer] Warning: GMAIL_APP_PASSWORD appears invalid (${gmailAppPassword.length} characters). ` +
-      `Google App Passwords are strictly 16 characters generated via Google Account Security (e.g., "abcd efgh ijkl mnop"). ` +
-      `Regular account passwords are rejected with 535-5.7.8 by Google SMTP. Order notification email skipped.`
-    );
+  const credentials = sanitizeAndValidateGmailCredentials();
+  if (!credentials) {
     return;
   }
 
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: gmailUser,
-      pass: gmailAppPassword
+      user: credentials.user,
+      pass: credentials.pass
     }
   });
 
@@ -419,7 +466,7 @@ TOTAL: ${order.total} EGP
 `;
 
   await transporter.sendMail({
-    from: `"The Taté Glow" <${gmailUser}>`,
+    from: `"The Taté Glow" <${credentials.user}>`,
     to: 'thetateglow@gmail.com',
     subject: emailSubject,
     text: textContent,
@@ -791,4 +838,6 @@ async function startServer() {
   });
 }
 
-startServer();
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  startServer();
+}
