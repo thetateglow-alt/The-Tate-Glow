@@ -1,12 +1,9 @@
 {
-  "projectId": "the-tate-glow",
-  "appId": "1:272670126852:web:817c7910a572de47919651",
   "apiKey": "AIzaSyDigqP9ucpUGlVbO9SlwBgGtXJs22l6l_w",
   "authDomain": "the-tate-glow.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-thetatglow-e6703ffd-3b67-4723-8dae-49daf7486ab6",
+  "projectId": "the-tate-glow",
   "storageBucket": "the-tate-glow.firebasestorage.app",
   "messagingSenderId": "272670126852",
-  "measurementId": "",
-  "oAuthClientId": "272670126852-3noegmbl35prc9irmp382t0fe123adc6.apps.googleusercontent.com",
-  "recaptchaSiteKey": ""
+  "appId": "1:272670126852:web:817c7910a572de47919651",
+  "firestoreDatabaseId": "ai-studio-thetatglow-e6703ffd-3b67-4723-8dae-49daf7486ab6"
 }

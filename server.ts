@@ -28,8 +28,8 @@ const adminApp: App = getApps().length > 0
       projectId: firebaseConfig.projectId || 'the-tate-glow'
     });
 
-// Firestore instance pointing to the app's configured database
-const db = getFirestore(adminApp, firebaseConfig.firestoreDatabaseId || 'ai-studio-thetatglow-e6703ffd-3b67-4723-8dae-49daf7486ab6');
+// Firestore instance pointing to the app's configured named database
+const db = getFirestore(adminApp, 'ai-studio-thetatglow-e6703ffd-3b67-4723-8dae-49daf7486ab6');
 
 const app = express();
 app.use(express.json());

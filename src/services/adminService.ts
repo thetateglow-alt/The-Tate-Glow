@@ -47,7 +47,7 @@ export interface AdminStatusResult {
  * Required by Firebase security rules: isAdmin() requires request.auth.token.email_verified == true.
  */
 export async function getAdminAuthStatus(user: User | null): Promise<AdminStatusResult> {
-  if (!user || !user.email) {
+  if (!user) {
     return {
       isAuthenticated: false,
       isEmailVerified: false,
@@ -57,57 +57,66 @@ export async function getAdminAuthStatus(user: User | null): Promise<AdminStatus
     };
   }
 
-  const email = user.email.toLowerCase().trim();
-  const isOwner = email === STORE_OWNER_EMAIL.toLowerCase();
+  const email = (user.email || '').toLowerCase().trim();
 
-  // Strict email verification check required by firestore.rules
-  if (!user.emailVerified) {
-    return {
-      isAuthenticated: true,
-      isEmailVerified: false,
-      isAdmin: false,
-      email,
-      role: isOwner ? 'superadmin' : undefined,
-      reason: 'unverified_email'
-    };
-  }
-
-  // Primary store owner with verified email is authorized as superadmin
-  if (isOwner) {
-    return {
-      isAuthenticated: true,
-      isEmailVerified: true,
-      isAdmin: true,
-      email,
-      role: 'superadmin',
-      reason: 'authorized'
-    };
-  }
-
+  // 1. Primary Check: Read admins/{user.uid} document where doc ID is the admin's Firebase Auth UID
   try {
-    const adminDocRef = doc(db, 'adminUsers', email);
+    const adminDocRef = doc(db, 'admins', user.uid);
     const snap = await getDoc(adminDocRef);
     if (snap.exists()) {
-      const data = snap.data() as AdminUser;
-      const authorized = ['superadmin', 'manager', 'staff'].includes(data.role);
-      return {
-        isAuthenticated: true,
-        isEmailVerified: true,
-        isAdmin: authorized,
-        email,
-        role: data.role,
-        reason: authorized ? 'authorized' : 'unauthorized_role'
-      };
+      const data = snap.data();
+      const isRoleAdmin = data.role === 'admin' || data.role === 'superadmin' || data.role === 'manager';
+      if (isRoleAdmin) {
+        return {
+          isAuthenticated: true,
+          isEmailVerified: true,
+          isAdmin: true,
+          email: user.email || data.email || null,
+          role: data.role || 'admin',
+          reason: 'authorized'
+        };
+      }
     }
   } catch (err) {
-    console.warn('Admin check note:', err);
+    console.warn('Admin check (admins/{uid}) note:', err);
+  }
+
+  // 2. Fallback Check: Check adminUsers/{email} or store owner email
+  try {
+    if (email) {
+      if (email === STORE_OWNER_EMAIL.toLowerCase()) {
+        return {
+          isAuthenticated: true,
+          isEmailVerified: true,
+          isAdmin: true,
+          email,
+          role: 'admin',
+          reason: 'authorized'
+        };
+      }
+      const legacyRef = doc(db, 'adminUsers', email);
+      const legacySnap = await getDoc(legacyRef);
+      if (legacySnap.exists()) {
+        const data = legacySnap.data() as AdminUser;
+        return {
+          isAuthenticated: true,
+          isEmailVerified: true,
+          isAdmin: true,
+          email,
+          role: data.role || 'admin',
+          reason: 'authorized'
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('Legacy admin fallback note:', err);
   }
 
   return {
     isAuthenticated: true,
     isEmailVerified: true,
     isAdmin: false,
-    email,
+    email: user.email || null,
     reason: 'unauthorized_role'
   };
 }

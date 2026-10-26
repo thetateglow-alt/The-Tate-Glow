@@ -20,7 +20,6 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
-import firebaseConfig from '../../firebase-applet-config.json';
 
 export interface UserProfileData {
   uid: string;
@@ -32,33 +31,24 @@ export interface UserProfileData {
   updatedAt: string;
 }
 
-export const GMAIL_SCOPES = [
-  'https://mail.google.com/',
-  'https://www.googleapis.com/auth/gmail.addons.current.action.compose',
-  'https://www.googleapis.com/auth/gmail.addons.current.message.action',
-  'https://www.googleapis.com/auth/gmail.addons.current.message.metadata',
-  'https://www.googleapis.com/auth/gmail.addons.current.message.readonly',
-  'https://www.googleapis.com/auth/gmail.compose',
-  'https://www.googleapis.com/auth/gmail.insert',
-  'https://www.googleapis.com/auth/gmail.labels',
-  'https://www.googleapis.com/auth/gmail.metadata',
-  'https://www.googleapis.com/auth/gmail.modify',
-  'https://www.googleapis.com/auth/gmail.readonly',
-  'https://www.googleapis.com/auth/gmail.send',
-  'https://www.googleapis.com/auth/gmail.settings.basic',
-  'https://www.googleapis.com/auth/gmail.settings.sharing',
-];
+export const firebaseConfig = {
+  apiKey: "AIzaSyDigqP9ucpUGlVbO9SlwBgGtXJs22l6l_w",
+  authDomain: "the-tate-glow.firebaseapp.com",
+  projectId: "the-tate-glow",
+  storageBucket: "the-tate-glow.firebasestorage.app",
+  messagingSenderId: "272670126852",
+  appId: "1:272670126852:web:817c7910a572de47919651"
+};
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = firebaseConfig.firestoreDatabaseId
-  ? getFirestore(app, firebaseConfig.firestoreDatabaseId)
-  : getFirestore(app);
 
+// Named Firestore database as specified by user
+export const FIRESTORE_DATABASE_ID = "ai-studio-thetatglow-e6703ffd-3b67-4723-8dae-49daf7486ab6";
+export const db = getFirestore(app, FIRESTORE_DATABASE_ID);
+
+// Plain GoogleAuthProvider, NO addScope calls, no Gmail scopes
 const googleProvider = new GoogleAuthProvider();
-GMAIL_SCOPES.forEach((scope) => {
-  googleProvider.addScope(scope);
-});
 googleProvider.setCustomParameters({
   prompt: 'select_account',
 });
