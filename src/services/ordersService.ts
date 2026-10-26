@@ -1,4 +1,4 @@
-import { collection, doc, setDoc, getDocs, orderBy, query } from 'firebase/firestore';
+import { collection, doc, setDoc, getDocs, orderBy, query, where } from 'firebase/firestore';
 import { db } from './firebaseAuth';
 import { PRODUCTS, BRAND_CONFIG } from '../data/products';
 import { calculateBundleDiscount } from '../utils/pricing';
@@ -359,16 +359,29 @@ export async function fetchCustomerOrders(userId?: string): Promise<CustomerOrde
   // If user is logged in, attempt fetching from Firestore
   if (userId) {
     try {
-      const ordersCol = collection(db, 'users', userId, 'orders');
-      const q = query(ordersCol, orderBy('createdAt', 'desc'));
-      const snapshot = await getDocs(q);
+      const firestoreOrders: CustomerOrder[] = [];
 
-      if (!snapshot.empty) {
-        const firestoreOrders: CustomerOrder[] = [];
-        snapshot.forEach((d) => {
-          firestoreOrders.push(d.data() as CustomerOrder);
-        });
+      // 1. Check user subcollection
+      try {
+        const userOrdersCol = collection(db, 'users', userId, 'orders');
+        const qSub = query(userOrdersCol, orderBy('createdAt', 'desc'));
+        const snapSub = await getDocs(qSub);
+        snapSub.forEach((d) => firestoreOrders.push(d.data() as CustomerOrder));
+      } catch (errSub) {
+        console.warn('Subcollection fetch note:', errSub);
+      }
 
+      // 2. Check top-level orders collection where userId matches
+      try {
+        const mainOrdersCol = collection(db, 'orders');
+        const qMain = query(mainOrdersCol, where('userId', '==', userId));
+        const snapMain = await getDocs(qMain);
+        snapMain.forEach((d) => firestoreOrders.push(d.data() as CustomerOrder));
+      } catch (errMain) {
+        console.warn('Main orders fetch note:', errMain);
+      }
+
+      if (firestoreOrders.length > 0) {
         // Merge firestore and local orders, preferring firestore data
         const map = new Map<string, CustomerOrder>();
         localOrders.forEach((o) => map.set(o.id, o));

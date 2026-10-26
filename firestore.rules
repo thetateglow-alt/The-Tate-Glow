@@ -11,46 +11,55 @@ service cloud.firestore {
       return isAuthenticated() &&
         request.auth.token.email_verified == true && (
           request.auth.token.email == 'thetateglow@gmail.com' ||
-          exists(/databases/$(database)/documents/adminUsers/$(request.auth.token.email))
+          exists(/databases/$(database)/documents/adminUsers/$(request.auth.token.email)) ||
+          exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+          exists(/databases/$(database)/documents/admins/$(request.auth.token.email))
         );
     }
 
-    // 1. Products: Public read ONLY when status is "published"; Admins can read and write everything
+    // 1. Users collection: users can read & write their own profile; admins can read all users
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      allow read: if isAdmin();
+    }
+
+    // 2. Products: Public read ONLY when status is "published"; Admins can read and write everything
     match /products/{productId} {
       allow read: if isAdmin() || resource.data.status == 'published';
       allow write: if isAdmin();
     }
 
-    // 2. Orders: Customers can create orders directly (GitHub Pages client-side mode).
-    // Customers can read their own orders; Admins can read, update, and delete all orders.
+    // 3. Orders: Customers (signed-in or anonymous guest) can create their orders.
+    // Users can read/write their own orders; Admins can read/manage all orders.
     match /orders/{orderId} {
-      allow create: if true;
+      allow create: if isAuthenticated() || true;
       allow read: if isAdmin() || (isAuthenticated() && (
         resource.data.userId == request.auth.uid ||
         resource.data.customerEmail == request.auth.token.email
       ));
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
     }
 
-    // 3. User subcollection order history: customer can create and read their own orders; update/delete by admin
+    // 4. User subcollection order history: customer can create and read their own orders; update/delete by admin
     match /users/{userId}/orders/{orderId} {
       allow create: if isAuthenticated() && request.auth.uid == userId;
       allow read: if isAdmin() || (isAuthenticated() && request.auth.uid == userId);
       allow update, delete: if isAdmin();
     }
 
-    // 4. Physical Inventory: Public read for stock availability; ONLY admins can write
+    // 5. Physical Inventory: Public read for stock availability; ONLY admins can write
     match /inventory/{productId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // 5. Inventory movement audit logs: ONLY admins can read and write
+    // 6. Inventory movement audit logs: ONLY admins can read and write
     match /inventoryLogs/{logId} {
       allow read, write: if isAdmin();
     }
 
-    // 6. Customers: Customers can create their profile during checkout; read their own record; admin write
+    // 7. Customers: Customers can create their profile during checkout; read their own record; admin write
     match /customers/{customerId} {
       allow create: if true;
       allow read: if isAdmin() || (isAuthenticated() && (
@@ -60,24 +69,29 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
-    // 7. Discounts: Public read for promo validation; ONLY admins can write
+    // 8. Discounts: Public read for promo validation; ONLY admins can write
     match /discounts/{code} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // 8. Homepage CMS: Public read; ONLY admins can write
+    // 9. Homepage CMS: Public read; ONLY admins can write
     match /homepageContent/{configId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // 9. Admin users: ONLY verified admins can read and write
+    // 10. Admin users: ONLY verified admins can read and write
     match /adminUsers/{email} {
       allow read, write: if isAdmin();
     }
 
-    // 10. Audit logs: ONLY admins can read and write
+    // 11. Admins collection: ONLY verified admins can read and write
+    match /admins/{adminId} {
+      allow read, write: if isAdmin();
+    }
+
+    // 12. Audit logs: ONLY admins can read and write
     match /auditLogs/{logId} {
       allow read, write: if isAdmin();
     }

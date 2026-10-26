@@ -19,7 +19,9 @@ import { Sparkles, ShieldCheck } from 'lucide-react';
 import { calculateBundleDiscount } from './utils/pricing';
 import { useCartReservation } from './hooks/useCartReservation';
 import { Language, TRANSLATIONS } from './i18n/translations';
-import { initAuth } from './services/firebaseAuth';
+import { initAuth, logout } from './services/firebaseAuth';
+import { CustomerAuthModal } from './components/CustomerAuthModal';
+import { CustomerOrdersModal } from './components/CustomerOrdersModal';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { initializeStoreBackend, fetchAdminProducts, checkIsAdmin } from './services/adminService';
 
@@ -104,6 +106,9 @@ export default function App() {
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isAdminAuthorized, setIsAdminAuthorized] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isAuthGateCheckout, setIsAuthGateCheckout] = useState(false);
+  const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
 
   // Live Catalog Products State (synced from Firestore)
   const [catalogProducts, setCatalogProducts] = useState<Product[]>(PRODUCTS);
@@ -330,6 +335,17 @@ export default function App() {
         }}
         lang={lang}
         onToggleLanguage={toggleLanguage}
+        currentUser={currentUser}
+        onOpenAuth={() => {
+          setIsAuthGateCheckout(false);
+          setIsAuthModalOpen(true);
+        }}
+        onOpenOrders={() => setIsOrdersModalOpen(true)}
+        onLogout={async () => {
+          await logout();
+          setCurrentUser(null);
+          showToast(lang === 'ar' ? 'تم تسجيل الخروج بنجاح' : 'Signed out successfully');
+        }}
       />
 
       <main className="flex-1">
@@ -495,7 +511,12 @@ export default function App() {
         onRemoveItem={handleRemoveItem}
         onCheckout={() => {
           setIsCartOpen(false);
-          setIsCheckoutOpen(true);
+          if (!currentUser) {
+            setIsAuthGateCheckout(true);
+            setIsAuthModalOpen(true);
+          } else {
+            setIsCheckoutOpen(true);
+          }
         }}
         reservationTime={reservationTime}
         isReservationExpired={isReservationExpired}
@@ -516,6 +537,48 @@ export default function App() {
         lang={lang}
         currentUser={currentUser}
         onAuthChange={setCurrentUser}
+      />
+
+      {/* Customer Authentication Gate Modal */}
+      <CustomerAuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => {
+          setIsAuthModalOpen(false);
+          setIsAuthGateCheckout(false);
+        }}
+        onSuccess={(user) => {
+          setCurrentUser(user);
+          setIsAuthModalOpen(false);
+          const name = user.displayName || (user.isAnonymous ? (lang === 'ar' ? 'زائر' : 'Guest') : (lang === 'ar' ? 'عميل' : 'Customer'));
+          showToast(
+            lang === 'ar'
+              ? `أهلاً بكِ ${name}`
+              : `Welcome, ${name}`
+          );
+          if (isAuthGateCheckout) {
+            setIsAuthGateCheckout(false);
+            setIsCheckoutOpen(true);
+          }
+        }}
+        lang={lang}
+        isCheckoutGate={isAuthGateCheckout}
+      />
+
+      {/* Customer Orders & Tracking Modal */}
+      <CustomerOrdersModal
+        isOpen={isOrdersModalOpen}
+        onClose={() => setIsOrdersModalOpen(false)}
+        currentUser={currentUser}
+        lang={lang}
+        onOpenAuth={() => {
+          setIsOrdersModalOpen(false);
+          setIsAuthGateCheckout(false);
+          setIsAuthModalOpen(true);
+        }}
+        onShopClick={() => {
+          setIsOrdersModalOpen(false);
+          scrollToCatalog();
+        }}
       />
 
       <SteelScienceModal

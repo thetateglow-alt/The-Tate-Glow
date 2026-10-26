@@ -104,14 +104,15 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
   useEffect(() => {
     if (currentUser) {
+      const isAnon = currentUser.isAnonymous;
       setFormData(prev => ({
         ...prev,
-        name: prev.name || currentUser.displayName || '',
-        email: prev.email || currentUser.email || ''
+        name: prev.name || (!isAnon ? currentUser.displayName : '') || '',
+        email: prev.email || (!isAnon ? currentUser.email : '') || ''
       }));
       setCardData(prev => ({
         ...prev,
-        holder: prev.holder || currentUser.displayName || ''
+        holder: prev.holder || (!isAnon ? currentUser.displayName : '') || ''
       }));
     }
   }, [currentUser]);
