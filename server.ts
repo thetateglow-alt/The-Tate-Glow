@@ -25,7 +25,7 @@ if (fs.existsSync(configPath)) {
 const adminApp: App = getApps().length > 0
   ? getApp()
   : initializeApp({
-      projectId: firebaseConfig.projectId || 'giga-folio-l3kqt'
+      projectId: firebaseConfig.projectId || 'the-tate-glow'
     });
 
 // Firestore instance pointing to the app's configured database

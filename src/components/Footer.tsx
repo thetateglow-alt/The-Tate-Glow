@@ -163,6 +163,22 @@ export const Footer: React.FC<FooterProps> = ({
                   {t.tarnishFreeGuaranteeTitle}
                 </button>
               </li>
+              <li>
+                <a
+                  href="/privacy.html"
+                  className="hover:text-white transition-colors block text-left rtl:text-right"
+                >
+                  {lang === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy'}
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/terms.html"
+                  className="hover:text-white transition-colors block text-left rtl:text-right"
+                >
+                  {lang === 'ar' ? 'شروط الخدمة' : 'Terms of Service'}
+                </a>
+              </li>
               <li className="pt-1 text-[11px] text-stone-500">
                 {lang === 'ar' ? 'توصيل مجاني للطلبات فوق 1,200 ج.م' : 'Free Delivery over 1,200 EGP'}
               </li>
@@ -208,12 +224,26 @@ export const Footer: React.FC<FooterProps> = ({
 
         </div>
 
-        {/* Bottom Bar: Copyright & Staff Access */}
+        {/* Bottom Bar: Copyright, Legal Links & Staff Access */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500 font-light">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <p>
               © {new Date().getFullYear()} {t.copyrightNotice}
             </p>
+            <span className="text-stone-700">·</span>
+            <a
+              href="/privacy.html"
+              className="text-stone-400 hover:text-white transition-colors underline underline-offset-4"
+            >
+              {lang === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy'}
+            </a>
+            <span className="text-stone-700">·</span>
+            <a
+              href="/terms.html"
+              className="text-stone-400 hover:text-white transition-colors underline underline-offset-4"
+            >
+              {lang === 'ar' ? 'شروط الخدمة' : 'Terms of Service'}
+            </a>
             {onOpenAdmin && (
               <>
                 <span className="text-stone-700">·</span>

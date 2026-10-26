@@ -1,12 +1,12 @@
 {
-  "projectId": "giga-folio-l3kqt",
-  "appId": "1:673829796553:web:ce882b48ca1c9551222b18",
-  "apiKey": "AIzaSyA-gFQca1dSZi-4I6AT41UuagH6AtJgE0E",
-  "authDomain": "giga-folio-l3kqt.firebaseapp.com",
+  "projectId": "the-tate-glow",
+  "appId": "1:272670126852:web:817c7910a572de47919651",
+  "apiKey": "AIzaSyDigqP9ucpUGlVbO9SlwBgGtXJs22l6l_w",
+  "authDomain": "the-tate-glow.firebaseapp.com",
   "firestoreDatabaseId": "ai-studio-thetatglow-e6703ffd-3b67-4723-8dae-49daf7486ab6",
-  "storageBucket": "giga-folio-l3kqt.firebasestorage.app",
-  "messagingSenderId": "673829796553",
+  "storageBucket": "the-tate-glow.firebasestorage.app",
+  "messagingSenderId": "272670126852",
   "measurementId": "",
-  "oAuthClientId": "673829796553-0t7prcdmsci9fi918m8j7rmf68psdbsk.apps.googleusercontent.com",
+  "oAuthClientId": "272670126852-3noegmbl35prc9irmp382t0fe123adc6.apps.googleusercontent.com",
   "recaptchaSiteKey": ""
 }
