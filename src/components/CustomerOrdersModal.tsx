@@ -9,7 +9,7 @@ interface CustomerOrdersModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentUser: User | null;
-  lang: Language;
+  lang?: Language;
   onOpenAuth: () => void;
   onShopClick: () => void;
 }
@@ -18,13 +18,12 @@ export const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
   isOpen,
   onClose,
   currentUser,
-  lang,
   onOpenAuth,
   onShopClick,
 }) => {
   const [orders, setOrders] = useState<CustomerOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const t = TRANSLATIONS[lang];
+  const t = TRANSLATIONS.en;
 
   const isGuest = currentUser?.isAnonymous ?? true;
 
@@ -63,12 +62,10 @@ export const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
             </div>
             <div>
               <h3 className="font-serif text-xl sm:text-2xl font-medium text-stone-950">
-                {lang === 'ar' ? 'طلباتي السابقة والتتبع' : 'My Orders & Tracking'}
+                My Orders & Tracking
               </h3>
               <p className="text-xs text-stone-500">
-                {currentUser?.email
-                  ? `${currentUser.email}`
-                  : (lang === 'ar' ? 'جلسة زائر (الطلبات المحفوظة على هذا الجهاز)' : 'Guest Session Orders')}
+                {currentUser?.email ? `${currentUser.email}` : 'Guest Session Orders'}
               </p>
             </div>
           </div>
@@ -87,9 +84,7 @@ export const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-amber-700 shrink-0" />
               <span>
-                {lang === 'ar'
-                  ? 'سجلي دخولكِ لربط هذه الطلبات بحساب دائم وتتبعها من أي جهاز!'
-                  : 'Link these guest orders to a permanent account to track them anywhere!'}
+                Link these guest orders to a permanent account to track them anywhere!
               </span>
             </div>
             <button
@@ -100,7 +95,7 @@ export const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
               className="px-3 py-1.5 bg-stone-900 text-white hover:bg-stone-800 rounded text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer shrink-0 shadow-2xs"
             >
               <UserPlus className="w-3.5 h-3.5" />
-              <span>{lang === 'ar' ? 'ربط الحساب الآن' : 'Sign in to Link'}</span>
+              <span>Sign in to Link</span>
             </button>
           </div>
         )}
@@ -111,7 +106,7 @@ export const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
             <div className="py-16 text-center space-y-3">
               <div className="w-8 h-8 border-2 border-stone-800 border-t-transparent rounded-full animate-spin mx-auto" />
               <p className="text-xs text-stone-500">
-                {lang === 'ar' ? 'جاري تحميل الطلبات وتفاصيل الشحن...' : 'Loading orders and courier status...'}
+                Loading orders and courier status...
               </p>
             </div>
           ) : orders.length === 0 ? (
@@ -121,12 +116,10 @@ export const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
               </div>
               <div>
                 <h4 className="font-serif text-lg font-medium text-stone-900">
-                  {lang === 'ar' ? 'لا توجد طلبات سابقة بعد' : 'No Orders Yet'}
+                  No Orders Yet
                 </h4>
                 <p className="text-xs text-stone-500 mt-1 leading-relaxed">
-                  {lang === 'ar'
-                    ? 'لم تقومي بطلب أي قطع من تشكيلة الستانلس ستيل الطبي بعد. ابدأي تسوقك الآن!'
-                    : 'Your bag is empty. Explore our hypoallergenic, tarnish-free surgical stainless steel jewelry.'}
+                  Your bag is empty. Explore our hypoallergenic, tarnish-free surgical stainless steel jewelry.
                 </p>
               </div>
               <button
@@ -136,13 +129,13 @@ export const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
                 }}
                 className="px-6 py-2.5 bg-stone-950 text-white rounded text-xs uppercase tracking-wider font-medium hover:bg-stone-800 transition-colors cursor-pointer shadow-xs"
               >
-                {lang === 'ar' ? 'استعراض التشكيلة' : 'Explore Jewelry'}
+                Explore Jewelry
               </button>
             </div>
           ) : (
             orders.map((order) => {
               const statusCfg = ORDER_STATUS_MAP[order.status] || ORDER_STATUS_MAP.confirmed;
-              const formattedDate = new Date(order.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US', {
+              const formattedDate = new Date(order.createdAt).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric'
@@ -165,7 +158,7 @@ export const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
 
                     <div className="flex items-center gap-2">
                       <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${statusCfg.color}`}>
-                        {lang === 'ar' ? statusCfg.ar : statusCfg.en}
+                        {statusCfg.en}
                       </span>
                     </div>
                   </div>
@@ -184,16 +177,16 @@ export const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
                           )}
                           <div className="min-w-0">
                             <p className="font-medium text-stone-900 truncate">
-                              {lang === 'ar' && item.nameAr ? item.nameAr : item.name}
+                              {item.name}
                             </p>
                             <p className="text-[11px] text-stone-400">
-                              {item.selectedSize ? `${lang === 'ar' ? 'المقاس:' : 'Size:'} ${item.selectedSize} · ` : ''}
-                              {lang === 'ar' ? 'الكمية:' : 'Qty:'} {item.quantity}
+                              {item.selectedSize ? `Size: ${item.selectedSize} · ` : ''}
+                              Qty: {item.quantity}
                             </p>
                           </div>
                         </div>
                         <span className="font-semibold text-stone-900 tabular-nums shrink-0">
-                          {formatEGP(item.price * item.quantity, lang)}
+                          {formatEGP(item.price * item.quantity)}
                         </span>
                       </div>
                     ))}
@@ -203,19 +196,19 @@ export const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
                   <div className="pt-3 border-t border-stone-100 flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-2 bg-[#FAF8F5]/60 -mx-5 -mb-5 p-4 rounded-b-lg">
                     <div className="space-y-0.5 text-stone-600 text-[11px]">
                       <p>
-                        <strong>{lang === 'ar' ? 'العنوان:' : 'Delivery to:'}</strong> {order.customerName} ({order.city}, {order.address})
+                        <strong>Delivery to:</strong> {order.customerName} ({order.city}, {order.address})
                       </p>
                       <p>
-                        <strong>{lang === 'ar' ? 'الدفع:' : 'Payment:'}</strong> {order.paymentMethod}
+                        <strong>Payment:</strong> {order.paymentMethod}
                       </p>
                     </div>
 
-                    <div className="text-right rtl:text-left sm:shrink-0">
+                    <div className="text-right sm:shrink-0">
                       <span className="text-[11px] text-stone-500 block">
-                        {lang === 'ar' ? 'الإجمالي المستحق' : 'Total Amount'}
+                        Total Amount
                       </span>
                       <span className="text-base font-semibold text-stone-950 font-serif tabular-nums">
-                        {formatEGP(order.total, lang)}
+                        {formatEGP(order.total)}
                       </span>
                     </div>
                   </div>

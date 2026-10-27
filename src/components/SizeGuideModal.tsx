@@ -5,12 +5,12 @@ import { Language, TRANSLATIONS } from '../i18n/translations';
 interface SizeGuideModalProps {
   isOpen: boolean;
   onClose: () => void;
-  lang: Language;
+  lang?: Language;
 }
 
-export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({ isOpen, onClose, lang }) => {
+export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState<'rings' | 'necklaces' | 'bracelets'>('rings');
-  const t = TRANSLATIONS[lang];
+  const t = TRANSLATIONS.en;
 
   if (!isOpen) return null;
 
@@ -83,7 +83,7 @@ export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({ isOpen, onClose,
               </p>
 
               <div className="border border-stone-200 rounded overflow-hidden">
-                <table className="w-full text-left rtl:text-right border-collapse">
+                <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-stone-100 font-semibold text-stone-900">
                       <th className="py-2.5 px-3">{t.usRingSize}</th>
@@ -105,7 +105,7 @@ export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({ isOpen, onClose,
               <div className="p-3 bg-stone-50 rounded border border-stone-200 flex items-start gap-2.5 text-stone-600 leading-relaxed">
                 <HelpCircle className="w-4 h-4 text-stone-700 shrink-0 mt-0.5" />
                 <p>
-                  <strong>{lang === 'ar' ? 'طريقة قياس الخاتم:' : 'How to measure at home:'}</strong> {t.howToMeasureRings}
+                  <strong>How to measure at home:</strong> {t.howToMeasureRings}
                 </p>
               </div>
             </div>
@@ -120,34 +120,34 @@ export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({ isOpen, onClose,
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="p-3.5 bg-stone-50 rounded border border-stone-200">
                   <h4 className="font-semibold text-stone-900 mb-1">
-                    38cm - 40cm ({lang === 'ar' ? 'طوق ضيق' : 'Choker Style'})
+                    38cm - 40cm (Choker Style)
                   </h4>
                   <p className="text-stone-500 leading-relaxed">
-                    {lang === 'ar' ? 'يستقر أعلى عظمة الترقوة مباشرة. مثالي للارتداء المنفرد أو كأقصر طبقة في التنسيق.' : 'Rests high at base of neck above collarbone. Ideal as top anchor for layered chains.'}
+                    Rests high at base of neck above collarbone. Ideal as top anchor for layered chains.
                   </p>
                 </div>
                 <div className="p-3.5 bg-stone-50 rounded border border-stone-200">
                   <h4 className="font-semibold text-stone-900 mb-1">
-                    42cm - 45cm ({lang === 'ar' ? 'طول يومي قياسي' : 'Standard Everyday'})
+                    42cm - 45cm (Standard Everyday)
                   </h4>
                   <p className="text-stone-500 leading-relaxed">
-                    {lang === 'ar' ? 'يستقر بنعومة على عظمة الترقوة. الطول المثالي للقمصان المفتوحة والفساتين.' : 'Rests comfortably over collarbone. The most versatile length for V-necks and button-downs.'}
+                    Rests comfortably over collarbone. The most versatile length for V-necks and button-downs.
                   </p>
                 </div>
                 <div className="p-3.5 bg-stone-50 rounded border border-stone-200">
                   <h4 className="font-semibold text-stone-900 mb-1">
-                    50cm ({lang === 'ar' ? 'طول الدلايات الناعمة' : 'Pendant Drop'})
+                    50cm (Pendant Drop)
                   </h4>
                   <p className="text-stone-500 leading-relaxed">
-                    {lang === 'ar' ? 'يستقر أسفل عظمة الترقوة ببضع سنتيمترات لإبراز الدلايات المتدلية.' : 'Falls a few centimeters below the collarbone, creating depth and vertical elegance.'}
+                    Falls a few centimeters below the collarbone, creating depth and vertical elegance.
                   </p>
                 </div>
                 <div className="p-3.5 bg-stone-50 rounded border border-stone-200">
                   <h4 className="font-semibold text-stone-900 mb-1">
-                    +5cm ({lang === 'ar' ? 'سلسلة تمديد مدمجة' : 'Built-in Extender'})
+                    +5cm (Built-in Extender)
                   </h4>
                   <p className="text-stone-500 leading-relaxed">
-                    {lang === 'ar' ? 'تحتوي جميع سلاسل ذا تاتي جلو على سلسلة تمديد 5 سم لضبط الارتفاع حسب رغبتك.' : 'Every Taté Glow chain includes an integrated 5cm extension for micro-adjustments.'}
+                    Every Taté Glow chain includes an integrated 5cm extension for micro-adjustments.
                   </p>
                 </div>
               </div>
@@ -161,18 +161,18 @@ export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({ isOpen, onClose,
               </p>
 
               <div className="border border-stone-200 rounded overflow-hidden">
-                <table className="w-full text-left rtl:text-right border-collapse">
+                <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-stone-100 font-semibold text-stone-900">
-                      <th className="py-2.5 px-3">{lang === 'ar' ? 'المقاس' : 'Size'}</th>
-                      <th className="py-2.5 px-3">{lang === 'ar' ? 'محيط المعصم المناسب' : 'Recommended Wrist Fit'}</th>
-                      <th className="py-2.5 px-3">{lang === 'ar' ? 'طبيعة الارتداء' : 'Fit Style'}</th>
+                      <th className="py-2.5 px-3">Size</th>
+                      <th className="py-2.5 px-3">Recommended Wrist Fit</th>
+                      <th className="py-2.5 px-3">Fit Style</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-100">
-                    <tr><td className="py-2 px-3 font-medium">Small</td><td className="py-2 px-3">14.5 cm - 16.5 cm</td><td className="py-2 px-3">{lang === 'ar' ? 'مناسب للمعاصم النحيفة' : 'Snug & Tailored'}</td></tr>
-                    <tr className="bg-stone-50/50"><td className="py-2 px-3 font-medium">Medium</td><td className="py-2 px-3">16.5 cm - 18.5 cm</td><td className="py-2 px-3">{lang === 'ar' ? 'مريح وانسيابي' : 'Comfort drape'}</td></tr>
-                    <tr><td className="py-2 px-3 font-medium">One Size (Link)</td><td className="py-2 px-3">15.0 cm - 19.0 cm</td><td className="py-2 px-3">{lang === 'ar' ? 'قابل للتعديل بحلقات' : 'Multi-link adjustable'}</td></tr>
+                    <tr><td className="py-2 px-3 font-medium">Small</td><td className="py-2 px-3">14.5 cm - 16.5 cm</td><td className="py-2 px-3">Snug & Tailored</td></tr>
+                    <tr className="bg-stone-50/50"><td className="py-2 px-3 font-medium">Medium</td><td className="py-2 px-3">16.5 cm - 18.5 cm</td><td className="py-2 px-3">Comfort drape</td></tr>
+                    <tr><td className="py-2 px-3 font-medium">One Size (Link)</td><td className="py-2 px-3">15.0 cm - 19.0 cm</td><td className="py-2 px-3">Multi-link adjustable</td></tr>
                   </tbody>
                 </table>
               </div>

@@ -11,7 +11,7 @@ interface ProductModalProps {
   isWishlisted: boolean;
   onToggleWishlist: (productId: string) => void;
   onOpenSizeGuide: () => void;
-  lang: Language;
+  lang?: Language;
 }
 
 export const ProductModal: React.FC<ProductModalProps> = ({
@@ -21,9 +21,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   isWishlisted,
   onToggleWishlist,
   onOpenSizeGuide,
-  lang
 }) => {
-  const t = TRANSLATIONS[lang];
+  const t = TRANSLATIONS.en;
   const [selectedSize, setSelectedSize] = useState<string>(
     product?.specs?.sizes?.[0] || 'Standard'
   );
@@ -38,10 +37,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
   if (!product) return null;
 
-  const displayName = lang === 'ar' && product.nameAr ? product.nameAr : product.name;
-  const displayCategory = lang === 'ar' && product.categoryAr ? product.categoryAr : product.category;
-  const displayDesc = lang === 'ar' && product.descriptionAr ? product.descriptionAr : product.description;
-  const displayDetails = lang === 'ar' && product.detailsAr ? product.detailsAr : product.details;
+  const displayName = product.name;
+  const displayCategory = product.category;
+  const displayDesc = product.description;
+  const displayDetails = product.details;
 
   const isOutOfStock = product.stock !== undefined && product.stock <= 0;
   const isLowStock = !isOutOfStock && product.stock !== undefined && product.stock > 0 && product.stock <= 5;
@@ -119,8 +118,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               <div className="mb-3 p-2.5 bg-amber-50 rounded border border-amber-200 text-xs text-amber-900 flex items-center gap-2">
                 <Tag className="w-4 h-4 text-amber-700 shrink-0" />
                 <span>
-                  <strong>{lang === 'ar' ? 'عرض التوفير:' : 'Bundle Offer:'}</strong>{' '}
-                  {lang === 'ar' ? 'اشتري 2 والثالث بـ 50% · اشتري 3 والرابع مجاناً' : 'Buy 2 get 3rd 50% OFF · Buy 3 get 4th FREE'}
+                  <strong>Bundle Offer:</strong> Buy 2 get 3rd 50% OFF · Buy 3 get 4th FREE
                 </span>
               </div>
 
@@ -155,11 +153,11 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               <div className="mt-3 flex items-center justify-between pb-4 border-b border-stone-100">
                 <div className="flex items-baseline gap-2.5">
                   <span className="text-2xl font-semibold text-stone-950 tabular-nums">
-                    {formatEGP(product.price, lang)}
+                    {formatEGP(product.price)}
                   </span>
                   {product.originalPrice && (
                     <span className="text-sm text-stone-400 line-through tabular-nums">
-                      {formatEGP(product.originalPrice, lang)}
+                      {formatEGP(product.originalPrice)}
                     </span>
                   )}
                 </div>
@@ -181,7 +179,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 <div>
                   <span className="font-semibold text-stone-900 block">{t.pureSolidSteelBadge}</span>
                   <span className="text-stone-500 text-[11px]">
-                    {lang === 'ar' ? 'بريق فضي طبيعي متألق · بدون طلاء يتقشر' : 'Natural silvery mirror luster · No surface plating to chip'}
+                    Natural silvery mirror luster · No surface plating to chip
                   </span>
                 </div>
                 <ShieldCheck className="w-5 h-5 text-stone-700" />
@@ -234,7 +232,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         : 'border-transparent text-stone-500 hover:text-stone-800'
                     }`}
                   >
-                    {lang === 'ar' ? 'المواصفات والتفاصيل' : 'Craft Details'}
+                    Craft Details
                   </button>
                   <button
                     onClick={() => setActiveTab('specs')}
@@ -244,7 +242,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         : 'border-transparent text-stone-500 hover:text-stone-800'
                     }`}
                   >
-                    {lang === 'ar' ? 'المعدن والمتانة' : 'Metal & Durability'}
+                    Metal & Durability
                   </button>
                 </div>
               </div>
@@ -275,7 +273,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     </div>
                     <div>
                       <span className="text-stone-400 block text-[11px]">{t.hypoallergenicLabel}</span>
-                      <span className="font-medium text-emerald-700">{lang === 'ar' ? 'آمن للبشرة 100%' : '100% Skin Safe'}</span>
+                      <span className="font-medium text-emerald-700">100% Skin Safe</span>
                     </div>
                   </div>
                 )}
@@ -316,7 +314,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       : 'bg-stone-950 text-white hover:bg-stone-800 cursor-pointer shadow-sm'
                   }`}
                 >
-                  {isOutOfStock ? t.outOfStock : `${t.addToBagBtn} · ${formatEGP(product.price * quantity, lang)}`}
+                  {isOutOfStock ? t.outOfStock : `${t.addToBagBtn} · ${formatEGP(product.price * quantity)}`}
                 </button>
 
                 {/* Wishlist Toggle */}

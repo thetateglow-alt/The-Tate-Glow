@@ -4,7 +4,6 @@
   :root {
     --font-serif: 'Cormorant Garamond', Georgia, serif;
     --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    --font-arabic: 'Cairo', system-ui, -apple-system, sans-serif;
   }
 
   body {
@@ -15,17 +14,8 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  [dir="rtl"], [dir="rtl"] body {
-    font-family: var(--font-arabic);
-  }
-
   h1, h2, h3, .font-serif, .font-luxury {
     font-family: var(--font-serif);
-  }
-
-  [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] .font-serif {
-    font-family: var(--font-arabic);
-    letter-spacing: normal;
   }
 }
 
@@ -44,4 +34,82 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Cinematic Luxury Intro Keyframes & Utilities */
+@keyframes shimmer-sweep {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes light-beam-glide {
+  0% {
+    transform: translate(-100%, -100%) rotate(45deg);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.8;
+  }
+  70% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(200%, 200%) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+@keyframes subtle-float {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-6px) scale(1.008);
+  }
+}
+
+@keyframes gold-halo-breathe {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.04);
+  }
+}
+
+.animate-shimmer-sweep {
+  background-size: 200% auto;
+  animation: shimmer-sweep 3s ease-in-out infinite;
+}
+
+.animate-light-beam {
+  animation: light-beam-glide 4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.animate-subtle-float {
+  animation: subtle-float 6s ease-in-out infinite;
+}
+
+.animate-gold-halo {
+  animation: gold-halo-breathe 4s ease-in-out infinite;
+}
+
+/* Metallic Champagne Gold Text */
+.text-metallic-gold {
+  background: linear-gradient(
+    135deg,
+    #FBF3D5 0%,
+    #E6CA85 25%,
+    #FFFDF7 50%,
+    #C49B45 75%,
+    #FBF3D5 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

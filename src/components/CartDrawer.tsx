@@ -15,7 +15,7 @@ interface CartDrawerProps {
   reservationTime: string;
   isReservationExpired: boolean;
   onRenewReservation: () => void;
-  lang: Language;
+  lang?: Language;
 }
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({
@@ -28,14 +28,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   reservationTime,
   isReservationExpired,
   onRenewReservation,
-  lang
 }) => {
   if (!isOpen) return null;
 
-  const t = TRANSLATIONS[lang];
+  const t = TRANSLATIONS.en;
   const totalItemCount = items.reduce((acc, i) => acc + i.quantity, 0);
   const bundle = calculateBundleDiscount(items);
-  const bundleInfo = getLocalizedBundleInfo(bundle, lang, totalItemCount);
+  const bundleInfo = getLocalizedBundleInfo(bundle, 'en', totalItemCount);
 
   const rawSubtotal = items.reduce(
     (acc, i) => acc + i.product.price * i.quantity,
@@ -88,7 +87,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       {isReservationExpired ? t.reservationExpired : `${t.cartReservedFor} ${reservationTime}`}
                     </span>
                     <span className="text-[10px] text-stone-500">
-                      {isReservationExpired ? (lang === 'ar' ? 'القطع قد تنفد قريباً' : 'Items held temporarily released') : t.minuteHold}
+                      {isReservationExpired ? 'Items held temporarily released' : t.minuteHold}
                     </span>
                   </div>
                 </div>
@@ -96,7 +95,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <button
                   type="button"
                   onClick={onRenewReservation}
-                  className="flex items-center gap-1 px-2 py-1 text-[11px] font-medium rounded bg-white text-stone-800 border border-stone-300 hover:bg-stone-50 transition-colors cursor-pointer shadow-2xs shrink-0 ml-2 rtl:mr-2 rtl:ml-0"
+                  className="flex items-center gap-1 px-2 py-1 text-[11px] font-medium rounded bg-white text-stone-800 border border-stone-300 hover:bg-stone-50 transition-colors cursor-pointer shadow-2xs shrink-0 ml-2"
                   title="Renew 15-minute hold"
                 >
                   <RefreshCw className="w-3 h-3" />
@@ -115,7 +114,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   </div>
                   {bundle.discountAmount > 0 && (
                     <span className="text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded text-[11px] font-bold tabular-nums">
-                      {t.saved} {formatEGP(bundle.discountAmount, lang)}
+                      {t.saved} {formatEGP(bundle.discountAmount)}
                     </span>
                   )}
                 </div>
@@ -139,7 +138,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   <span>
                     {amountToFreeShipping === 0
                       ? t.qualifyFreeShipping
-                      : t.addMoreForFreeDelivery.replace('{amount}', formatEGP(amountToFreeShipping, lang))}
+                      : t.addMoreForFreeDelivery.replace('{amount}', formatEGP(amountToFreeShipping))}
                   </span>
                 </div>
                 <div className="w-full h-1.5 bg-stone-100 rounded-full overflow-hidden">
@@ -182,7 +181,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   {/* Thumbnail */}
                   <img
                     src={item.product.image}
-                    alt={lang === 'ar' && item.product.nameAr ? item.product.nameAr : item.product.name}
+                    alt={item.product.name}
                     className="w-18 h-18 rounded bg-stone-100 object-cover border border-stone-200 shrink-0"
                   />
 
@@ -191,7 +190,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     <div>
                       <div className="flex items-start justify-between">
                         <h4 className="text-xs font-serif font-medium text-stone-900">
-                          {lang === 'ar' && item.product.nameAr ? item.product.nameAr : item.product.name}
+                          {item.product.name}
                         </h4>
                         <button
                           onClick={() => onRemoveItem(item.id)}
@@ -232,7 +231,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
                       {/* Price in EGP */}
                       <span className="text-sm font-semibold text-stone-900 tabular-nums">
-                        {formatEGP(item.product.price * item.quantity, lang)}
+                        {formatEGP(item.product.price * item.quantity)}
                       </span>
                     </div>
                   </div>
@@ -248,7 +247,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <div className="flex justify-between">
                   <span>{t.subtotal}</span>
                   <span className="font-semibold text-stone-900 tabular-nums">
-                    {formatEGP(rawSubtotal, lang)}
+                    {formatEGP(rawSubtotal)}
                   </span>
                 </div>
 
@@ -258,21 +257,21 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       <Tag className="w-3.5 h-3.5 text-emerald-700" />
                       {t.bundleOfferDiscount}
                     </span>
-                    <span className="tabular-nums">-{formatEGP(bundle.discountAmount, lang)}</span>
+                    <span className="tabular-nums">-{formatEGP(bundle.discountAmount)}</span>
                   </div>
                 )}
 
                 <div className="flex justify-between">
                   <span>{t.deliveryEgypt}</span>
                   <span className="tabular-nums">
-                    {finalSubtotal >= freeShippingThreshold ? t.freeOver : formatEGP(65, lang)}
+                    {finalSubtotal >= freeShippingThreshold ? t.freeOver : formatEGP(65)}
                   </span>
                 </div>
 
                 <div className="pt-2 border-t border-stone-200 flex justify-between text-base font-semibold text-stone-900">
                   <span>{t.estimatedTotal}</span>
                   <span className="tabular-nums">
-                    {formatEGP(finalSubtotal + (finalSubtotal >= freeShippingThreshold ? 0 : 65), lang)}
+                    {formatEGP(finalSubtotal + (finalSubtotal >= freeShippingThreshold ? 0 : 65))}
                   </span>
                 </div>
               </div>
@@ -282,7 +281,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 className="w-full py-3.5 bg-stone-950 text-white rounded text-xs uppercase tracking-[0.2em] font-medium hover:bg-stone-800 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
               >
                 <span>{t.proceedCheckout}</span>
-                <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+                <ArrowRight className="w-4 h-4" />
               </button>
 
               <p className="text-[11px] text-center text-stone-400">

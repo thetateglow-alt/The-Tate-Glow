@@ -9,7 +9,7 @@ interface CategoryNavProps {
   sortBy: 'featured' | 'price-asc' | 'price-desc' | 'rating';
   onSelectSort: (sort: 'featured' | 'price-asc' | 'price-desc' | 'rating') => void;
   totalCount: number;
-  lang: Language;
+  lang?: Language;
 }
 
 export const CategoryNav: React.FC<CategoryNavProps> = ({
@@ -18,9 +18,8 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
   sortBy,
   onSelectSort,
   totalCount,
-  lang
 }) => {
-  const t = TRANSLATIONS[lang];
+  const t = TRANSLATIONS.en;
 
   const categories: { label: string; value: JewelryCategory | 'all' }[] = [
     { label: t.allPieces, value: 'all' },
@@ -54,7 +53,7 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
         </div>
 
         {/* Sort & Count Controls */}
-        <div className="flex items-center gap-3 text-xs ml-auto rtl:mr-auto rtl:ml-0 sm:ml-0">
+        <div className="flex items-center gap-3 text-xs ml-auto sm:ml-0">
           <div className="flex items-center gap-2">
             <SlidersHorizontal className="w-3.5 h-3.5 text-stone-400" />
             <select
@@ -69,7 +68,7 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
             </select>
           </div>
 
-          <span className="text-stone-400 text-xs tabular-nums pl-1 rtl:pr-1 rtl:pl-0">
+          <span className="text-stone-400 text-xs tabular-nums pl-1">
             {totalCount} {t.pieces}
           </span>
         </div>

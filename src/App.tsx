@@ -24,43 +24,19 @@ import { CustomerAuthModal } from './components/CustomerAuthModal';
 import { CustomerOrdersModal } from './components/CustomerOrdersModal';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { initializeStoreBackend, fetchAdminProducts, checkIsAdmin } from './services/adminService';
+import { CinematicIntro } from './components/CinematicIntro';
 
 export default function App() {
-  // Language State: Customer can choose English or Arabic
-  const [lang, setLang] = useState<Language>(() => {
-    try {
-      const savedLang = localStorage.getItem('tate_glow_lang');
-      if (savedLang === 'en' || savedLang === 'ar') {
-        return savedLang;
-      }
-    } catch (e) {
-      // fallback
-    }
-    return 'en';
-  });
+  // English-only storefront
+  const lang: Language = 'en';
+  const t = TRANSLATIONS.en;
 
-  const t = TRANSLATIONS[lang];
-
-  // Sync Language and Direction to document root & HTML
+  // Sync document root to English
   useEffect(() => {
-    try {
-      localStorage.setItem('tate_glow_lang', lang);
-    } catch (e) {
-      // ignore
-    }
-    document.documentElement.lang = lang;
-    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-
-    if (lang === 'ar') {
-      document.title = 'ذا تاتي جلو | جرعتك اليومية من التوهج';
-    } else {
-      document.title = 'The Taté Glow | Your Daily Dose of Glow';
-    }
-  }, [lang]);
-
-  const toggleLanguage = () => {
-    setLang((prev) => (prev === 'en' ? 'ar' : 'en'));
-  };
+    document.documentElement.lang = 'en';
+    document.documentElement.dir = 'ltr';
+    document.title = 'The Taté Glow | Your Daily Dose of Glow';
+  }, []);
 
   // Navigation & Filter States
   const [activeCategory, setActiveCategory] = useState<JewelryCategory | 'all'>('all');
@@ -109,6 +85,29 @@ export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAuthGateCheckout, setIsAuthGateCheckout] = useState(false);
   const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
+
+  // Cinematic Intro Animation State (5-8s Cartier-inspired luxury reveal)
+  const [showCinematicIntro, setShowCinematicIntro] = useState<boolean>(() => {
+    try {
+      const seen = sessionStorage.getItem('tate_glow_intro_seen');
+      return !seen;
+    } catch (e) {
+      return true;
+    }
+  });
+
+  const handleIntroComplete = () => {
+    setShowCinematicIntro(false);
+    try {
+      sessionStorage.setItem('tate_glow_intro_seen', 'true');
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  const handleReplayIntro = () => {
+    setShowCinematicIntro(true);
+  };
 
   // Live Catalog Products State (synced from Firestore)
   const [catalogProducts, setCatalogProducts] = useState<Product[]>(PRODUCTS);
@@ -224,7 +223,7 @@ export default function App() {
     quantity: number = 1
   ) => {
     if (product.stock !== undefined && product.stock <= 0) {
-      showToast(lang === 'ar' ? 'عذراً، هذه القطعة نفدت من المخزون حالياً' : 'Sorry, this piece is currently out of stock');
+      showToast('Sorry, this piece is currently out of stock');
       return;
     }
 
@@ -252,8 +251,8 @@ export default function App() {
     });
 
     renewReservation();
-    const pName = lang === 'ar' && product.nameAr ? product.nameAr : product.name;
-    showToast(lang === 'ar' ? `تمت إضافة "${pName}" إلى حقيبتك (محجوزة لمدة 15 دقيقة)` : `Added ${pName} to your bag (reserved for 15m)`);
+    const pName = product.name;
+    showToast(`Added "${pName}" to your bag (reserved for 15m)`);
   };
 
   const handleUpdateQuantity = (compoundId: string, newQty: number) => {
@@ -305,6 +304,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF8F5] text-stone-900 selection:bg-stone-800 selection:text-white">
+      {/* Cinematic Luxury Brand Intro Animation (Scene 1-4) */}
+      {showCinematicIntro && (
+        <CinematicIntro
+          onComplete={handleIntroComplete}
+          lang={lang}
+        />
+      )}
+
       {/* Toast Feedback */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 rtl:right-auto rtl:left-6 z-50 bg-stone-950 text-white text-xs px-4 py-3 rounded-md shadow-xl border border-stone-800 flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-2 duration-200">
@@ -333,8 +340,6 @@ export default function App() {
             scrollToCatalog();
           }
         }}
-        lang={lang}
-        onToggleLanguage={toggleLanguage}
         currentUser={currentUser}
         onOpenAuth={() => {
           setIsAuthGateCheckout(false);
@@ -344,14 +349,16 @@ export default function App() {
         onLogout={async () => {
           await logout();
           setCurrentUser(null);
-          showToast(lang === 'ar' ? 'تم تسجيل الخروج بنجاح' : 'Signed out successfully');
+          showToast('Signed out successfully');
         }}
+        onPlayFilm={handleReplayIntro}
       />
 
-      <main className="flex-1">
+      <main className={`flex-1 transition-all duration-700 ${showCinematicIntro ? 'opacity-90 filter blur-[0.5px]' : 'opacity-100 filter-none'}`}>
         {/* Simple Campaign Hero Section with Slogan */}
         <Hero
           onShopClick={scrollToCatalog}
+          onPlayFilm={handleReplayIntro}
           lang={lang}
         />
 
@@ -476,15 +483,15 @@ export default function App() {
         onOpenScience={() => setIsScienceOpen(true)}
         onOpenSizeGuide={() => setIsSizeGuideOpen(true)}
         lang={lang}
-        onToggleLanguage={toggleLanguage}
         onOpenAdmin={() => setIsAdminOpen(true)}
+        onPlayFilm={handleReplayIntro}
       />
 
       {/* Discreet Admin Floating Button when logged in as admin */}
       {isAdminAuthorized && (
         <button
           onClick={() => setIsAdminOpen(true)}
-          className="fixed bottom-6 left-6 rtl:left-auto rtl:right-6 z-40 bg-stone-950 text-amber-300 border border-amber-400/50 px-3.5 py-2 rounded-full shadow-xl flex items-center gap-2 text-xs font-semibold hover:bg-stone-900 transition-all cursor-pointer backdrop-blur-md"
+          className="fixed bottom-6 left-6 z-40 bg-stone-950 text-amber-300 border border-amber-400/50 px-3.5 py-2 rounded-full shadow-xl flex items-center gap-2 text-xs font-semibold hover:bg-stone-900 transition-all cursor-pointer backdrop-blur-md"
           title="Open Admin Dashboard (Alt+A or Ctrl+Shift+A)"
         >
           <ShieldCheck className="w-4 h-4 text-amber-400" />
@@ -549,12 +556,8 @@ export default function App() {
         onSuccess={(user) => {
           setCurrentUser(user);
           setIsAuthModalOpen(false);
-          const name = user.displayName || (user.isAnonymous ? (lang === 'ar' ? 'زائر' : 'Guest') : (lang === 'ar' ? 'عميل' : 'Customer'));
-          showToast(
-            lang === 'ar'
-              ? `أهلاً بكِ ${name}`
-              : `Welcome, ${name}`
-          );
+          const name = user.displayName || (user.isAnonymous ? 'Guest' : 'Customer');
+          showToast(`Welcome, ${name}`);
           if (isAuthGateCheckout) {
             setIsAuthGateCheckout(false);
             setIsCheckoutOpen(true);

@@ -95,65 +95,17 @@ export function calculateBundleDiscount(cartItems: CartItem[]): BundleDiscount {
   };
 }
 
-export function formatEGP(amount: number, lang: 'en' | 'ar' = 'en'): string {
-  if (lang === 'ar') {
-    return `${amount.toLocaleString('ar-EG')} ج.م`;
-  }
+export function formatEGP(amount: number, _lang?: string): string {
   return `${amount.toLocaleString('en-US')} EGP`;
 }
 
 export function getLocalizedBundleInfo(
   discount: BundleDiscount,
-  lang: 'en' | 'ar',
-  totalCount: number
+  _lang?: string,
+  _totalCount?: number
 ): { promoDescription: string; nextTierHint: string } {
-  if (lang === 'en') {
-    return {
-      promoDescription: discount.promoDescription,
-      nextTierHint: discount.nextTierHint
-    };
-  }
-
-  const remainder = totalCount % 4;
-
-  if (discount.freeItemCount > 0 && discount.halfOffItemCount > 0) {
-    return {
-      promoDescription: `تم تطبيق ${discount.freeItemCount} قطعة مجاناً + قطعة بخصم 50%!`,
-      nextTierHint: 'أضيفي قطعة واحدة أخرى للحصول عليها مجاناً 100%!'
-    };
-  }
-  
-  if (discount.freeItemCount > 0) {
-    let hint = '';
-    if (remainder === 0) {
-      hint = 'أضيفي قطعتين للحصول على الثالثة بخصم 50%';
-    } else if (remainder === 1) {
-      hint = 'أضيفي قطعة واحدة للحصول على التالية بخصم 50%';
-    } else if (remainder === 2) {
-      hint = 'أضيفي قطعة واحدة للحصول عليها بخصم 50%!';
-    }
-    return {
-      promoDescription: `تم تطبيق ${discount.freeItemCount} قطعة مجاناً (اشتري 3 والرابعة مجاناً)!`,
-      nextTierHint: hint
-    };
-  }
-
-  if (discount.halfOffItemCount > 0) {
-    return {
-      promoDescription: 'تم تطبيق خصم 50% على القطعة الثالثة (اشتري 2 والثالثة بـ 50%)!',
-      nextTierHint: 'أضيفي قطعة واحدة أخرى واحصلي على القطعة الرابعة مجاناً 100%!'
-    };
-  }
-
-  let hint = 'اشتري 2 والثالثة بـ 50% · اشتري 3 والرابعة مجاناً';
-  if (totalCount === 1) {
-    hint = 'أضيفي قطعة واحدة أخرى للحصول على القطعة الثالثة بنصف السعر!';
-  } else if (totalCount === 2) {
-    hint = 'أضيفي قطعة واحدة أخرى للحصول عليها بخصم 50%!';
-  }
-
   return {
-    promoDescription: 'أضيفي قطعاً لحقيبتك لتفعيل عروض التوفير',
-    nextTierHint: hint
+    promoDescription: discount.promoDescription,
+    nextTierHint: discount.nextTierHint
   };
 }

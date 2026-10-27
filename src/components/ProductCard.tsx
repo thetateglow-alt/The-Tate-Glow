@@ -10,7 +10,7 @@ interface ProductCardProps {
   onQuickAdd: (product: Product) => void;
   isWishlisted: boolean;
   onToggleWishlist: (productId: string) => void;
-  lang: Language;
+  lang?: Language;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
@@ -19,15 +19,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onQuickAdd,
   isWishlisted,
   onToggleWishlist,
-  lang
 }) => {
   const [imageFailed, setImageFailed] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const t = TRANSLATIONS[lang];
+  const t = TRANSLATIONS.en;
 
-  const displayName = lang === 'ar' && product.nameAr ? product.nameAr : product.name;
-  const displayCategory = lang === 'ar' && product.categoryAr ? product.categoryAr : product.category;
-  const displayDesc = lang === 'ar' && product.descriptionAr ? product.descriptionAr : product.description;
+  const displayName = product.name;
+  const displayCategory = product.category;
+  const displayDesc = product.description;
 
   const isOutOfStock = product.stock !== undefined && product.stock <= 0;
   const isLowStock = !isOutOfStock && product.stock !== undefined && product.stock > 0 && product.stock <= 5;
@@ -175,7 +174,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   <span>{t.lowStockBadge.replace('{count}', String(product.stock))}</span>
                 </div>
                 <span className="text-[10px] text-amber-700 font-semibold uppercase tracking-wider">
-                  {lang === 'ar' ? 'سارعي بالطلب' : 'Order soon'}
+                  Order soon
                 </span>
               </div>
               <div className="w-full bg-amber-200/60 rounded-full h-1 overflow-hidden">
@@ -194,7 +193,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               <div className="flex-1">
                 <span className="font-semibold text-stone-700 block text-[11px]">{t.outOfStock}</span>
                 <span className="text-[10px] text-stone-400 block">
-                  {lang === 'ar' ? 'غير متوفر حالياً · جاري إعادة التوفير' : 'Currently unavailable for purchase'}
+                  Currently unavailable for purchase
                 </span>
               </div>
             </div>
@@ -213,11 +212,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             <div className="flex items-baseline gap-2">
               {product.originalPrice && (
                 <span className="text-xs text-stone-400 line-through tabular-nums">
-                  {formatEGP(product.originalPrice, lang)}
+                  {formatEGP(product.originalPrice)}
                 </span>
               )}
               <span className="text-sm font-semibold text-stone-900 tabular-nums">
-                {formatEGP(product.price, lang)}
+                {formatEGP(product.price)}
               </span>
             </div>
           </div>

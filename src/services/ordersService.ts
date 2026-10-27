@@ -56,25 +56,25 @@ export interface CustomerOrder {
 export const ORDER_STATUS_MAP: Record<OrderStatus, { en: string; ar: string; color: string; step: number }> = {
   confirmed: {
     en: 'Order Confirmed',
-    ar: 'تم تأكيد الطلب',
+    ar: 'Order Confirmed',
     color: 'bg-amber-100 text-amber-900 border-amber-200',
     step: 1
   },
   processing: {
     en: 'Packaging in Studio',
-    ar: 'جاري التجهيز والتغليف',
+    ar: 'Packaging in Studio',
     color: 'bg-blue-100 text-blue-900 border-blue-200',
     step: 2
   },
   shipped: {
     en: 'Out for Delivery (Courier)',
-    ar: 'مع المندوب للشحن',
+    ar: 'Out for Delivery (Courier)',
     color: 'bg-purple-100 text-purple-900 border-purple-200',
     step: 3
   },
   delivered: {
     en: 'Delivered Successfully',
-    ar: 'تم التوصيل بنجاح',
+    ar: 'Delivered Successfully',
     color: 'bg-emerald-100 text-emerald-900 border-emerald-200',
     step: 4
   }
@@ -219,7 +219,7 @@ export async function submitSecureCheckout(payload: CheckoutRequestPayload): Pro
     total: finalTotal,
     status: 'confirmed',
     statusLabelEn: 'Order Confirmed',
-    statusLabelAr: 'تم تأكيد الطلب',
+    statusLabelAr: 'Order Confirmed',
     paymentStatus,
     fulfillmentStatus: 'unfulfilled',
     createdAt: nowIso,

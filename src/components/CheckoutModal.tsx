@@ -16,7 +16,7 @@ interface CheckoutModalProps {
   items: CartItem[];
   reservationTime: string;
   onOrderSuccess: () => void;
-  lang: Language;
+  lang?: Language;
   currentUser: User | null;
   onAuthChange: (user: User | null) => void;
 }
@@ -27,11 +27,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   items,
   reservationTime,
   onOrderSuccess,
-  lang,
   currentUser,
   onAuthChange,
 }) => {
-  const t = TRANSLATIONS[lang];
+  const t = TRANSLATIONS.en;
   const [step, setStep] = useState<'form' | 'success'>('form');
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'cod'>('card');
   const [formData, setFormData] = useState({
@@ -162,13 +161,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const getPaymentMethodLabel = () => {
     if (paymentMethod === 'card') {
       const last4 = cardData.number.replace(/\s/g, '').slice(-4);
-      return lang === 'ar'
-        ? `بطاقة بنكية ${last4 ? `(تنتهي بـ ${last4})` : ''}`
-        : `Credit / Debit Card ${last4 ? `(ending in ${last4})` : ''}`;
+      return `Credit / Debit Card ${last4 ? `(ending in ${last4})` : ''}`;
     }
-    return lang === 'ar'
-      ? `الدفع عند الاستلام (المبلغ الإجمالي المستحق: ${formatEGP(total, lang)})`
-      : `Cash on Delivery (Total Amount Due: ${formatEGP(total, lang)})`;
+    return `Cash on Delivery (Total Amount Due: ${formatEGP(total)})`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -245,7 +240,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         discount: bundle.discountAmount,
         deliveryFee: shipping,
         total,
-        bundleType: bundle.discountAmount > 0 ? (lang === 'ar' ? 'عرض حزم التوهج' : 'Special Glow Bundle Offer') : undefined,
+        bundleType: bundle.discountAmount > 0 ? 'Special Glow Bundle Offer' : undefined,
         glowPointsEarned: confirmedPointsEarned,
         glowPointsDiscount: glowPointsDiscount > 0 ? glowPointsDiscount : undefined
       });
@@ -350,21 +345,19 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   {t.tierGlowInsider}
                 </span>
               </div>
-              <p className="text-[11px] text-stone-600 leading-relaxed text-left rtl:text-right pt-1.5 border-t border-amber-200/60">
-                {lang === 'ar'
-                  ? 'تم حفظ نقاطك في محفظتك تلقائياً ويمكنكِ استبدالها بخصومات في طلباتكِ القادمة.'
-                  : 'Your points are automatically banked and ready to redeem for instant discounts on future orders.'}
+              <p className="text-[11px] text-stone-600 leading-relaxed text-left pt-1.5 border-t border-amber-200/60">
+                Your points are automatically banked and ready to redeem for instant discounts on future orders.
               </p>
             </div>
 
             {/* Receipt Summary Card */}
-            <div className="p-4 bg-stone-50 rounded-lg border border-stone-200 text-xs text-left rtl:text-right space-y-2 max-w-md mx-auto">
+            <div className="p-4 bg-stone-50 rounded-lg border border-stone-200 text-xs text-left space-y-2 max-w-md mx-auto">
               <div className="flex justify-between text-stone-500">
-                <span>{lang === 'ar' ? 'رقم الطلب' : 'Order Reference'}</span>
+                <span>Order Reference</span>
                 <span className="font-mono font-semibold text-stone-900">{confirmedOrderId}</span>
               </div>
               <div className="flex justify-between text-stone-500">
-                <span>{lang === 'ar' ? 'طريقة الدفع' : 'Payment Method'}</span>
+                <span>Payment Method</span>
                 <span className="font-medium text-stone-900">
                   {getPaymentMethodLabel()}
                 </span>
@@ -377,25 +370,25 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               {bundle.discountAmount > 0 && (
                 <div className="flex justify-between text-emerald-800 font-medium">
                   <span>{t.bundleOfferDiscount}</span>
-                  <span className="tabular-nums">-{formatEGP(bundle.discountAmount, lang)}</span>
+                  <span className="tabular-nums">-{formatEGP(bundle.discountAmount)}</span>
                 </div>
               )}
 
               {glowPointsDiscount > 0 && (
                 <div className="flex justify-between text-amber-900 font-medium">
                   <span>{t.glowPointsDiscount}</span>
-                  <span className="tabular-nums">-{formatEGP(glowPointsDiscount, lang)}</span>
+                  <span className="tabular-nums">-{formatEGP(glowPointsDiscount)}</span>
                 </div>
               )}
 
               <div className="flex justify-between text-amber-800 font-medium">
-                <span>{lang === 'ar' ? 'نقاط التوهج المكتسبة' : 'Glow Points Earned'}</span>
+                <span>Glow Points Earned</span>
                 <span className="font-semibold tabular-nums">+{confirmedPointsEarned} {t.points}</span>
               </div>
 
               <div className="pt-2 border-t border-stone-200 flex justify-between font-semibold text-stone-900 text-sm">
                 <span>{t.totalDue}</span>
-                <span className="tabular-nums text-base">{formatEGP(total, lang)}</span>
+                <span className="tabular-nums text-base">{formatEGP(total)}</span>
               </div>
 
               {paymentMethod === 'cod' && (
@@ -403,10 +396,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   <Banknote className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
                   <div>
                     <span className="font-semibold block">
-                      {lang === 'ar' ? 'الدفع نقداً للمندوب عند الاستلام:' : 'Cash on Delivery Reminder:'}
+                      Cash on Delivery Reminder:
                     </span>
                     <span className="text-stone-700">
-                      {t.codCashReminder.replace('{amount}', formatEGP(total, lang))}
+                      {t.codCashReminder.replace('{amount}', formatEGP(total))}
                     </span>
                   </div>
                 </div>
@@ -423,10 +416,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 font-semibold text-stone-900">
                   <Mail className="w-4 h-4 text-stone-700" />
-                  <span>{lang === 'ar' ? 'إيصال إلكتروني فوري (EmailJS)' : 'Instant Email Receipt (EmailJS)'}</span>
+                  <span>Instant Email Receipt (EmailJS)</span>
                 </div>
                 <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">
-                  {lang === 'ar' ? 'تم الحفظ في فايرستور' : 'Saved in Firestore'}
+                  Saved in Firestore
                 </span>
               </div>
 
@@ -434,29 +427,27 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 <div className="p-2.5 bg-emerald-50 text-emerald-900 rounded font-medium flex items-center justify-center gap-2 border border-emerald-200 text-xs">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>
-                    {lang === 'ar'
-                      ? `تم إرسال إيصال وتفاصيل الطلب إلى ${formData.email}`
-                      : `Order receipt & care certificate dispatched to ${formData.email}`}
+                    Order receipt & care certificate dispatched to {formData.email}
                   </span>
                 </div>
               ) : emailStatus === 'sending' ? (
                 <div className="p-2.5 bg-stone-100 text-stone-800 rounded text-center flex items-center justify-center gap-2">
                   <div className="w-3.5 h-3.5 border-2 border-stone-800 border-t-transparent rounded-full animate-spin" />
-                  <span>{lang === 'ar' ? 'جاري إرسال الإيصال عبر EmailJS...' : 'Sending receipt via EmailJS...'}</span>
+                  <span>Sending receipt via EmailJS...</span>
                 </div>
               ) : emailStatus === 'error' ? (
                 <div className="p-2.5 bg-rose-50 text-rose-800 rounded text-xs border border-rose-200">
-                  <span>{lang === 'ar' ? 'تعذر إرسال الإيميل تلقائياً. يمكنكِ إعادة المحاولة أدناه.' : 'Could not dispatch receipt. You can retry below.'}</span>
+                  <span>Could not dispatch receipt. You can retry below.</span>
                 </div>
               ) : (
                 <div className="p-2.5 bg-stone-100 text-stone-700 rounded text-xs">
-                  <span>{lang === 'ar' ? `سيتم إرسال الإيصال إلى ${formData.email}` : `Receipt will be delivered to ${formData.email}`}</span>
+                  <span>Receipt will be delivered to {formData.email}</span>
                 </div>
               )}
 
               <div className="flex items-center justify-between pt-1">
                 <p className="text-[11px] text-stone-500">
-                  {lang === 'ar' ? 'البريد الإلكتروني للعميل:' : 'Sent to:'} <strong>{formData.email}</strong>
+                  Sent to: <strong>{formData.email}</strong>
                 </p>
                 <button
                   type="button"
@@ -464,7 +455,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   disabled={emailStatus === 'sending'}
                   className="text-[11px] font-medium text-stone-900 hover:text-stone-700 underline underline-offset-2 cursor-pointer disabled:opacity-50"
                 >
-                  {lang === 'ar' ? 'إعادة إرسال الإيصال' : 'Resend Receipt'}
+                  Resend Receipt
                 </button>
               </div>
             </div>
@@ -489,14 +480,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   {t.orderSummary} ({items.reduce((acc, i) => acc + i.quantity, 0)} {t.items})
                 </span>
                 <span className="font-semibold text-stone-900 tabular-nums">
-                  {t.totalToPay} {formatEGP(total, lang)}
+                  {t.totalToPay} {formatEGP(total)}
                 </span>
               </div>
 
               {bundle.discountAmount > 0 && (
                 <div className="flex justify-between text-emerald-800 text-[11px]">
                   <span>{t.bundleOfferDiscount}</span>
-                  <span className="tabular-nums">-{formatEGP(bundle.discountAmount, lang)}</span>
+                  <span className="tabular-nums">-{formatEGP(bundle.discountAmount)}</span>
                 </div>
               )}
 
@@ -506,14 +497,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     <Tag className="w-3 h-3 text-emerald-700" />
                     <span>Promo ({appliedPromo.code}):</span>
                   </span>
-                  <span className="tabular-nums">-{formatEGP(appliedPromo.discountAmount, lang)}</span>
+                  <span className="tabular-nums">-{formatEGP(appliedPromo.discountAmount)}</span>
                 </div>
               )}
 
               {glowPointsDiscount > 0 && (
                 <div className="flex justify-between text-amber-900 font-medium text-[11px]">
                   <span>{t.glowPointsDiscount} ({activePointsRedeemed} {t.points})</span>
-                  <span className="tabular-nums">-{formatEGP(glowPointsDiscount, lang)}</span>
+                  <span className="tabular-nums">-{formatEGP(glowPointsDiscount)}</span>
                 </div>
               )}
 
@@ -521,14 +512,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               <div className="pt-2 border-t border-stone-200/60">
                 <div className="flex items-center gap-2">
                   <div className="relative flex-1">
-                    <Tag className="w-3.5 h-3.5 text-stone-400 absolute left-2.5 top-2.5 rtl:left-auto rtl:right-2.5 pointer-events-none" />
+                    <Tag className="w-3.5 h-3.5 text-stone-400 absolute left-2.5 top-2.5 pointer-events-none" />
                     <input
                       type="text"
-                      placeholder={lang === 'ar' ? 'كود الخصم (مثال: GLOW10)' : 'Discount Code (e.g. GLOW10)'}
+                      placeholder="Discount Code (e.g. GLOW10)"
                       value={promoCodeInput}
                       onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase())}
                       disabled={Boolean(appliedPromo)}
-                      className="w-full border border-stone-300 rounded px-3 py-1.5 pl-8 rtl:pr-8 rtl:pl-3 text-xs uppercase font-mono font-semibold text-stone-900 bg-white placeholder:text-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-900"
+                      className="w-full border border-stone-300 rounded px-3 py-1.5 pl-8 text-xs uppercase font-mono font-semibold text-stone-900 bg-white placeholder:text-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-900"
                     />
                   </div>
                   {appliedPromo ? (
@@ -537,7 +528,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       onClick={handleRemovePromo}
                       className="px-3 py-1.5 text-xs text-red-600 hover:text-red-800 font-medium cursor-pointer"
                     >
-                      {lang === 'ar' ? 'إزالة' : 'Remove'}
+                      Remove
                     </button>
                   ) : (
                     <button
@@ -546,7 +537,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       disabled={isValidatingPromo || !promoCodeInput.trim()}
                       className="px-4 py-1.5 bg-stone-900 text-white rounded text-xs font-semibold hover:bg-stone-800 disabled:opacity-40 cursor-pointer shadow-2xs"
                     >
-                      {isValidatingPromo ? '...' : (lang === 'ar' ? 'تطبيق' : 'Apply')}
+                      {isValidatingPromo ? '...' : 'Apply'}
                     </button>
                   )}
                 </div>
@@ -660,14 +651,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                               : 'bg-white text-stone-700 border-stone-300 hover:border-stone-400'
                           }`}
                         >
-                          {lang === 'ar' ? `كل الرصيد (${maxRedeemablePoints})` : `Max (${maxRedeemablePoints} pts)`}
+                          Max ({maxRedeemablePoints} pts)
                         </button>
                       )}
                     </div>
                   </div>
                   {glowPointsDiscount > 0 && (
                     <p className="text-[11px] text-emerald-800 font-medium">
-                      ✓ {lang === 'ar' ? `تم تطبيق خصم ${formatEGP(glowPointsDiscount, lang)} مقابل ${activePointsRedeemed} نقطة` : `Applied -${formatEGP(glowPointsDiscount, lang)} discount using ${activePointsRedeemed} Glow Points`}
+                      ✓ Applied -{formatEGP(glowPointsDiscount)} discount using {activePointsRedeemed} Glow Points
                     </p>
                   )}
                 </div>
@@ -720,12 +711,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                     className="w-full border border-stone-300 rounded px-3 py-2 text-stone-900 focus:outline-none focus:ring-1 focus:ring-stone-900 bg-white"
                   >
-                    <option value="Cairo">{lang === 'ar' ? 'القاهرة' : 'Cairo'}</option>
-                    <option value="Giza">{lang === 'ar' ? 'الجيزة' : 'Giza'}</option>
-                    <option value="Alexandria">{lang === 'ar' ? 'الإسكندرية' : 'Alexandria'}</option>
-                    <option value="Mansoura">{lang === 'ar' ? 'المنصورة' : 'Mansoura'}</option>
-                    <option value="Tanta">{lang === 'ar' ? 'طنطا' : 'Tanta'}</option>
-                    <option value="Other">{lang === 'ar' ? 'محافظات أخرى' : 'Other Governorate'}</option>
+                    <option value="Cairo">Cairo</option>
+                    <option value="Giza">Giza</option>
+                    <option value="Alexandria">Alexandria</option>
+                    <option value="Mansoura">Mansoura</option>
+                    <option value="Tanta">Tanta</option>
+                    <option value="Other">Other Governorate</option>
                   </select>
                 </div>
                 <div className="sm:col-span-2">
@@ -750,11 +741,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     onChange={(e) => setSendEmailReceipt(e.target.checked)}
                     className="rounded border-stone-300 text-stone-900 focus:ring-stone-900 w-3.5 h-3.5 cursor-pointer"
                   />
-                  <span>
-                    {lang === 'ar'
-                      ? 'إرسال إيصال إلكتروني فوري وتفاصيل العناية إلى بريدي'
-                      : 'Send instant email receipt & jewelry care certificate'}
-                  </span>
+                  <span>Send instant email receipt & jewelry care certificate</span>
                 </label>
                 <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-stone-100 text-stone-600 border border-stone-200">
                   EmailJS
@@ -911,28 +898,28 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         <span>{t.codSelected}</span>
                       </p>
                       <span className="text-xs font-bold text-stone-950 bg-stone-200/80 px-2 py-0.5 rounded tabular-nums">
-                        {formatEGP(total, lang)}
+                        {formatEGP(total)}
                       </span>
                     </div>
 
                     <p className="text-[11px] text-stone-600 leading-relaxed">
-                      {t.codDesc.replace('{amount}', formatEGP(total, lang))}
+                      {t.codDesc.replace('{amount}', formatEGP(total))}
                     </p>
 
                     <div className="bg-amber-50/80 border border-amber-200/80 p-2.5 rounded text-[11px] text-amber-950 space-y-1">
                       <div className="flex items-center justify-between text-stone-600">
-                        <span>{lang === 'ar' ? 'قيمة المجوهرات:' : 'Jewelry Items:'}</span>
-                        <span className="tabular-nums font-semibold text-stone-900">{formatEGP(discountedJewelrySubtotal, lang)}</span>
+                        <span>Jewelry Items:</span>
+                        <span className="tabular-nums font-semibold text-stone-900">{formatEGP(discountedJewelrySubtotal)}</span>
                       </div>
                       <div className="flex items-center justify-between text-stone-600">
-                        <span>{lang === 'ar' ? 'رسوم الشحن والتوصيل:' : 'Courier Delivery:'}</span>
+                        <span>Courier Delivery:</span>
                         <span className="tabular-nums font-semibold text-stone-900">
-                          {shipping === 0 ? (lang === 'ar' ? 'مجاناً' : 'FREE') : formatEGP(shipping, lang)}
+                          {shipping === 0 ? 'FREE' : formatEGP(shipping)}
                         </span>
                       </div>
                       <div className="flex items-center justify-between font-bold pt-1.5 border-t border-amber-200/70 text-xs text-amber-950">
                         <span>{t.codTotalNote}</span>
-                        <span className="tabular-nums text-sm text-stone-950">{formatEGP(total, lang)}</span>
+                        <span className="tabular-nums text-sm text-stone-950">{formatEGP(total)}</span>
                       </div>
                     </div>
                   </div>
@@ -963,13 +950,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               {isSubmitting ? (
                 <span>{t.confirmingOrder}</span>
               ) : paymentMethod === 'cod' ? (
-                <span>
-                  {lang === 'ar'
-                    ? `تأكيد الطلب · الدفع عند الاستلام (${formatEGP(total, lang)})`
-                    : `Confirm Order · Total Due on Delivery: ${formatEGP(total, lang)}`}
-                </span>
+                <span>Confirm Order · Total Due on Delivery: {formatEGP(total)}</span>
               ) : (
-                <span>{t.confirmOrder} · {formatEGP(total, lang)}</span>
+                <span>{t.confirmOrder} · {formatEGP(total)}</span>
               )}
             </button>
 

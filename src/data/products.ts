@@ -417,52 +417,32 @@ export const REVIEWS: Review[] = [
 export const STEEL_COMPARISON = [
   {
     feature: 'Water & Shower Resistance',
-    featureAr: 'مقاومة الماء والاستحمام',
     tateSteel: '100% Waterproof (Wear 24/7)',
-    tateSteelAr: 'مقاوم للماء 100% (ارتداء دائم 24/7)',
     sterlingSilver: 'Blackens and oxidizes in water',
-    sterlingSilverAr: 'يسود ويتأكسد مع الماء والرطوبة',
-    brassAlloy: 'Peels and turns green in days',
-    brassAlloyAr: 'يتقشر ويترك أثراً أخضر خلال أيام'
+    brassAlloy: 'Peels and turns green in days'
   },
   {
     feature: 'Metal Composition',
-    featureAr: 'تركيبة المعدن',
     tateSteel: 'Pure Solid Surgical Steel',
-    tateSteelAr: 'ستانلس ستيل طبي خالص وصلب',
     sterlingSilver: '92.5% Silver + reactive copper',
-    sterlingSilverAr: '92.5% فضة + نحاس متفاعل',
-    brassAlloy: 'Copper-zinc base with flash coating',
-    brassAlloyAr: 'نحاس وزنك مطلي بطبقة رقيقة'
+    brassAlloy: 'Copper-zinc base with flash coating'
   },
   {
     feature: 'Sweat, Perfume & Humidity',
-    featureAr: 'مقاومة العرق والعطور والرطوبة',
     tateSteel: 'Impervious to sweat & chemicals',
-    tateSteelAr: 'غير متأثر بالعطور أو العرق أو الكيماويات',
     sterlingSilver: 'Tarnishes from sulfur & acidity',
-    sterlingSilverAr: 'يبهت بسبب الكبريت والأحماض',
-    brassAlloy: 'Quick corrosion & dark residue',
-    brassAlloyAr: 'تآكل سريع وظهور سواد داكن'
+    brassAlloy: 'Quick corrosion & dark residue'
   },
   {
     feature: 'Hypoallergenic Standard',
-    featureAr: 'معيار مضاد للحساسية',
     tateSteel: 'Medical Grade (Skin-Safe)',
-    tateSteelAr: 'درجة طبية جراحية (آمن للبشرة)',
     sterlingSilver: 'Common reactions with alloyed metals',
-    sterlingSilverAr: 'تفاعلات شائعة بسبب خلط المعادن',
-    brassAlloy: 'High skin irritation & allergic reaction',
-    brassAlloyAr: 'تهيج عالي للبشرة والتهابات'
+    brassAlloy: 'High skin irritation & allergic reaction'
   },
   {
     feature: 'Maintenance & Longevity',
-    featureAr: 'الصيانة والعمر الافتراضي',
     tateSteel: 'Zero polishing needed, lasts a lifetime',
-    tateSteelAr: 'لا يحتاج لتلميع أبداً، يدوم مدى الحياة',
     sterlingSilver: 'Needs regular chemical polish baths',
-    sterlingSilverAr: 'يحتاج محاليل تنظيف كيميائية دورية',
-    brassAlloy: 'Cannot be restored once peeling starts',
-    brassAlloyAr: 'لا يمكن إصلاحه بمجرد بدء التقشر'
+    brassAlloy: 'Cannot be restored once peeling starts'
   }
 ];

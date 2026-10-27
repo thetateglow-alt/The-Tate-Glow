@@ -250,7 +250,7 @@ export async function sendOrderConfirmationEmail(order: OrderEmailData): Promise
           <div style="font-size: 16px; font-weight: 700; color: #1c1917; font-family: monospace;">${order.orderId}</div>
           <div style="margin-top: 8px; font-size: 13px; color: #78716c;">Payment Method: <strong style="color: #1c1917;">${order.paymentMethod}</strong></div>
           ${
-            order.paymentMethod.toLowerCase().includes('cash on delivery') || order.paymentMethod.includes('الدفع عند الاستلام')
+            order.paymentMethod.toLowerCase().includes('cash on delivery') || order.paymentMethod.toLowerCase().includes('cod')
               ? `
             <div style="margin-top: 12px; padding: 10px 14px; background: #fefce8; border: 1px solid #fde047; border-radius: 6px; font-size: 13px; color: #854d0e; line-height: 1.4;">
               💵 <strong>Cash on Delivery (Full Total Due):</strong> The courier must collect the <strong>Total Amount of ${formatEGP(order.total)}</strong> in cash upon delivery (includes all jewelry items and delivery fee).

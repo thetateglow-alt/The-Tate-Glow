@@ -4,11 +4,11 @@ import { CheckCircle2, Star } from 'lucide-react';
 import { Language, TRANSLATIONS } from '../i18n/translations';
 
 interface ReviewsSectionProps {
-  lang: Language;
+  lang?: Language;
 }
 
-export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ lang }) => {
-  const t = TRANSLATIONS[lang];
+export const ReviewsSection: React.FC<ReviewsSectionProps> = () => {
+  const t = TRANSLATIONS.en;
 
   return (
     <section className="py-16 sm:py-24 bg-[#F5F2EC] border-t border-stone-200/80">
@@ -46,7 +46,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ lang }) => {
                     ))}
                   </div>
                   <span className="text-[11px] text-stone-400">
-                    {lang === 'ar' ? 'منذ أسبوعين' : review.date}
+                    {review.date}
                   </span>
                 </div>
 

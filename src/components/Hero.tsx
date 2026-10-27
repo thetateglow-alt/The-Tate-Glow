@@ -6,11 +6,12 @@ import { Language, TRANSLATIONS } from '../i18n/translations';
 interface HeroProps {
   onShopClick: () => void;
   onExploreSteel?: () => void;
-  lang: Language;
+  onPlayFilm?: () => void;
+  lang?: Language;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onShopClick, lang }) => {
-  const t = TRANSLATIONS[lang];
+export const Hero: React.FC<HeroProps> = ({ onShopClick, onPlayFilm }) => {
+  const t = TRANSLATIONS.en;
 
   return (
     <section className="relative overflow-hidden bg-[#FAF8F5]">
@@ -43,8 +44,18 @@ export const Hero: React.FC<HeroProps> = ({ onShopClick, lang }) => {
                 className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 bg-stone-950 text-white text-xs uppercase tracking-[0.2em] font-medium rounded-md hover:bg-stone-800 transition-all cursor-pointer shadow-sm group whitespace-nowrap shrink-0"
               >
                 <span>{t.exploreCapsule}</span>
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </button>
+
+              {onPlayFilm && (
+                <button
+                  onClick={onPlayFilm}
+                  className="inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-white hover:bg-stone-100 text-stone-900 border border-stone-300 text-xs uppercase tracking-[0.2em] font-medium rounded-md transition-all cursor-pointer shadow-xs whitespace-nowrap shrink-0 group"
+                >
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                  <span>Watch Film</span>
+                </button>
+              )}
             </div>
 
             {/* Trust line */}
@@ -70,7 +81,7 @@ export const Hero: React.FC<HeroProps> = ({ onShopClick, lang }) => {
               />
               
               {/* Subtle caption */}
-              <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 rtl:left-auto rtl:right-4 sm:rtl:right-6 bg-stone-950/80 backdrop-blur-md px-4 py-2.5 rounded text-white border border-white/10 max-w-xs">
+              <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 bg-stone-950/80 backdrop-blur-md px-4 py-2.5 rounded text-white border border-white/10 max-w-xs">
                 <p className="text-[10px] tracking-[0.2em] uppercase text-stone-300 font-medium">
                   {t.slogan}
                 </p>

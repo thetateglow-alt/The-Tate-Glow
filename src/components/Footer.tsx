@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { JewelryCategory } from '../types/jewelry';
-import { ShieldCheck, Mail, ArrowRight, Check, Globe } from 'lucide-react';
+import { ShieldCheck, Mail, ArrowRight, Check } from 'lucide-react';
 import { BRAND_CONFIG } from '../data/products';
 import { Language, TRANSLATIONS } from '../i18n/translations';
 
@@ -8,22 +8,21 @@ interface FooterProps {
   onSelectCategory: (cat: JewelryCategory | 'all') => void;
   onOpenScience: () => void;
   onOpenSizeGuide: () => void;
-  lang: Language;
-  onToggleLanguage: () => void;
+  lang?: Language;
   onOpenAdmin?: () => void;
+  onPlayFilm?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   onSelectCategory,
   onOpenScience,
   onOpenSizeGuide,
-  lang,
-  onToggleLanguage,
-  onOpenAdmin
+  onOpenAdmin,
+  onPlayFilm
 }) => {
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const t = TRANSLATIONS[lang];
+  const t = TRANSLATIONS.en;
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +42,7 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Brand Manifesto Col */}
           <div className="lg:col-span-2 space-y-3">
             <span className="text-xl font-serif tracking-[0.25em] font-medium text-white uppercase block">
-              {lang === 'ar' ? 'ذا تاتي جلو · The Taté Glow' : BRAND_CONFIG.name}
+              {BRAND_CONFIG.name}
             </span>
             <span className="text-xs tracking-[0.25em] uppercase text-stone-400 font-light block">
               {t.slogan}
@@ -55,17 +54,6 @@ export const Footer: React.FC<FooterProps> = ({
             <div className="pt-2 flex items-center gap-2 text-xs text-amber-300">
               <ShieldCheck className="w-4 h-4 text-amber-400" />
               <span>{t.tarnishFreeGuaranteeTitle}</span>
-            </div>
-
-            {/* Language Switch Button */}
-            <div className="pt-3">
-              <button
-                onClick={onToggleLanguage}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded border border-stone-700 bg-stone-900 hover:bg-stone-800 text-xs font-medium text-stone-200 transition-colors cursor-pointer"
-              >
-                <Globe className="w-3.5 h-3.5 text-stone-400" />
-                <span>{lang === 'en' ? 'تغيير اللغة إلى العربية' : 'Switch Language to English'}</span>
-              </button>
             </div>
           </div>
 
@@ -166,21 +154,21 @@ export const Footer: React.FC<FooterProps> = ({
               <li>
                 <a
                   href="/privacy.html"
-                  className="hover:text-white transition-colors block text-left rtl:text-right"
+                  className="hover:text-white transition-colors block text-left"
                 >
-                  {lang === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy'}
+                  Privacy Policy
                 </a>
               </li>
               <li>
                 <a
                   href="/terms.html"
-                  className="hover:text-white transition-colors block text-left rtl:text-right"
+                  className="hover:text-white transition-colors block text-left"
                 >
-                  {lang === 'ar' ? 'شروط الخدمة' : 'Terms of Service'}
+                  Terms of Service
                 </a>
               </li>
               <li className="pt-1 text-[11px] text-stone-500">
-                {lang === 'ar' ? 'توصيل مجاني للطلبات فوق 1,200 ج.م' : 'Free Delivery over 1,200 EGP'}
+                Free Delivery over 1,200 EGP
               </li>
             </ul>
           </div>
@@ -235,15 +223,27 @@ export const Footer: React.FC<FooterProps> = ({
               href="/privacy.html"
               className="text-stone-400 hover:text-white transition-colors underline underline-offset-4"
             >
-              {lang === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy'}
+              Privacy Policy
             </a>
             <span className="text-stone-700">·</span>
             <a
               href="/terms.html"
               className="text-stone-400 hover:text-white transition-colors underline underline-offset-4"
             >
-              {lang === 'ar' ? 'شروط الخدمة' : 'Terms of Service'}
+              Terms of Service
             </a>
+            {onPlayFilm && (
+              <>
+                <span className="text-stone-700">·</span>
+                <button
+                  type="button"
+                  onClick={onPlayFilm}
+                  className="text-amber-400/90 hover:text-amber-200 transition-colors cursor-pointer text-[11px] underline underline-offset-4"
+                >
+                  Cinematic Film
+                </button>
+              </>
+            )}
             {onOpenAdmin && (
               <>
                 <span className="text-stone-700">·</span>
@@ -258,7 +258,7 @@ export const Footer: React.FC<FooterProps> = ({
             )}
           </div>
 
-          <p className="text-stone-400 text-center sm:text-right rtl:sm:text-left">
+          <p className="text-stone-400 text-center sm:text-right">
             {t.footerDeliveryNotice}
           </p>
         </div>

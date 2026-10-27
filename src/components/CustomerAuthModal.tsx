@@ -15,7 +15,7 @@ interface CustomerAuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (user: User) => void;
-  lang: Language;
+  lang?: Language;
   isCheckoutGate?: boolean;
 }
 
@@ -23,7 +23,6 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
-  lang,
   isCheckoutGate = false,
 }) => {
   const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>('signin');
@@ -53,7 +52,7 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
       }
     } catch (err: any) {
       if (err.code !== 'auth/popup-closed-by-user') {
-        setErrorMessage(formatAuthError(err, lang));
+        setErrorMessage(formatAuthError(err));
       }
     } finally {
       setLoadingGoogle(false);
@@ -65,11 +64,7 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
     setErrorMessage(null);
 
     if (!email.trim() || !password) {
-      setErrorMessage(
-        lang === 'ar'
-          ? 'يرجى إدخال البريد الإلكتروني وكلمة المرور'
-          : 'Please enter your email and password'
-      );
+      setErrorMessage('Please enter your email and password');
       return;
     }
 
@@ -85,7 +80,7 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
         onClose();
       }
     } catch (err: any) {
-      setErrorMessage(formatAuthError(err, lang));
+      setErrorMessage(formatAuthError(err));
     } finally {
       setLoadingEmail(false);
     }
@@ -97,24 +92,16 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
     setResetSuccessMessage(null);
 
     if (!email.trim()) {
-      setErrorMessage(
-        lang === 'ar'
-          ? 'يرجى إدخال البريد الإلكتروني لإرسال رابط الاستعادة'
-          : 'Please enter your email address to receive the reset link'
-      );
+      setErrorMessage('Please enter your email address to receive the reset link');
       return;
     }
 
     setLoadingReset(true);
     try {
       await sendPasswordReset(email);
-      setResetSuccessMessage(
-        lang === 'ar'
-          ? 'تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني بنجاح.'
-          : 'Password reset link sent! Please check your inbox and spam folder.'
-      );
+      setResetSuccessMessage('Password reset link sent! Please check your inbox and spam folder.');
     } catch (err: any) {
-      setErrorMessage(formatAuthError(err, lang));
+      setErrorMessage(formatAuthError(err));
     } finally {
       setLoadingReset(false);
     }
@@ -128,7 +115,7 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
       onSuccess(guestUser);
       onClose();
     } catch (err: any) {
-      setErrorMessage(formatAuthError(err, lang));
+      setErrorMessage(formatAuthError(err));
     } finally {
       setLoadingGuest(false);
     }
@@ -157,23 +144,19 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
           <div>
             <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.2em] font-medium text-amber-900 mb-1">
               <Sparkles className="w-3.5 h-3.5 text-amber-700" />
-              <span>{isCheckoutGate ? (lang === 'ar' ? 'بوابة إتمام الطلب' : 'Checkout Gate') : (lang === 'ar' ? 'حساب تاتي جلو' : 'The Taté Glow Account')}</span>
+              <span>{isCheckoutGate ? 'Checkout Gate' : 'The Taté Glow Account'}</span>
             </div>
             <h3 className="font-serif text-2xl font-normal text-stone-950 tracking-tight">
               {mode === 'forgot'
-                ? (lang === 'ar' ? 'استعادة كلمة المرور' : 'Reset Password')
+                ? 'Reset Password'
                 : mode === 'signup'
-                ? (lang === 'ar' ? 'إنشاء حساب جديد' : 'Join The Taté Glow')
-                : (lang === 'ar' ? 'تسجيل الدخول' : 'Welcome Back')}
+                ? 'Join The Taté Glow'
+                : 'Welcome Back'}
             </h3>
             <p className="text-xs text-stone-500 mt-1">
               {isCheckoutGate
-                ? (lang === 'ar'
-                    ? 'سجلي دخولك لربط طلبك وحفظ نقاط التوهج، أو تابعي كزائر.'
-                    : 'Sign in to bank your Glow Points, or checkout as a guest seamlessly.')
-                : (lang === 'ar'
-                    ? 'تابعي طلباتكِ واستمتعي بمكافآت التوهج الدائمة.'
-                    : 'Access your order tracking and personal jewelry collection.')}
+                ? 'Sign in to bank your Glow Points, or checkout as a guest seamlessly.'
+                : 'Access your order tracking and personal jewelry collection.'}
             </p>
           </div>
           <button
@@ -235,9 +218,7 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
                   </svg>
                 )}
                 <span>
-                  {loadingGoogle
-                    ? (lang === 'ar' ? 'جاري الاتصال بجوجل...' : 'Connecting to Google...')
-                    : (lang === 'ar' ? 'المتابعة باستخدام Google' : 'Continue with Google')}
+                  {loadingGoogle ? 'Connecting to Google...' : 'Continue with Google'}
                 </span>
               </button>
 
@@ -247,7 +228,7 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
                   <div className="w-full border-t border-stone-200" />
                 </div>
                 <span className="relative bg-white px-3 text-[11px] tracking-wider uppercase text-stone-400 font-medium">
-                  {lang === 'ar' ? 'أو عبر البريد الإلكتروني' : 'or with email'}
+                  or with email
                 </span>
               </div>
 
@@ -256,24 +237,24 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
                 {mode === 'signup' && (
                   <div>
                     <label className="block text-xs font-medium text-stone-700 mb-1">
-                      {lang === 'ar' ? 'الاسم بالكامل' : 'Full Name'}
+                      Full Name
                     </label>
                     <div className="relative">
                       <input
                         type="text"
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
-                        placeholder={lang === 'ar' ? 'مثال: ندى الأحمدي' : 'e.g. Nada Ahmed'}
-                        className="w-full pl-9 rtl:pl-3 rtl:pr-9 pr-3 py-2 text-xs border border-stone-300 rounded-md focus:outline-none focus:border-stone-900 text-stone-900 bg-stone-50/50"
+                        placeholder="e.g. Nada Ahmed"
+                        className="w-full pl-9 pr-3 py-2 text-xs border border-stone-300 rounded-md focus:outline-none focus:border-stone-900 text-stone-900 bg-stone-50/50"
                       />
-                      <UserIcon className="w-4 h-4 text-stone-400 absolute left-2.5 rtl:left-auto rtl:right-2.5 top-2.5 pointer-events-none" />
+                      <UserIcon className="w-4 h-4 text-stone-400 absolute left-2.5 top-2.5 pointer-events-none" />
                     </div>
                   </div>
                 )}
 
                 <div>
                   <label className="block text-xs font-medium text-stone-700 mb-1">
-                    {lang === 'ar' ? 'البريد الإلكتروني' : 'Email Address'}
+                    Email Address
                   </label>
                   <div className="relative">
                     <input
@@ -282,16 +263,16 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="name@example.com"
-                      className="w-full pl-9 rtl:pl-3 rtl:pr-9 pr-3 py-2 text-xs border border-stone-300 rounded-md focus:outline-none focus:border-stone-900 text-stone-900 bg-stone-50/50"
+                      className="w-full pl-9 pr-3 py-2 text-xs border border-stone-300 rounded-md focus:outline-none focus:border-stone-900 text-stone-900 bg-stone-50/50"
                     />
-                    <Mail className="w-4 h-4 text-stone-400 absolute left-2.5 rtl:left-auto rtl:right-2.5 top-2.5 pointer-events-none" />
+                    <Mail className="w-4 h-4 text-stone-400 absolute left-2.5 top-2.5 pointer-events-none" />
                   </div>
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="block text-xs font-medium text-stone-700">
-                      {lang === 'ar' ? 'كلمة المرور' : 'Password'}
+                      Password
                     </label>
                     {mode === 'signin' && (
                       <button
@@ -299,7 +280,7 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
                         onClick={() => switchMode('forgot')}
                         className="text-[11px] text-amber-900 hover:text-amber-950 underline underline-offset-2 cursor-pointer font-medium"
                       >
-                        {lang === 'ar' ? 'نسيت كلمة المرور؟' : 'Forgot password?'}
+                        Forgot password?
                       </button>
                     )}
                   </div>
@@ -310,13 +291,13 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full pl-9 rtl:pl-3 rtl:pr-9 pr-10 rtl:pr-3 rtl:pl-10 py-2 text-xs border border-stone-300 rounded-md focus:outline-none focus:border-stone-900 text-stone-900 bg-stone-50/50"
+                      className="w-full pl-9 pr-10 py-2 text-xs border border-stone-300 rounded-md focus:outline-none focus:border-stone-900 text-stone-900 bg-stone-50/50"
                     />
-                    <Lock className="w-4 h-4 text-stone-400 absolute left-2.5 rtl:left-auto rtl:right-2.5 top-2.5 pointer-events-none" />
+                    <Lock className="w-4 h-4 text-stone-400 absolute left-2.5 top-2.5 pointer-events-none" />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-2.5 rtl:right-auto rtl:left-2.5 top-2.5 text-stone-400 hover:text-stone-700 p-0.5"
+                      className="absolute right-2.5 top-2.5 text-stone-400 hover:text-stone-700 p-0.5"
                     >
                       {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                     </button>
@@ -333,11 +314,9 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
                   ) : (
                     <>
                       <span>
-                        {mode === 'signup'
-                          ? (lang === 'ar' ? 'إنشاء حساب' : 'Create Account')
-                          : (lang === 'ar' ? 'تسجيل الدخول' : 'Sign In')}
+                        {mode === 'signup' ? 'Create Account' : 'Sign In'}
                       </span>
-                      <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </>
                   )}
                 </button>
@@ -347,24 +326,24 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
               <div className="text-center pt-1 text-xs text-stone-600">
                 {mode === 'signin' ? (
                   <span>
-                    {lang === 'ar' ? 'ليس لديكِ حساب؟ ' : "Don't have an account? "}
+                    Don't have an account?{' '}
                     <button
                       type="button"
                       onClick={() => switchMode('signup')}
                       className="font-semibold text-stone-900 hover:underline cursor-pointer"
                     >
-                      {lang === 'ar' ? 'سجلي حسابكِ الآن' : 'Sign up now'}
+                      Sign up now
                     </button>
                   </span>
                 ) : (
                   <span>
-                    {lang === 'ar' ? 'لديكِ حساب بالفعل؟ ' : 'Already have an account? '}
+                    Already have an account?{' '}
                     <button
                       type="button"
                       onClick={() => switchMode('signin')}
                       className="font-semibold text-stone-900 hover:underline cursor-pointer"
                     >
-                      {lang === 'ar' ? 'تسجيل الدخول' : 'Sign in'}
+                      Sign in
                     </button>
                   </span>
                 )}
@@ -382,9 +361,9 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
                     <div className="w-4 h-4 border-2 border-stone-700 border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <>
-                      <span>{lang === 'ar' ? 'المتابعة كزائر بدون حساب' : 'Continue as Guest'}</span>
+                      <span>Continue as Guest</span>
                       <span className="text-[10px] text-stone-400 font-normal">
-                        ({lang === 'ar' ? 'بدون كلمة مرور' : 'no password needed'})
+                        (no password needed)
                       </span>
                     </>
                   )}
@@ -395,14 +374,12 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
             /* Forgot Password View */
             <form onSubmit={handleForgotPassword} className="space-y-4">
               <p className="text-xs text-stone-600 leading-relaxed">
-                {lang === 'ar'
-                  ? 'أدخلي بريدكِ الإلكتروني المسجل، وسنرسل لكِ رابطاً آمناً لإعادة تعيين كلمة المرور فوراً.'
-                  : 'Enter your registered email address, and we will send you a secure link to reset your password.'}
+                Enter your registered email address, and we will send you a secure link to reset your password.
               </p>
 
               <div>
                 <label className="block text-xs font-medium text-stone-700 mb-1">
-                  {lang === 'ar' ? 'البريد الإلكتروني' : 'Email Address'}
+                  Email Address
                 </label>
                 <div className="relative">
                   <input
@@ -411,9 +388,9 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@example.com"
-                    className="w-full pl-9 rtl:pl-3 rtl:pr-9 pr-3 py-2 text-xs border border-stone-300 rounded-md focus:outline-none focus:border-stone-900 text-stone-900 bg-stone-50/50"
+                    className="w-full pl-9 pr-3 py-2 text-xs border border-stone-300 rounded-md focus:outline-none focus:border-stone-900 text-stone-900 bg-stone-50/50"
                   />
-                  <Mail className="w-4 h-4 text-stone-400 absolute left-2.5 rtl:left-auto rtl:right-2.5 top-2.5 pointer-events-none" />
+                  <Mail className="w-4 h-4 text-stone-400 absolute left-2.5 top-2.5 pointer-events-none" />
                 </div>
               </div>
 
@@ -423,7 +400,7 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
                   onClick={() => switchMode('signin')}
                   className="w-1/3 py-2.5 px-3 border border-stone-300 hover:bg-stone-50 text-stone-700 rounded-md text-xs font-medium transition-colors cursor-pointer"
                 >
-                  {lang === 'ar' ? 'رجوع' : 'Back'}
+                  Back
                 </button>
                 <button
                   type="submit"
@@ -433,7 +410,7 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
                   {loadingReset ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
-                    <span>{lang === 'ar' ? 'إرسال الرابط' : 'Send Reset Link'}</span>
+                    <span>Send Reset Link</span>
                   )}
                 </button>
               </div>

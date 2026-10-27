@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { User } from 'firebase/auth';
-import { ShoppingBag, Heart, Search, X, Tag, Globe, User as UserIcon, LogOut, Package, Sparkles, ChevronDown } from 'lucide-react';
+import { ShoppingBag, Heart, Search, X, Tag, User as UserIcon, LogOut, Package, Sparkles, ChevronDown } from 'lucide-react';
 import { JewelryCategory } from '../types/jewelry';
 import { BRAND_CONFIG } from '../data/products';
 import { Language, TRANSLATIONS } from '../i18n/translations';
@@ -14,12 +14,12 @@ interface NavbarProps {
   onOpenWishlist: () => void;
   searchQuery: string;
   onSearchChange: (q: string) => void;
-  lang: Language;
-  onToggleLanguage: () => void;
+  lang?: Language;
   currentUser: User | null;
   onOpenAuth: () => void;
   onOpenOrders: () => void;
   onLogout: () => void;
+  onPlayFilm?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -31,18 +31,17 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenWishlist,
   searchQuery,
   onSearchChange,
-  lang,
-  onToggleLanguage,
   currentUser,
   onOpenAuth,
   onOpenOrders,
   onLogout,
+  onPlayFilm,
 }) => {
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
-  const t = TRANSLATIONS[lang];
+  const t = TRANSLATIONS.en;
 
   // Close account dropdown on outside click
   useEffect(() => {
@@ -56,7 +55,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   }, []);
 
   const isGuest = currentUser?.isAnonymous ?? false;
-  const userDisplayName = currentUser?.displayName || (isGuest ? (lang === 'ar' ? 'زائر' : 'Guest') : (lang === 'ar' ? 'عميل' : 'Customer'));
+  const userDisplayName = currentUser?.displayName || (isGuest ? 'Guest' : 'Customer');
 
   return (
     <header className="sticky top-0 z-40 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-stone-200/80 transition-all duration-200">
@@ -72,7 +71,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             onClick={() => setShowBanner(false)}
             aria-label="Dismiss banner"
-            className="text-stone-400 hover:text-white p-0.5 ml-2 rtl:mr-2 rtl:ml-0 transition-colors cursor-pointer"
+            className="text-stone-400 hover:text-white p-0.5 ml-2 transition-colors cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -87,10 +86,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             onSelectCategory('all');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          className="text-left rtl:text-right cursor-pointer group whitespace-nowrap shrink-0 flex flex-col justify-center"
+          className="text-left cursor-pointer group whitespace-nowrap shrink-0 flex flex-col justify-center"
         >
           <span className="text-xl sm:text-2xl font-serif tracking-[0.2em] font-semibold text-stone-950 uppercase group-hover:text-stone-700 transition-colors">
-            {lang === 'ar' ? 'The Taté Glow · ذا تاتي جلو' : BRAND_CONFIG.name}
+            {BRAND_CONFIG.name}
           </span>
           <span className="text-[10px] tracking-[0.28em] uppercase text-stone-500 font-light mt-0.5">
             {t.slogan}
@@ -154,32 +153,30 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-stone-950" />
             )}
           </button>
+          {onPlayFilm && (
+            <button
+              onClick={onPlayFilm}
+              className="cursor-pointer transition-colors whitespace-nowrap shrink-0 hover:text-amber-800 text-stone-600 flex items-center gap-1.5 py-1 text-amber-900/90 font-medium"
+              title="Watch Cinematic Brand Film"
+            >
+              <Sparkles className="w-3 h-3 text-amber-600" />
+              <span>The Film</span>
+            </button>
+          )}
         </nav>
 
-        {/* Zone 3: Language Toggle, Account/Auth, Search, Wishlist, Cart Drawer Trigger */}
+        {/* Zone 3: Account/Auth, Search, Wishlist, Cart Drawer Trigger */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          {/* Customer Language Switcher */}
-          <button
-            onClick={onToggleLanguage}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold border border-stone-300 rounded-md bg-stone-50 hover:bg-stone-100 text-stone-900 transition-colors cursor-pointer shadow-2xs"
-            title={lang === 'en' ? 'التحويل إلى اللغة العربية' : 'Switch to English'}
-            aria-label="Change language"
-          >
-            <Globe className="w-3.5 h-3.5 text-stone-600 shrink-0" />
-            <span className="tracking-wide hidden sm:inline">{t.switchToLang}</span>
-            <span className="sm:hidden">{lang === 'en' ? 'عربي' : 'EN'}</span>
-          </button>
-
           {/* Customer Authentication & Account Menu */}
           <div className="relative" ref={accountMenuRef}>
             {!currentUser ? (
               <button
                 onClick={onOpenAuth}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium border border-stone-300 rounded-md bg-white hover:bg-stone-50 text-stone-900 transition-colors cursor-pointer shadow-2xs"
-                title={lang === 'ar' ? 'تسجيل الدخول' : 'Sign in to account'}
+                title="Sign in to account"
               >
                 <UserIcon className="w-3.5 h-3.5 text-stone-700" />
-                <span className="hidden md:inline">{lang === 'ar' ? 'دخول' : 'Sign In'}</span>
+                <span className="hidden md:inline">Sign In</span>
               </button>
             ) : (
               <button
@@ -209,13 +206,13 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Account Popover Menu */}
             {isAccountMenuOpen && currentUser && (
-              <div className="absolute right-0 rtl:right-auto rtl:left-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-stone-200 py-1.5 z-50 text-xs animate-in fade-in slide-in-from-top-1 duration-150">
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-stone-200 py-1.5 z-50 text-xs animate-in fade-in slide-in-from-top-1 duration-150">
                 <div className="px-3.5 py-2.5 border-b border-stone-100 bg-[#FAF8F5]/80">
                   <p className="font-semibold text-stone-900 truncate">
                     {userDisplayName}
                   </p>
                   <p className="text-[11px] text-stone-500 truncate">
-                    {currentUser.email || (lang === 'ar' ? 'جلسة تسوق زائر' : 'Guest Shopper Session')}
+                    {currentUser.email || 'Guest Shopper Session'}
                   </p>
                 </div>
 
@@ -226,10 +223,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                         setIsAccountMenuOpen(false);
                         onOpenAuth();
                       }}
-                      className="w-full text-left rtl:text-right py-1.5 px-2 bg-amber-100 hover:bg-amber-200 text-amber-950 rounded text-[11px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                      className="w-full text-left py-1.5 px-2 bg-amber-100 hover:bg-amber-200 text-amber-950 rounded text-[11px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
                     >
                       <Sparkles className="w-3 h-3 text-amber-800 shrink-0" />
-                      <span>{lang === 'ar' ? 'تسجيل الدخول لحفظ الطلبات' : 'Sign in to save orders'}</span>
+                      <span>Sign in to save orders</span>
                     </button>
                   </div>
                 )}
@@ -240,10 +237,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                       setIsAccountMenuOpen(false);
                       onOpenOrders();
                     }}
-                    className="w-full flex items-center gap-2 px-3.5 py-2 text-stone-700 hover:bg-stone-100 hover:text-stone-900 text-left rtl:text-right cursor-pointer"
+                    className="w-full flex items-center gap-2 px-3.5 py-2 text-stone-700 hover:bg-stone-100 hover:text-stone-900 text-left cursor-pointer"
                   >
                     <Package className="w-3.5 h-3.5 text-stone-500" />
-                    <span>{lang === 'ar' ? 'طلباتي السابقة والتتبع' : 'My Orders & Tracking'}</span>
+                    <span>My Orders & Tracking</span>
                   </button>
 
                   {!isGuest && (
@@ -252,10 +249,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                         setIsAccountMenuOpen(false);
                         onOpenAuth();
                       }}
-                      className="w-full flex items-center gap-2 px-3.5 py-2 text-stone-700 hover:bg-stone-100 hover:text-stone-900 text-left rtl:text-right cursor-pointer"
+                      className="w-full flex items-center gap-2 px-3.5 py-2 text-stone-700 hover:bg-stone-100 hover:text-stone-900 text-left cursor-pointer"
                     >
                       <UserIcon className="w-3.5 h-3.5 text-stone-500" />
-                      <span>{lang === 'ar' ? 'إدارة الحساب' : 'Switch / Manage Account'}</span>
+                      <span>Switch / Manage Account</span>
                     </button>
                   )}
                 </div>
@@ -266,10 +263,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                       setIsAccountMenuOpen(false);
                       onLogout();
                     }}
-                    className="w-full flex items-center gap-2 px-3.5 py-2 text-rose-700 hover:bg-rose-50 text-left rtl:text-right cursor-pointer font-medium"
+                    className="w-full flex items-center gap-2 px-3.5 py-2 text-rose-700 hover:bg-rose-50 text-left cursor-pointer font-medium"
                   >
                     <LogOut className="w-3.5 h-3.5 text-rose-600" />
-                    <span>{lang === 'ar' ? 'تسجيل الخروج' : 'Sign Out'}</span>
+                    <span>Sign Out</span>
                   </button>
                 </div>
               </div>

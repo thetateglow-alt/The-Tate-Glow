@@ -6,11 +6,11 @@ import { Language, TRANSLATIONS } from '../i18n/translations';
 
 interface CategoryGridProps {
   onSelectCategory: (cat: JewelryCategory) => void;
-  lang: Language;
+  lang?: Language;
 }
 
-export const CategoryGrid: React.FC<CategoryGridProps> = ({ onSelectCategory, lang }) => {
-  const t = TRANSLATIONS[lang];
+export const CategoryGrid: React.FC<CategoryGridProps> = ({ onSelectCategory }) => {
+  const t = TRANSLATIONS.en;
 
   const cards: {
     category: JewelryCategory;
@@ -21,31 +21,31 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ onSelectCategory, la
   }[] = [
     {
       category: 'necklace',
-      title: lang === 'ar' ? 'السلاسل والقلادات' : 'Necklaces & Chains',
-      subtitle: lang === 'ar' ? 'سلسلة انسيابية مسطحة، وأطواق، ودلايات ناعمة' : 'Liquid herringbone, snake collars & pendants',
+      title: 'Necklaces & Chains',
+      subtitle: 'Liquid herringbone, snake collars & pendants',
       image: BRAND_IMAGES.necklace,
-      count: lang === 'ar' ? '3 تصاميم' : '3 Designs'
+      count: '3 Designs'
     },
     {
       category: 'bracelet',
-      title: lang === 'ar' ? 'الأساور والكفوف' : 'Bracelets & Cuffs',
-      subtitle: lang === 'ar' ? 'أساور كف مفتوحة وسلاسل عصرية صلبة' : 'Architectural open cuffs & modern links',
+      title: 'Bracelets & Cuffs',
+      subtitle: 'Architectural open cuffs & modern links',
       image: BRAND_IMAGES.bracelet,
-      count: lang === 'ar' ? '3 تصاميم' : '3 Designs'
+      count: '3 Designs'
     },
     {
       category: 'ring',
-      title: lang === 'ar' ? 'الخواتم والدبل' : 'Rings & Signets',
-      subtitle: lang === 'ar' ? 'خواتم مقببة منحوتة وأطقم دبل قابلة للتنسيق' : 'Molten sculptural domes & stackable bands',
+      title: 'Rings & Signets',
+      subtitle: 'Molten sculptural domes & stackable bands',
       image: BRAND_IMAGES.rings,
-      count: lang === 'ar' ? '3 تصاميم' : '3 Designs'
+      count: '3 Designs'
     },
     {
       category: 'earrings',
-      title: lang === 'ar' ? 'الأقراط والحلقان' : 'Earrings & Huggies',
-      subtitle: lang === 'ar' ? 'حلقان هوجي خفيفة وأقراط بيضاوية ممتدة' : 'Hollow lightweight hoops & teardrop drops',
+      title: 'Earrings & Huggies',
+      subtitle: 'Hollow lightweight hoops & teardrop drops',
       image: BRAND_IMAGES.earrings,
-      count: lang === 'ar' ? '3 تصاميم' : '3 Designs'
+      count: '3 Designs'
     }
   ];
 
@@ -83,7 +83,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ onSelectCategory, la
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-stone-900/15 group-hover:bg-stone-900/5 transition-colors" />
-                <span className="absolute top-3 right-3 rtl:right-auto rtl:left-3 p-1.5 rounded-full bg-white/90 text-stone-900 backdrop-blur-xs opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all shadow-xs">
+                <span className="absolute top-3 right-3 p-1.5 rounded-full bg-white/90 text-stone-900 backdrop-blur-xs opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all shadow-xs">
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </span>
               </div>
@@ -104,8 +104,8 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ onSelectCategory, la
 
                 <div className="mt-3 pt-2 border-t border-stone-100 text-xs font-medium text-stone-900 flex items-center justify-between">
                   <span>{t.shopCollection}</span>
-                  <span className="text-stone-400 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform">
-                    {lang === 'ar' ? '←' : '→'}
+                  <span className="text-stone-400 group-hover:translate-x-1 transition-transform">
+                    →
                   </span>
                 </div>
               </div>

@@ -6,13 +6,13 @@ import { Language, TRANSLATIONS } from '../i18n/translations';
 interface SteelScienceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  lang: Language;
+  lang?: Language;
 }
 
-export const SteelScienceModal: React.FC<SteelScienceModalProps> = ({ isOpen, onClose, lang }) => {
+export const SteelScienceModal: React.FC<SteelScienceModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
-  const t = TRANSLATIONS[lang];
+  const t = TRANSLATIONS.en;
 
   return (
     <div
@@ -80,14 +80,14 @@ export const SteelScienceModal: React.FC<SteelScienceModalProps> = ({ isOpen, on
           {/* Section 2: Comparison Table */}
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wider text-stone-900 mb-3">
-              {lang === 'ar' ? 'مقارنة الستانلس ستيل الخالص بالمعادن التقليدية' : 'Pure Steel vs. Traditional Jewelry Metals'}
+              Pure Steel vs. Traditional Jewelry Metals
             </h3>
 
             <div className="border border-stone-200 rounded-md overflow-hidden overflow-x-auto">
-              <table className="w-full text-left rtl:text-right text-xs border-collapse">
+              <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-stone-900 text-white font-medium">
-                    <th className="py-3 px-4">{lang === 'ar' ? 'المعيار' : 'Feature'}</th>
+                    <th className="py-3 px-4">Feature</th>
                     <th className="py-3 px-4 bg-stone-800 text-amber-300">{t.comparePureSteel}</th>
                     <th className="py-3 px-4">{t.compareSterlingSilver}</th>
                     <th className="py-3 px-4">{t.compareBrass}</th>
@@ -97,24 +97,24 @@ export const SteelScienceModal: React.FC<SteelScienceModalProps> = ({ isOpen, on
                   {STEEL_COMPARISON.map((row, idx) => (
                     <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-stone-50/50'}>
                       <td className="py-3 px-4 font-medium text-stone-900">
-                        {lang === 'ar' && (row as any).featureAr ? (row as any).featureAr : row.feature}
+                        {row.feature}
                       </td>
                       <td className="py-3 px-4 font-semibold text-emerald-800 bg-emerald-50/30">
                         <div className="flex items-center gap-1.5">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                          <span>{lang === 'ar' && (row as any).tateSteelAr ? (row as any).tateSteelAr : row.tateSteel}</span>
+                          <span>{row.tateSteel}</span>
                         </div>
                       </td>
                       <td className="py-3 px-4 text-stone-600">
                         <div className="flex items-center gap-1.5">
                           <XCircle className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-                          <span>{lang === 'ar' && (row as any).sterlingSilverAr ? (row as any).sterlingSilverAr : row.sterlingSilver}</span>
+                          <span>{row.sterlingSilver}</span>
                         </div>
                       </td>
                       <td className="py-3 px-4 text-stone-500">
                         <div className="flex items-center gap-1.5">
                           <XCircle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-                          <span>{lang === 'ar' && (row as any).brassAlloyAr ? (row as any).brassAlloyAr : row.brassAlloy}</span>
+                          <span>{row.brassAlloy}</span>
                         </div>
                       </td>
                     </tr>

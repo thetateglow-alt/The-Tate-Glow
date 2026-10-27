@@ -10,7 +10,7 @@ interface WishlistModalProps {
   wishlistProducts: Product[];
   onRemoveFromWishlist: (productId: string) => void;
   onAddToCart: (product: Product) => void;
-  lang: Language;
+  lang?: Language;
 }
 
 export const WishlistModal: React.FC<WishlistModalProps> = ({
@@ -19,11 +19,10 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
   wishlistProducts,
   onRemoveFromWishlist,
   onAddToCart,
-  lang
 }) => {
   if (!isOpen) return null;
 
-  const t = TRANSLATIONS[lang];
+  const t = TRANSLATIONS.en;
 
   return (
     <div
@@ -65,8 +64,8 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
             </div>
           ) : (
             wishlistProducts.map((p) => {
-              const displayName = lang === 'ar' && p.nameAr ? p.nameAr : p.name;
-              const displayCategory = lang === 'ar' && p.categoryAr ? p.categoryAr : p.category;
+              const displayName = p.name;
+              const displayCategory = p.category;
 
               const isOutOfStock = p.stock !== undefined && p.stock <= 0;
 
@@ -87,7 +86,7 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
                     </h3>
                     <div className="flex items-center gap-2 mt-0.5">
                       <p className="text-xs font-semibold text-stone-900 tabular-nums">
-                        {formatEGP(p.price, lang)}
+                        {formatEGP(p.price)}
                       </p>
                       {isOutOfStock && (
                         <span className="text-[10px] font-medium text-stone-500 bg-stone-100 px-1.5 py-0.5 rounded">

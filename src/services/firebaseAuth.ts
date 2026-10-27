@@ -344,67 +344,28 @@ export const reloadCurrentUser = async (user?: User | null): Promise<User | null
 /**
  * Translates Firebase Auth error codes into clean, user-friendly messages.
  */
-export function formatAuthError(err: any, lang: 'en' | 'ar' = 'en'): string {
+export function formatAuthError(err: any, _lang?: string): string {
   const code = err?.code || '';
 
-  const messages: Record<string, { en: string; ar: string }> = {
-    'auth/invalid-credential': {
-      en: 'Incorrect email or password. Please verify your credentials.',
-      ar: 'البريد الإلكتروني أو كلمة المرور غير صحيحة. يرجى التأكد والمحاولة مجدداً.',
-    },
-    'auth/wrong-password': {
-      en: 'Incorrect password. Please try again or reset your password.',
-      ar: 'كلمة المرور غير صحيحة. يرجى المحاولة مرة أخرى أو استعادة كلمة المرور.',
-    },
-    'auth/user-not-found': {
-      en: 'No account found with this email. Please check the spelling or sign up.',
-      ar: 'لا يوجد حساب مسجل بهذا البريد. يرجى التحقق أو إنشاء حساب جديد.',
-    },
-    'auth/email-already-in-use': {
-      en: 'An account with this email already exists. Please sign in instead.',
-      ar: 'هذا البريد مسجل مسبقاً. يرجى تسجيل الدخول بدلاً من ذلك.',
-    },
-    'auth/weak-password': {
-      en: 'Password should be at least 6 characters long.',
-      ar: 'يجب أن تتكون كلمة المرور من 6 أحرف أو أرقام على الأقل.',
-    },
-    'auth/invalid-email': {
-      en: 'Please enter a valid email address.',
-      ar: 'يرجى إدخال عنوان بريد إلكتروني صحيح.',
-    },
-    'auth/popup-closed-by-user': {
-      en: 'Sign-in window was closed before completion. Please try again.',
-      ar: 'تم إغلاق نافذة تسجيل الدخول قبل اكتمالها. يرجى المحاولة مرة أخرى.',
-    },
-    'auth/cancelled-popup-request': {
-      en: 'Sign-in was cancelled. Please try again.',
-      ar: 'تم إلغاء عملية تسجيل الدخول. يرجى المحاولة مجدداً.',
-    },
-    'auth/popup-blocked': {
-      en: 'Pop-up was blocked by your browser. Please allow pop-ups for this site.',
-      ar: 'تم حظر النافذة المنبثقة من قبل المتصفح. يرجى السماح بالنوافذ المنبثقة.',
-    },
-    'auth/network-request-failed': {
-      en: 'Network connection issue. Please check your internet connection.',
-      ar: 'تعذر الاتصال بالشبكة. يرجى التحقق من اتصال الإنترنت والمحاولة ثانية.',
-    },
-    'auth/too-many-requests': {
-      en: 'Too many attempts. Access to this account has been temporarily disabled. Reset your password or try later.',
-      ar: 'محاولات كثيرة جداً. تم تعطيل المحاولة مؤقتاً لحماية حسابك. حاول لاحقاً.',
-    },
-    'auth/credential-already-in-use': {
-      en: 'This credential is already linked to another existing account.',
-      ar: 'بيانات الاعتماد هذه مرتبطة مسبقاً بحساب آخر.',
-    },
-    'auth/operation-not-allowed': {
-      en: 'This sign-in provider is not enabled in Firebase Authentication.',
-      ar: 'طريقة تسجيل الدخول هذه غير مفعلة في إعدادات فايربيس.',
-    },
+  const messages: Record<string, string> = {
+    'auth/invalid-credential': 'Incorrect email or password. Please verify your credentials.',
+    'auth/wrong-password': 'Incorrect password. Please try again or reset your password.',
+    'auth/user-not-found': 'No account found with this email. Please check the spelling or sign up.',
+    'auth/email-already-in-use': 'An account with this email already exists. Please sign in instead.',
+    'auth/weak-password': 'Password should be at least 6 characters long.',
+    'auth/invalid-email': 'Please enter a valid email address.',
+    'auth/popup-closed-by-user': 'Sign-in window was closed before completion. Please try again.',
+    'auth/cancelled-popup-request': 'Sign-in was cancelled. Please try again.',
+    'auth/popup-blocked': 'Pop-up was blocked by your browser. Please allow pop-ups for this site.',
+    'auth/network-request-failed': 'Network connection issue. Please check your internet connection.',
+    'auth/too-many-requests': 'Too many attempts. Access to this account has been temporarily disabled. Reset your password or try later.',
+    'auth/credential-already-in-use': 'This credential is already linked to another existing account.',
+    'auth/operation-not-allowed': 'This sign-in provider is not enabled in Firebase Authentication.',
   };
 
   if (code && messages[code]) {
-    return messages[code][lang];
+    return messages[code];
   }
 
-  return err?.message || (lang === 'ar' ? 'حدث خطأ غير متوقع. يرجى المحاولة ثانية.' : 'An unexpected error occurred. Please try again.');
+  return err?.message || 'An unexpected error occurred. Please try again.';
 }

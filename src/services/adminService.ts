@@ -238,24 +238,24 @@ export async function initializeStoreBackend(): Promise<void> {
       const hpData: HomepageContentConfig = {
         announcementBar: {
           en: 'Pure Stainless Steel · 100% Waterproof & Tarnish-Free · Free Express Delivery Over 1,200 EGP',
-          ar: 'ستانلس ستيل طبي خالص · مقاوم للماء 100% وبدون تغير لون · شحن مجاني للطلبات فوق 1,200 ج.م',
+          ar: 'Pure Stainless Steel · 100% Waterproof & Tarnish-Free · Free Express Delivery Over 1,200 EGP',
           active: true
         },
         hero: {
           headlineEn: 'Effortless shine for her.',
-          headlineAr: 'بريق انسيابي للمرأة العصرية.',
+          headlineAr: 'Effortless shine for her.',
           subtitleEn: 'Minimalist everyday jewelry cast in pure stainless steel. 100% waterproof, hypoallergenic, and made to never take off.',
-          subtitleAr: 'مجوهرات يومية بسيطة مصوغة من الستانلس ستيل الطبي الخالص. مقاومة للماء 100%، مضادة للحساسية، ومصممة لارتداء دائم.',
+          subtitleAr: 'Minimalist everyday jewelry cast in pure stainless steel. 100% waterproof, hypoallergenic, and made to never take off.',
           badgeEn: '100% Pure Stainless Steel',
-          badgeAr: 'ستانلس ستيل طبي 100%',
+          badgeAr: '100% Pure Stainless Steel',
           ctaButtonTextEn: 'Explore Capsule',
-          ctaButtonTextAr: 'استكشفي التشكيلة'
+          ctaButtonTextAr: 'Explore Capsule'
         },
         brandStory: {
           titleEn: 'Your Daily Dose of Glow',
-          titleAr: 'جرعتكِ اليومية من التوهج',
+          titleAr: 'Your Daily Dose of Glow',
           descriptionEn: 'Designed in Cairo for women who want permanent jewelry luxury that stands up to daily showers, sea water, and skincare.',
-          descriptionAr: 'صممت في القاهرة للمرأة التي تبحث عن الفخامة الدائمة المقاومة للماء والعطور والاستحمام اليومي دون صيانة.'
+          descriptionAr: 'Designed in Cairo for women who want permanent jewelry luxury that stands up to daily showers, sea water, and skincare.'
         },
         featuredCategoryIds: ['necklace', 'bracelet', 'ring', 'earrings'],
         featuredProductIds: ['tate-aura-herringbone', 'tate-arc-cuff', 'tate-dome-signet-ring', 'tate-goutte-teardrop-huggies'],
@@ -847,24 +847,24 @@ export async function fetchHomepageContent(): Promise<HomepageContentConfig> {
   return {
     announcementBar: {
       en: 'Pure Stainless Steel · 100% Waterproof & Tarnish-Free · Free Express Delivery Over 1,200 EGP',
-      ar: 'ستانلس ستيل طبي خالص · مقاوم للماء 100% وبدون تغير لون · شحن مجاني للطلبات فوق 1,200 ج.م',
+      ar: 'Pure Stainless Steel · 100% Waterproof & Tarnish-Free · Free Express Delivery Over 1,200 EGP',
       active: true
     },
     hero: {
       headlineEn: 'Effortless shine for her.',
-      headlineAr: 'بريق انسيابي للمرأة العصرية.',
+      headlineAr: 'Effortless shine for her.',
       subtitleEn: 'Minimalist everyday jewelry cast in pure stainless steel. 100% waterproof, hypoallergenic, and made to never take off.',
-      subtitleAr: 'مجوهرات يومية بسيطة مصوغة من الستانلس ستيل الطبي الخالص. مقاومة للماء 100%، مضادة للحساسية، ومصممة لارتداء دائم.',
+      subtitleAr: 'Minimalist everyday jewelry cast in pure stainless steel. 100% waterproof, hypoallergenic, and made to never take off.',
       badgeEn: '100% Pure Stainless Steel',
-      badgeAr: 'ستانلس ستيل طبي 100%',
+      badgeAr: '100% Pure Stainless Steel',
       ctaButtonTextEn: 'Explore Capsule',
-      ctaButtonTextAr: 'استكشفي التشكيلة'
+      ctaButtonTextAr: 'Explore Capsule'
     },
     brandStory: {
       titleEn: 'Your Daily Dose of Glow',
-      titleAr: 'جرعتكِ اليومية من التوهج',
+      titleAr: 'Your Daily Dose of Glow',
       descriptionEn: 'Designed in Cairo for women who want permanent jewelry luxury that stands up to daily showers, sea water, and skincare.',
-      descriptionAr: 'صممت في القاهرة للمرأة التي تبحث عن الفخامة الدائمة المقاومة للماء والعطور والاستحمام اليومي دون صيانة.'
+      descriptionAr: 'Designed in Cairo for women who want permanent jewelry luxury that stands up to daily showers, sea water, and skincare.'
     },
     featuredCategoryIds: ['necklace', 'bracelet', 'ring', 'earrings'],
     featuredProductIds: ['tate-aura-herringbone', 'tate-arc-cuff', 'tate-dome-signet-ring', 'tate-goutte-teardrop-huggies'],
