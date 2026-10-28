@@ -22,11 +22,9 @@ export const Hero: React.FC<HeroProps> = ({ onShopClick, onPlayFilm }) => {
           {/* Left Column: Simple, Direct Brand Introduction */}
           <div className="lg:col-span-5 flex flex-col justify-center">
             
-            {/* Slogan & Material Badge */}
+            {/* Slogan */}
             <div className="flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-stone-500 mb-3 font-medium">
               <span className="text-amber-800 font-semibold">{t.slogan}</span>
-              <span aria-hidden="true" className="text-stone-300">·</span>
-              <span>{t.heroBadge}</span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl lg:text-[2.25rem] leading-[1.25] font-serif font-normal text-stone-950 tracking-tight text-balance mb-3">

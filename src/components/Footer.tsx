@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { JewelryCategory } from '../types/jewelry';
-import { ShieldCheck, Mail, ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 import { BRAND_CONFIG } from '../data/products';
 import { Language, TRANSLATIONS } from '../i18n/translations';
 
@@ -50,11 +50,6 @@ export const Footer: React.FC<FooterProps> = ({
             <p className="text-xs text-stone-400 max-w-sm leading-relaxed font-light mt-2">
               {t.footerBrandDesc}
             </p>
-
-            <div className="pt-2 flex items-center gap-2 text-xs text-amber-300">
-              <ShieldCheck className="w-4 h-4 text-amber-400" />
-              <span>{t.tarnishFreeGuaranteeTitle}</span>
-            </div>
           </div>
 
           {/* Shop Categories Col */}
@@ -141,14 +136,6 @@ export const Footer: React.FC<FooterProps> = ({
                   className="hover:text-white transition-colors cursor-pointer text-left rtl:text-right"
                 >
                   {t.viewSizeGuide}
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={onOpenScience}
-                  className="hover:text-white transition-colors cursor-pointer text-left rtl:text-right"
-                >
-                  {t.tarnishFreeGuaranteeTitle}
                 </button>
               </li>
               <li>
