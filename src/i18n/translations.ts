@@ -521,7 +521,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     enterEmail: 'Enter your email',
     subscribedMsg: "You're subscribed to The Glow.",
     copyrightNotice: 'The Taté Glow. Your Daily Dose of Glow. All rights reserved.',
-    footerDeliveryNotice: 'Fast Courier Delivery Across Egypt · Card, Cash on Delivery & InstaPay',
+    footerDeliveryNotice: 'Fast Courier Delivery Across Egypt · Card & Cash on Delivery',
 
     // Language Toggle
     languageLabel: 'Language',

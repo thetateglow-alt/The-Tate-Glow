@@ -333,13 +333,6 @@ export default function App() {
         wishlistCount={wishlist.length}
         onOpenCart={() => setIsCartOpen(true)}
         onOpenWishlist={() => setIsWishlistOpen(true)}
-        searchQuery={searchQuery}
-        onSearchChange={(q) => {
-          setSearchQuery(q);
-          if (q.trim()) {
-            scrollToCatalog();
-          }
-        }}
         currentUser={currentUser}
         onOpenAuth={() => {
           setIsAuthGateCheckout(false);

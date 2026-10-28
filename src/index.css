@@ -113,3 +113,33 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+/* Infinite Scrolling Top Marquee Banner */
+@keyframes marquee-scroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 28s linear infinite;
+  will-change: transform;
+}
+
+.marquee-container:hover .animate-marquee,
+.marquee-container:focus-within .animate-marquee,
+.marquee-container:active .animate-marquee {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none !important;
+    transform: none !important;
+  }
+}

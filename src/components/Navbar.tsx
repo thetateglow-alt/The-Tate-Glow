@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { User } from 'firebase/auth';
-import { ShoppingBag, Heart, Search, X, Tag, User as UserIcon, LogOut, Package, Sparkles, ChevronDown } from 'lucide-react';
+import { ShoppingBag, Heart, X, Tag, User as UserIcon, LogOut, Package, Sparkles, ChevronDown } from 'lucide-react';
 import { JewelryCategory } from '../types/jewelry';
 import { BRAND_CONFIG } from '../data/products';
 import { Language, TRANSLATIONS } from '../i18n/translations';
@@ -12,8 +12,8 @@ interface NavbarProps {
   wishlistCount: number;
   onOpenCart: () => void;
   onOpenWishlist: () => void;
-  searchQuery: string;
-  onSearchChange: (q: string) => void;
+  searchQuery?: string;
+  onSearchChange?: (q: string) => void;
   lang?: Language;
   currentUser: User | null;
   onOpenAuth: () => void;
@@ -29,15 +29,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   wishlistCount,
   onOpenCart,
   onOpenWishlist,
-  searchQuery,
-  onSearchChange,
   currentUser,
   onOpenAuth,
   onOpenOrders,
   onLogout,
   onPlayFilm,
 }) => {
-  const [showSearchInput, setShowSearchInput] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
@@ -59,22 +56,51 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <header className="sticky top-0 z-40 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-stone-200/80 transition-all duration-200">
-      {/* Promotional Top Announcement Banner */}
+      {/* Promotional Top Announcement Banner - Infinite Marquee */}
       {showBanner && (
-        <div className="bg-stone-900 text-stone-100 text-xs px-4 py-2 flex items-center justify-between tracking-wide">
-          <div className="flex-1 text-center font-normal flex items-center justify-center gap-2">
-            <span className="font-medium text-amber-300 flex items-center gap-1">
-              <Tag className="w-3 h-3 inline" />
-            </span>
-            <span>{t.bundleOfferTop}</span>
+        <div className="relative bg-stone-900 text-stone-100 text-xs py-2 overflow-hidden marquee-container select-none tracking-wide border-b border-stone-800/80">
+          {/* Left subtle fade gradient mask */}
+          <div className="absolute left-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-r from-stone-900 to-transparent pointer-events-none" />
+
+          {/* Seamless Infinite Scrolling Marquee Track */}
+          <div className="animate-marquee flex items-center cursor-default">
+            {/* Strip 1 */}
+            <div className="flex items-center shrink-0">
+              {[...Array(3)].map((_, i) => (
+                <div key={`offer-a-${i}`} className="flex items-center gap-2 whitespace-nowrap px-4">
+                  <span className="font-medium text-amber-300 flex items-center gap-1 shrink-0">
+                    <Tag className="w-3 h-3 inline" />
+                  </span>
+                  <span className="font-normal">{t.bundleOfferTop}</span>
+                  <span className="text-amber-400/80 font-serif text-[11px] select-none ml-4" aria-hidden="true">✦</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Strip 2 (Exact duplicate for seamless infinite 0% to -50% loop) */}
+            <div className="flex items-center shrink-0" aria-hidden="true">
+              {[...Array(3)].map((_, i) => (
+                <div key={`offer-b-${i}`} className="flex items-center gap-2 whitespace-nowrap px-4">
+                  <span className="font-medium text-amber-300 flex items-center gap-1 shrink-0">
+                    <Tag className="w-3 h-3 inline" />
+                  </span>
+                  <span className="font-normal">{t.bundleOfferTop}</span>
+                  <span className="text-amber-400/80 font-serif text-[11px] select-none ml-4" aria-hidden="true">✦</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <button
-            onClick={() => setShowBanner(false)}
-            aria-label="Dismiss banner"
-            className="text-stone-400 hover:text-white p-0.5 ml-2 transition-colors cursor-pointer"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
+
+          {/* Fixed Right Close (X) Button with gradient backdrop mask */}
+          <div className="absolute right-0 top-0 bottom-0 z-20 flex items-center pl-8 pr-3 bg-gradient-to-l from-stone-900 via-stone-900/95 to-transparent">
+            <button
+              onClick={() => setShowBanner(false)}
+              aria-label="Dismiss banner"
+              className="text-stone-400 hover:text-white p-1 rounded transition-colors cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       )}
 
@@ -165,7 +191,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
         </nav>
 
-        {/* Zone 3: Account/Auth, Search, Wishlist, Cart Drawer Trigger */}
+        {/* Zone 3: Account/Auth, Wishlist, Cart Drawer Trigger */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {/* Customer Authentication & Account Menu */}
           <div className="relative" ref={accountMenuRef}>
@@ -270,41 +296,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </button>
                 </div>
               </div>
-            )}
-          </div>
-
-          {/* Search Trigger / Input */}
-          <div className="relative flex items-center">
-            {showSearchInput ? (
-              <div className="flex items-center bg-white border border-stone-300 rounded-md px-2.5 py-1.5 shadow-sm">
-                <Search className="w-3.5 h-3.5 text-stone-400 mr-2 rtl:ml-2 rtl:mr-0" />
-                <input
-                  type="text"
-                  placeholder={t.searchPlaceholder}
-                  value={searchQuery}
-                  onChange={(e) => onSearchChange(e.target.value)}
-                  autoFocus
-                  className="w-24 sm:w-36 text-xs bg-transparent focus:outline-none text-stone-900 placeholder:text-stone-400"
-                />
-                <button
-                  onClick={() => {
-                    setShowSearchInput(false);
-                    onSearchChange('');
-                  }}
-                  className="text-stone-400 hover:text-stone-700 ml-1 rtl:mr-1 rtl:ml-0 p-0.5"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowSearchInput(true)}
-                aria-label="Open search"
-                className="p-2 text-stone-700 hover:text-stone-950 transition-colors cursor-pointer"
-                title={t.searchPlaceholder}
-              >
-                <Search className="w-4.5 h-4.5" />
-              </button>
             )}
           </div>
 
