@@ -86,15 +86,8 @@ export default function App() {
   const [isAuthGateCheckout, setIsAuthGateCheckout] = useState(false);
   const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
 
-  // Cinematic Intro Animation State (5-8s Cartier-inspired luxury reveal)
-  const [showCinematicIntro, setShowCinematicIntro] = useState<boolean>(() => {
-    try {
-      const seen = sessionStorage.getItem('tate_glow_intro_seen');
-      return !seen;
-    } catch (e) {
-      return true;
-    }
-  });
+  // Cinematic Intro Animation State (triggered via 'The Film' action)
+  const [showCinematicIntro, setShowCinematicIntro] = useState<boolean>(false);
 
   const handleIntroComplete = () => {
     setShowCinematicIntro(false);
