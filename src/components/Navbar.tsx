@@ -4,6 +4,7 @@ import { ShoppingBag, Heart, X, Tag, User as UserIcon, LogOut, Package, Sparkles
 import { JewelryCategory } from '../types/jewelry';
 import { BRAND_CONFIG } from '../data/products';
 import { Language, TRANSLATIONS } from '../i18n/translations';
+import { LuxuryMenuOverlay } from './LuxuryMenuOverlay';
 
 interface NavbarProps {
   activeCategory: JewelryCategory | 'all';
@@ -20,6 +21,9 @@ interface NavbarProps {
   onOpenOrders: () => void;
   onLogout: () => void;
   onPlayFilm?: () => void;
+  onOpenScience?: () => void;
+  onOpenSizeGuide?: () => void;
+  onShopClick?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -34,7 +38,11 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenOrders,
   onLogout,
   onPlayFilm,
+  onOpenScience,
+  onOpenSizeGuide,
+  onShopClick,
 }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
@@ -104,23 +112,71 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       )}
 
-      {/* Top Bar Contract: 3 zones separated by gap-8 (Brand - Nav Links - Primary Action) */}
+      {/* Top Bar Contract: 3 zones separated by gap-8 (Menu + Brand - Nav Links - Primary Action) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4 sm:gap-8">
-        {/* Zone 1: Brand Wordmark + Slogan */}
-        <button
-          onClick={() => {
-            onSelectCategory('all');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          className="text-left cursor-pointer group whitespace-nowrap shrink-0 flex flex-col justify-center"
-        >
-          <span className="text-xl sm:text-2xl font-serif tracking-[0.2em] font-semibold text-stone-950 uppercase group-hover:text-stone-700 transition-colors">
-            {BRAND_CONFIG.name}
-          </span>
-          <span className="text-[10px] tracking-[0.28em] uppercase text-stone-500 font-light mt-0.5">
-            {t.slogan}
-          </span>
-        </button>
+        {/* Zone 1: Animated Hamburger Menu Button + Brand Wordmark */}
+        <div className="flex items-center gap-4 sm:gap-6 shrink-0">
+          {/* Animated Hamburger Button with Morphing 3-Line Icon and Letter-Spaced Label */}
+          <button
+            type="button"
+            onClick={() => setIsMenuOpen((prev) => !prev)}
+            aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={isMenuOpen}
+            className="group flex items-center gap-2.5 py-2 px-2.5 -ml-2 rounded text-stone-900 hover:text-amber-900 transition-colors cursor-pointer select-none focus:outline-none focus-visible:ring-1 focus-visible:ring-stone-900"
+          >
+            {/* Minimal 3-Line Refined Stroke Icon */}
+            <span className="relative w-5 h-3.5 flex flex-col justify-between items-start" aria-hidden="true">
+              {/* Top Line */}
+              <span
+                className={`h-[1.5px] bg-stone-900 group-hover:bg-amber-900 rounded-full transition-all duration-300 ease-out origin-center ${
+                  isMenuOpen
+                    ? 'w-5 translate-y-[6px] rotate-45 !bg-amber-900'
+                    : 'w-5 group-hover:w-3.5'
+                }`}
+              />
+              {/* Middle Line */}
+              <span
+                className={`h-[1.5px] bg-stone-900 group-hover:bg-amber-900 rounded-full transition-all duration-200 ease-out ${
+                  isMenuOpen
+                    ? 'w-5 opacity-0 scale-x-0'
+                    : 'w-3.5 group-hover:w-5'
+                }`}
+              />
+              {/* Bottom Line */}
+              <span
+                className={`h-[1.5px] bg-stone-900 group-hover:bg-amber-900 rounded-full transition-all duration-300 ease-out origin-center ${
+                  isMenuOpen
+                    ? 'w-5 -translate-y-[6px] -rotate-45 !bg-amber-900'
+                    : 'w-4 group-hover:w-2.5'
+                }`}
+              />
+            </span>
+
+            {/* Label "MENU" with elegant letter-spaced typography */}
+            <span className="text-[10px] sm:text-[11px] uppercase tracking-[0.24em] font-medium text-stone-900 group-hover:text-amber-900 transition-colors">
+              {isMenuOpen ? 'CLOSE' : 'MENU'}
+            </span>
+          </button>
+
+          {/* Hairline luxury divider */}
+          <span className="w-px h-5 bg-stone-300/80 hidden sm:block" aria-hidden="true" />
+
+          {/* Brand Wordmark + Slogan */}
+          <button
+            onClick={() => {
+              onSelectCategory('all');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="text-left cursor-pointer group whitespace-nowrap shrink-0 flex flex-col justify-center"
+          >
+            <span className="text-xl sm:text-2xl font-serif tracking-[0.2em] font-semibold text-stone-950 uppercase group-hover:text-stone-700 transition-colors">
+              {BRAND_CONFIG.name}
+            </span>
+            <span className="text-[10px] tracking-[0.28em] uppercase text-stone-500 font-light mt-0.5">
+              {t.slogan}
+            </span>
+          </button>
+        </div>
 
         {/* Zone 2: Navigation Links */}
         <nav className="hidden lg:flex items-center gap-6 xl:gap-7 text-xs tracking-[0.16em] uppercase font-medium text-stone-600">
@@ -362,6 +418,28 @@ export const Navbar: React.FC<NavbarProps> = ({
           {t.earrings}
         </button>
       </div>
+
+      {/* Luxury Full-Screen Animated Navigation Overlay */}
+      <LuxuryMenuOverlay
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        onSelectCategory={onSelectCategory}
+        onShopClick={() => {
+          if (onShopClick) {
+            onShopClick();
+          } else {
+            const el = document.getElementById('catalog-section');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }
+        }}
+        onOpenScience={onOpenScience}
+        onOpenSizeGuide={onOpenSizeGuide}
+        onOpenWishlist={onOpenWishlist}
+        onOpenOrders={onOpenOrders}
+        onOpenAuth={onOpenAuth}
+        currentUser={currentUser}
+        onPlayFilm={onPlayFilm}
+      />
     </header>
   );
 };

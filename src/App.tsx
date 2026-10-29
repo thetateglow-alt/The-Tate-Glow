@@ -345,6 +345,9 @@ export default function App() {
           showToast('Signed out successfully');
         }}
         onPlayFilm={handleReplayIntro}
+        onShopClick={scrollToCatalog}
+        onOpenScience={() => setIsScienceOpen(true)}
+        onOpenSizeGuide={() => setIsSizeGuideOpen(true)}
       />
 
       <main className={`flex-1 transition-all duration-700 ${showCinematicIntro ? 'opacity-90 filter blur-[0.5px]' : 'opacity-100 filter-none'}`}>

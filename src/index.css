@@ -83,6 +83,17 @@
   }
 }
 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .animate-shimmer-sweep {
   background-size: 200% auto;
   animation: shimmer-sweep 3s ease-in-out infinite;
