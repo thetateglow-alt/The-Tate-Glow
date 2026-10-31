@@ -112,61 +112,10 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       )}
 
-      {/* Top Bar Contract: 3 zones separated by gap-8 (Menu + Brand - Nav Links - Primary Action) */}
+      {/* Top Bar Contract: 3 zones separated by gap-8 (Brand Wordmark - Nav Links with Menu - Primary Action) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4 sm:gap-8">
-        {/* Zone 1: Animated Hamburger Menu Button + Brand Wordmark */}
-        <div className="flex items-center gap-4 sm:gap-6 shrink-0">
-          {/* Animated Hamburger Button with Morphing 3-Line Icon and Letter-Spaced Label */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setIsMenuOpen((prev) => !prev);
-            }}
-            aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-            aria-expanded={isMenuOpen}
-            aria-controls="luxury-nav-overlay"
-            className="group flex items-center gap-2.5 py-2.5 px-2.5 sm:px-3 -ml-2 rounded-md text-stone-900 hover:text-amber-900 hover:bg-stone-200/50 active:bg-stone-200/80 transition-all cursor-pointer select-none focus:outline-none focus-visible:ring-1 focus-visible:ring-stone-900 min-h-[44px] touch-manipulation"
-          >
-            {/* Minimal 3-Line Refined Stroke Icon that smoothly animates into X */}
-            <span className="relative w-5 h-4 flex flex-col justify-between items-center" aria-hidden="true">
-              {/* Top Line */}
-              <span
-                className={`h-[1.5px] bg-stone-950 group-hover:bg-amber-900 rounded-full transition-all duration-300 ease-in-out origin-center ${
-                  isMenuOpen
-                    ? 'w-5 translate-y-[7.25px] rotate-45 !bg-amber-900'
-                    : 'w-5 group-hover:w-4'
-                }`}
-              />
-              {/* Middle Line */}
-              <span
-                className={`h-[1.5px] bg-stone-950 group-hover:bg-amber-900 rounded-full transition-all duration-200 ease-in-out ${
-                  isMenuOpen
-                    ? 'w-5 opacity-0 -translate-x-1.5'
-                    : 'w-3.5 group-hover:w-5'
-                }`}
-              />
-              {/* Bottom Line */}
-              <span
-                className={`h-[1.5px] bg-stone-950 group-hover:bg-amber-900 rounded-full transition-all duration-300 ease-in-out origin-center ${
-                  isMenuOpen
-                    ? 'w-5 -translate-y-[7.25px] -rotate-45 !bg-amber-900'
-                    : 'w-5 group-hover:w-3.5'
-                }`}
-              />
-            </span>
-
-            {/* Label "MENU" with elegant letter-spaced typography */}
-            <span className="text-[10px] sm:text-[11px] uppercase tracking-[0.24em] font-medium text-stone-900 group-hover:text-amber-900 transition-colors">
-              {isMenuOpen ? 'CLOSE' : 'MENU'}
-            </span>
-          </button>
-
-          {/* Hairline luxury divider */}
-          <span className="w-px h-5 bg-stone-300/80 hidden sm:block" aria-hidden="true" />
-
-          {/* Brand Wordmark + Slogan */}
+        {/* Zone 1: Brand Wordmark + Slogan */}
+        <div className="flex items-center shrink-0">
           <button
             onClick={() => {
               onSelectCategory('all');
@@ -183,8 +132,55 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         </div>
 
-        {/* Zone 2: Navigation Links */}
-        <nav className="hidden lg:flex items-center gap-6 xl:gap-7 text-xs tracking-[0.16em] uppercase font-medium text-stone-600">
+        {/* Zone 2: Navigation Links with Menu Button directly beside All Pieces */}
+        <nav className="hidden lg:flex items-center gap-5 xl:gap-6 text-xs tracking-[0.16em] uppercase font-medium text-stone-600">
+          {/* Animated Hamburger Menu Button positioned beside All Pieces on the same line */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsMenuOpen((prev) => !prev);
+            }}
+            aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={isMenuOpen}
+            aria-controls="luxury-nav-overlay"
+            className="group flex items-center gap-2 py-1.5 px-2.5 -ml-1 rounded-md text-stone-900 hover:text-amber-900 hover:bg-stone-200/50 active:bg-stone-200/80 transition-all cursor-pointer select-none focus:outline-none focus-visible:ring-1 focus-visible:ring-stone-900"
+          >
+            {/* Minimal 3-Line Refined Stroke Icon that smoothly animates into X */}
+            <span className="relative w-4 h-3.5 flex flex-col justify-between items-center" aria-hidden="true">
+              <span
+                className={`h-[1.5px] bg-stone-950 group-hover:bg-amber-900 rounded-full transition-all duration-300 ease-in-out origin-center ${
+                  isMenuOpen
+                    ? 'w-4 translate-y-[6px] rotate-45 !bg-amber-900'
+                    : 'w-4 group-hover:w-3.5'
+                }`}
+              />
+              <span
+                className={`h-[1.5px] bg-stone-950 group-hover:bg-amber-900 rounded-full transition-all duration-200 ease-in-out ${
+                  isMenuOpen
+                    ? 'w-4 opacity-0 -translate-x-1'
+                    : 'w-3 group-hover:w-4'
+                }`}
+              />
+              <span
+                className={`h-[1.5px] bg-stone-950 group-hover:bg-amber-900 rounded-full transition-all duration-300 ease-in-out origin-center ${
+                  isMenuOpen
+                    ? 'w-4 -translate-y-[6px] -rotate-45 !bg-amber-900'
+                    : 'w-4 group-hover:w-3'
+                }`}
+              />
+            </span>
+
+            {/* Label "MENU" with elegant letter-spaced typography */}
+            <span className="text-[11px] uppercase tracking-[0.22em] font-medium text-stone-900 group-hover:text-amber-900 transition-colors">
+              {isMenuOpen ? 'CLOSE' : 'MENU'}
+            </span>
+          </button>
+
+          {/* Hairline luxury divider */}
+          <span className="w-px h-3.5 bg-stone-300/80 shrink-0" aria-hidden="true" />
+
           <button
             onClick={() => onSelectCategory('all')}
             className={`cursor-pointer transition-colors whitespace-nowrap shrink-0 hover:text-stone-950 relative py-1 ${
@@ -390,8 +386,45 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      {/* Mobile Category Secondary Strip */}
-      <div className="lg:hidden border-t border-stone-200/60 overflow-x-auto no-scrollbar py-2 px-4 flex items-center gap-4 text-xs tracking-wider uppercase font-medium text-stone-600">
+      {/* Mobile Category Secondary Strip: Menu button beside All Pieces in the same line */}
+      <div className="lg:hidden border-t border-stone-200/60 overflow-x-auto no-scrollbar py-2 px-4 flex items-center gap-3.5 text-xs tracking-wider uppercase font-medium text-stone-600">
+        {/* Animated Hamburger Menu Button beside All Pieces on mobile */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsMenuOpen((prev) => !prev);
+          }}
+          aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-expanded={isMenuOpen}
+          aria-controls="luxury-nav-overlay"
+          className="group flex items-center gap-1.5 py-1 px-2.5 rounded bg-stone-100 hover:bg-stone-200 active:bg-stone-200/80 text-stone-900 hover:text-amber-900 transition-all whitespace-nowrap shrink-0 cursor-pointer select-none"
+        >
+          <span className="relative w-3.5 h-3 flex flex-col justify-between items-center" aria-hidden="true">
+            <span
+              className={`h-[1.5px] bg-stone-950 rounded-full transition-all duration-300 origin-center ${
+                isMenuOpen ? 'w-3.5 translate-y-[5.25px] rotate-45 !bg-amber-900' : 'w-3.5'
+              }`}
+            />
+            <span
+              className={`h-[1.5px] bg-stone-950 rounded-full transition-all duration-200 ${
+                isMenuOpen ? 'w-3.5 opacity-0' : 'w-2.5'
+              }`}
+            />
+            <span
+              className={`h-[1.5px] bg-stone-950 rounded-full transition-all duration-300 origin-center ${
+                isMenuOpen ? 'w-3.5 -translate-y-[5.25px] -rotate-45 !bg-amber-900' : 'w-3.5'
+              }`}
+            />
+          </span>
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-stone-900">
+            {isMenuOpen ? 'CLOSE' : 'MENU'}
+          </span>
+        </button>
+
+        <span className="w-px h-3.5 bg-stone-300/80 shrink-0" aria-hidden="true" />
+
         <button
           onClick={() => onSelectCategory('all')}
           className={`whitespace-nowrap shrink-0 py-1 ${activeCategory === 'all' ? 'text-stone-950 font-bold border-b border-stone-950' : ''}`}
