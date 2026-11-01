@@ -112,7 +112,7 @@ export default function App() {
   const loadCatalogProducts = async () => {
     try {
       const prods = await fetchAdminProducts();
-      if (prods && prods.length > 0) {
+      if (Array.isArray(prods)) {
         setCatalogProducts(prods.filter((p) => p.status !== 'archived'));
       }
     } catch (e) {
@@ -141,16 +141,14 @@ export default function App() {
     const unsubscribeProducts = onSnapshot(
       collection(db, 'products'),
       (snapshot) => {
-        if (!snapshot.empty) {
-          const prods: Product[] = [];
-          snapshot.forEach((docSnap) => {
-            const data = docSnap.data() as Product & { status?: string };
-            if (data.status !== 'archived') {
-              prods.push({ ...data, id: docSnap.id });
-            }
-          });
-          setCatalogProducts(prods);
-        }
+        const prods: Product[] = [];
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data() as Product & { status?: string };
+          if (data.status !== 'archived') {
+            prods.push({ ...data, id: docSnap.id });
+          }
+        });
+        setCatalogProducts(prods);
       },
       (err) => {
         console.warn('Real-time catalog listener note:', err);

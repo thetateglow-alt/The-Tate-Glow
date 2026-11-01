@@ -7,12 +7,13 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Admin verification: Document in 'admins' with ID equal to user's auth UID and role == 'admin'
+    // Admin verification: Any user listed in the admins collection (by UID or email), adminUsers collection, or the store owner email
     function isAdmin() {
       return isAuthenticated() && (
-        (exists(/databases/$(database)/documents/admins/$(request.auth.uid)) &&
-         get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'admin') ||
-        request.auth.token.email == 'thetateglow@gmail.com'
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (request.auth.token.email != null && exists(/databases/$(database)/documents/admins/$(request.auth.token.email))) ||
+        (request.auth.token.email != null && exists(/databases/$(database)/documents/adminUsers/$(request.auth.token.email))) ||
+        (request.auth.token.email != null && request.auth.token.email == 'thetateglow@gmail.com')
       );
     }
 
@@ -22,7 +23,7 @@ service cloud.firestore {
       allow read: if isAdmin();
     }
 
-    // 2. Products collection: Anyone can read the products catalog; admins can manage; checkout can decrement stock
+    // 2. Products collection: Anyone can read the products catalog; users listed in admins can create, update and delete; checkout can decrement stock
     match /products/{productId} {
       allow read: if true;
       allow create, delete: if isAdmin();
@@ -92,6 +93,12 @@ service cloud.firestore {
     // 11. General Audit Logs: Admin only
     match /auditLogs/{logId} {
       allow read, write: if isAdmin();
+    }
+
+    // 12. System status & seed flags: Public read, admin write
+    match /system/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // Default deny for all other paths

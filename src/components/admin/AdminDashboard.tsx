@@ -172,6 +172,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     expiresDays: 60
   });
 
+  // Permanent Delete Product Modal State
+  const [productToDelete, setProductToDelete] = useState<AdminProduct | null>(null);
+  const [isDeletingProduct, setIsDeletingProduct] = useState(false);
+  const [deleteErrorMessage, setDeleteErrorMessage] = useState<string | null>(null);
+
   const adminEmail = activeUser?.email || currentUser?.email || STORE_OWNER_EMAIL;
 
   const notify = (text: string, type: 'success' | 'error' = 'success') => {
@@ -481,15 +486,43 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
-  const handleDeleteProduct = async (productId: string) => {
-    if (!window.confirm('Are you sure you want to delete this product?')) return;
-    const res = await deleteAdminProduct(productId, adminEmail);
-    if (res.success) {
-      notify('Product deleted');
-      await loadData();
-      if (onProductsUpdated) onProductsUpdated();
-    } else {
-      notify(res.error || 'Failed to delete product', 'error');
+  const handleDeleteProduct = (product: AdminProduct) => {
+    setDeleteErrorMessage(null);
+    setProductToDelete(product);
+  };
+
+  const handleConfirmDeleteProduct = async () => {
+    if (!productToDelete) return;
+    setIsDeletingProduct(true);
+    setDeleteErrorMessage(null);
+
+    const targetId = productToDelete.id;
+    const targetName = productToDelete.name;
+
+    try {
+      const res = await deleteAdminProduct(targetId, adminEmail);
+      if (res.success) {
+        // 5. Remove the deleted product from the admin list immediately without needing a refresh
+        setProducts((prev) => prev.filter((p) => p.id !== targetId));
+        setProductToDelete(null);
+        notify(`"${targetName}" permanently deleted from catalog.`);
+        
+        // Remove from shop page immediately without needing a refresh
+        if (onProductsUpdated) {
+          onProductsUpdated();
+        }
+      } else {
+        // 2. Show an error message if the delete fails, instead of failing silently
+        const errText = res.error || 'Failed to delete product from database.';
+        setDeleteErrorMessage(errText);
+        notify(errText, 'error');
+      }
+    } catch (err: any) {
+      const errText = err?.message || 'Error executing delete request.';
+      setDeleteErrorMessage(errText);
+      notify(errText, 'error');
+    } finally {
+      setIsDeletingProduct(false);
     }
   };
 
@@ -1371,9 +1404,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                 <Edit className="w-3.5 h-3.5 inline" />
                               </button>
                               <button
-                                onClick={() => handleDeleteProduct(p.id)}
-                                title="Delete"
-                                className="p-1.5 text-stone-400 hover:text-red-700 rounded hover:bg-red-50 cursor-pointer"
+                                onClick={() => handleDeleteProduct(p)}
+                                title="Delete Product"
+                                className="p-1.5 text-stone-400 hover:text-red-700 rounded hover:bg-red-50 cursor-pointer transition-colors"
                               >
                                 <Trash2 className="w-3.5 h-3.5 inline" />
                               </button>
@@ -2460,6 +2493,109 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Permanent Product Delete Confirmation Popup Modal */}
+      {productToDelete && (
+        <div className="fixed inset-0 z-[100] bg-stone-950/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full border border-stone-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="p-5 border-b border-stone-100 flex items-start gap-3.5 bg-red-50/70">
+              <div className="w-10 h-10 rounded-full bg-red-100 border border-red-200 flex items-center justify-center text-red-700 shrink-0">
+                <Trash2 className="w-5 h-5 text-red-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-serif text-lg font-bold text-stone-950">
+                  Permanently Delete Product?
+                </h3>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  This action will permanently delete the document from Firestore.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  if (!isDeletingProduct) {
+                    setProductToDelete(null);
+                    setDeleteErrorMessage(null);
+                  }
+                }}
+                disabled={isDeletingProduct}
+                className="text-stone-400 hover:text-stone-700 p-1 rounded-full cursor-pointer disabled:opacity-50"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Product Summary & Warning */}
+            <div className="p-5 space-y-4">
+              <div className="p-3 bg-stone-50 rounded-lg border border-stone-200 flex items-center gap-3">
+                <img
+                  src={productToDelete.image}
+                  alt={productToDelete.name}
+                  className="w-12 h-12 rounded object-cover border border-stone-200 bg-white shrink-0"
+                />
+                <div className="min-w-0 flex-1 text-left">
+                  <h4 className="text-xs font-semibold text-stone-900 truncate">
+                    {productToDelete.name}
+                  </h4>
+                  <div className="flex items-center gap-2 text-[11px] text-stone-500 mt-0.5">
+                    <span className="font-mono">{productToDelete.sku || productToDelete.id}</span>
+                    <span>·</span>
+                    <span className="font-semibold text-stone-800">{formatEGP(productToDelete.price, 'en')}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Error Message if Delete Fails */}
+              {deleteErrorMessage && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-800 flex items-start gap-2 text-left">
+                  <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold block">Error Deleting Document:</span>
+                    <span className="text-[11px] text-red-700 break-words">{deleteErrorMessage}</span>
+                  </div>
+                </div>
+              )}
+
+              <p className="text-xs text-stone-600 leading-relaxed text-left">
+                Are you sure you want to permanently delete <strong className="text-stone-900">{productToDelete.name}</strong>? It will be deleted from the database (<code className="text-[10px] bg-stone-100 px-1 py-0.5 rounded font-mono">products/{productToDelete.id}</code>) and will immediately disappear from both the admin table and the storefront.
+              </p>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="p-4 bg-stone-50 border-t border-stone-100 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setProductToDelete(null);
+                  setDeleteErrorMessage(null);
+                }}
+                disabled={isDeletingProduct}
+                className="px-4 py-2 text-xs font-medium text-stone-700 hover:text-stone-950 bg-white border border-stone-300 rounded hover:bg-stone-50 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDeleteProduct}
+                disabled={isDeletingProduct}
+                className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white bg-red-600 hover:bg-red-700 rounded transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-50"
+              >
+                {isDeletingProduct ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete Permanently</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

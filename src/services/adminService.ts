@@ -176,138 +176,106 @@ export async function initializeStoreBackend(): Promise<void> {
       });
     }
 
-    // 2. Ensure initial products exist
-    const productsCol = collection(db, 'products');
-    const productsSnap = await getDocs(productsCol);
-    if (productsSnap.empty) {
-      console.log('Seeding initial products into Firestore...');
-      const batch = writeBatch(db);
+    // 2. Ensure initial products exist ONLY on very first installation, never re-seeding deleted items
+    const seedMarkerRef = doc(db, 'system', 'catalog_seeded');
+    const seedMarkerSnap = await getDoc(seedMarkerRef);
 
-      for (const p of PRODUCTS) {
-        const prodRef = doc(db, 'products', p.id);
-        const adminProduct: AdminProduct = {
-          ...p,
-          sku: p.id.toUpperCase(),
-          status: 'published',
-          costPrice: Math.round(p.price * 0.45), // baseline 45% production cost
-          variants: (p.specs?.sizes || ['Standard']).map((size, index) => ({
-            id: `${p.id}-${index}`,
-            size,
-            sku: `${p.id.toUpperCase()}-${index + 1}`,
-            stock: p.stock ?? 12,
-            price: p.price
-          })),
-          seoTitle: `${p.name} | The Taté Glow`,
-          seoDescription: p.description.slice(0, 155),
-          slug: p.id,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        batch.set(prodRef, adminProduct);
+    if (!seedMarkerSnap.exists()) {
+      const productsCol = collection(db, 'products');
+      const productsSnap = await getDocs(productsCol);
+      if (productsSnap.empty) {
+        console.log('Performing one-time initial products seed into Firestore...');
+        const batch = writeBatch(db);
 
-        // Also record initial inventory stock
-        const invRef = doc(db, 'inventory', p.id);
-        batch.set(invRef, {
-          productId: p.id,
-          productName: p.name,
-          sku: p.id.toUpperCase(),
-          stock: p.stock ?? 12,
-          lowStockThreshold: 5,
-          lastRestockedAt: new Date().toISOString()
-        });
-      }
-
-      // Initial Welcome Discount
-      const welcomeDiscountRef = doc(db, 'discounts', 'GLOW10');
-      const discountData: DiscountCode = {
-        id: 'GLOW10',
-        code: 'GLOW10',
-        discountType: 'percentage',
-        value: 10,
-        minPurchase: 500,
-        usedCount: 0,
-        startsAt: new Date().toISOString(),
-        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-        active: true,
-        createdAt: new Date().toISOString()
-      };
-      batch.set(welcomeDiscountRef, discountData);
-
-      // Initial Homepage Content
-      const hpRef = doc(db, 'homepageContent', 'config');
-      const hpData: HomepageContentConfig = {
-        announcementBar: {
-          en: 'Pure Stainless Steel · 100% Waterproof & Tarnish-Free · Free Express Delivery Over 1,200 EGP',
-          ar: 'Pure Stainless Steel · 100% Waterproof & Tarnish-Free · Free Express Delivery Over 1,200 EGP',
-          active: true
-        },
-        hero: {
-          headlineEn: 'Effortless shine for her.',
-          headlineAr: 'Effortless shine for her.',
-          subtitleEn: 'Minimalist everyday jewelry cast in pure stainless steel. 100% waterproof, hypoallergenic, and made to never take off.',
-          subtitleAr: 'Minimalist everyday jewelry cast in pure stainless steel. 100% waterproof, hypoallergenic, and made to never take off.',
-          badgeEn: '100% Pure Stainless Steel',
-          badgeAr: '100% Pure Stainless Steel',
-          ctaButtonTextEn: 'Explore Capsule',
-          ctaButtonTextAr: 'Explore Capsule'
-        },
-        brandStory: {
-          titleEn: 'Your Daily Dose of Glow',
-          titleAr: 'Your Daily Dose of Glow',
-          descriptionEn: 'Designed in Cairo for women who want permanent jewelry luxury that stands up to daily showers, sea water, and skincare.',
-          descriptionAr: 'Designed in Cairo for women who want permanent jewelry luxury that stands up to daily showers, sea water, and skincare.'
-        },
-        featuredCategoryIds: ['necklace', 'bracelet', 'ring', 'earrings'],
-        featuredProductIds: ['tate-aura-herringbone', 'tate-arc-cuff', 'tate-dome-signet-ring', 'tate-goutte-teardrop-huggies'],
-        updatedAt: new Date().toISOString(),
-        updatedBy: STORE_OWNER_EMAIL
-      };
-      batch.set(hpRef, hpData);
-
-      await batch.commit();
-      console.log('Seeding completed successfully.');
-    } else {
-      // Ensure any newly introduced products (e.g. Crystal Drop Tennis Necklace) exist in Firestore
-      for (const p of PRODUCTS) {
-        try {
+        for (const p of PRODUCTS) {
           const prodRef = doc(db, 'products', p.id);
-          const prodSnap = await getDoc(prodRef);
-          if (!prodSnap.exists()) {
-            console.log(`Seeding product ${p.id} into Firestore...`);
-            const adminProduct: AdminProduct = {
-              ...p,
-              sku: p.id.toUpperCase(),
-              status: 'published',
-              costPrice: Math.round(p.price * 0.45),
-              variants: (p.specs?.sizes || ['Standard']).map((size, index) => ({
-                id: `${p.id}-${index}`,
-                size,
-                sku: `${p.id.toUpperCase()}-${index + 1}`,
-                stock: p.stock ?? 1,
-                price: p.price
-              })),
-              seoTitle: `${p.name} | The Taté Glow`,
-              seoDescription: p.description.slice(0, 155),
-              slug: p.id,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
-            };
-            await setDoc(prodRef, adminProduct);
+          const adminProduct: AdminProduct = {
+            ...p,
+            sku: p.id.toUpperCase(),
+            status: 'published',
+            costPrice: Math.round(p.price * 0.45),
+            variants: (p.specs?.sizes || ['Standard']).map((size, index) => ({
+              id: `${p.id}-${index}`,
+              size,
+              sku: `${p.id.toUpperCase()}-${index + 1}`,
+              stock: p.stock ?? 12,
+              price: p.price
+            })),
+            seoTitle: `${p.name} | The Taté Glow`,
+            seoDescription: p.description.slice(0, 155),
+            slug: p.id,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          batch.set(prodRef, adminProduct);
 
-            const invRef = doc(db, 'inventory', p.id);
-            await setDoc(invRef, {
-              productId: p.id,
-              productName: p.name,
-              sku: p.id.toUpperCase(),
-              stock: p.stock ?? 1,
-              lowStockThreshold: 1,
-              lastRestockedAt: new Date().toISOString()
-            });
-          }
-        } catch (seedErr) {
-          console.warn(`Seed product check for ${p.id} notice:`, seedErr);
+          const invRef = doc(db, 'inventory', p.id);
+          batch.set(invRef, {
+            productId: p.id,
+            productName: p.name,
+            sku: p.id.toUpperCase(),
+            stock: p.stock ?? 12,
+            lowStockThreshold: 5,
+            lastRestockedAt: new Date().toISOString()
+          });
         }
+
+        // Initial Welcome Discount
+        const welcomeDiscountRef = doc(db, 'discounts', 'GLOW10');
+        const discountData: DiscountCode = {
+          id: 'GLOW10',
+          code: 'GLOW10',
+          discountType: 'percentage',
+          value: 10,
+          minPurchase: 500,
+          usedCount: 0,
+          startsAt: new Date().toISOString(),
+          expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+          active: true,
+          createdAt: new Date().toISOString()
+        };
+        batch.set(welcomeDiscountRef, discountData);
+
+        // Initial Homepage Content
+        const hpRef = doc(db, 'homepageContent', 'config');
+        const hpData: HomepageContentConfig = {
+          announcementBar: {
+            en: 'Pure Stainless Steel · 100% Waterproof & Tarnish-Free · Free Express Delivery Over 1,200 EGP',
+            ar: 'Pure Stainless Steel · 100% Waterproof & Tarnish-Free · Free Express Delivery Over 1,200 EGP',
+            active: true
+          },
+          hero: {
+            headlineEn: 'Effortless shine for her.',
+            headlineAr: 'Effortless shine for her.',
+            subtitleEn: 'Minimalist everyday jewelry cast in pure stainless steel. 100% waterproof, hypoallergenic, and made to never take off.',
+            subtitleAr: 'Minimalist everyday jewelry cast in pure stainless steel. 100% waterproof, hypoallergenic, and made to never take off.',
+            badgeEn: '100% Pure Stainless Steel',
+            badgeAr: '100% Pure Stainless Steel',
+            ctaButtonTextEn: 'Explore Capsule',
+            ctaButtonTextAr: 'Explore Capsule'
+          },
+          brandStory: {
+            titleEn: 'Your Daily Dose of Glow',
+            titleAr: 'Your Daily Dose of Glow',
+            descriptionEn: 'Designed in Cairo for women who want permanent jewelry luxury that stands up to daily showers, sea water, and skincare.',
+            descriptionAr: 'Designed in Cairo for women who want permanent jewelry luxury that stands up to daily showers, sea water, and skincare.'
+          },
+          featuredCategoryIds: ['necklace', 'bracelet', 'ring', 'earrings'],
+          featuredProductIds: ['tate-aura-herringbone', 'tate-arc-cuff', 'tate-dome-signet-ring', 'tate-goutte-teardrop-huggies'],
+          updatedAt: new Date().toISOString(),
+          updatedBy: STORE_OWNER_EMAIL
+        };
+        batch.set(hpRef, hpData);
+
+        await batch.commit();
+        console.log('Initial catalog seeding completed.');
       }
+
+      // Mark system as seeded so deleted products NEVER get re-seeded on page refresh
+      await setDoc(seedMarkerRef, {
+        seeded: true,
+        seededAt: new Date().toISOString()
+      }).catch(() => {});
     }
   } catch (err) {
     console.warn('Store backend initialization notice:', err);
@@ -322,31 +290,15 @@ export async function fetchAdminProducts(): Promise<AdminProduct[]> {
   try {
     const productsCol = collection(db, 'products');
     const snapshot = await getDocs(productsCol);
-    if (!snapshot.empty) {
-      const items: AdminProduct[] = [];
-      snapshot.forEach((d) => {
-        items.push({ ...(d.data() as AdminProduct), id: d.id });
-      });
-      return items;
-    }
+    const items: AdminProduct[] = [];
+    snapshot.forEach((d) => {
+      items.push({ ...(d.data() as AdminProduct), id: d.id });
+    });
+    return items;
   } catch (err) {
     console.warn('Failed to fetch admin products from Firestore:', err);
+    return [];
   }
-
-  // Fallback to local catalog mapped to AdminProduct format
-  return PRODUCTS.map((p) => ({
-    ...p,
-    sku: p.id.toUpperCase(),
-    status: 'published' as const,
-    costPrice: Math.round(p.price * 0.45),
-    variants: (p.specs?.sizes || ['Standard']).map((size, idx) => ({
-      id: `${p.id}-${idx}`,
-      size,
-      sku: `${p.id.toUpperCase()}-${idx + 1}`,
-      stock: p.stock ?? 12,
-      price: p.price
-    }))
-  }));
 }
 
 export async function checkSkuUnique(sku: string, excludeProductId?: string): Promise<boolean> {
