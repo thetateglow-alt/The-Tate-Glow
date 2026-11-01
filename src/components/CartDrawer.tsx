@@ -222,8 +222,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                           {item.quantity}
                         </span>
                         <button
-                          onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                          className="px-2 py-0.5 text-stone-600 hover:text-stone-900 text-xs cursor-pointer"
+                          onClick={() => {
+                            const maxStock = item.product.stock !== undefined ? item.product.stock : 99;
+                            if (item.quantity < maxStock) {
+                              onUpdateQuantity(item.id, item.quantity + 1);
+                            }
+                          }}
+                          disabled={item.product.stock !== undefined && item.quantity >= item.product.stock}
+                          className="px-2 py-0.5 text-stone-600 hover:text-stone-900 text-xs cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                          title={item.product.stock !== undefined && item.quantity >= item.product.stock ? 'Maximum available stock reached' : 'Add another piece'}
                         >
                           +
                         </button>

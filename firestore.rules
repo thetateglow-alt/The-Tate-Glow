@@ -22,10 +22,16 @@ service cloud.firestore {
       allow read: if isAdmin();
     }
 
-    // 2. Products collection: Anyone can read the products catalog; only admins can create, update, delete
+    // 2. Products collection: Anyone can read the products catalog; admins can manage; checkout can decrement stock
     match /products/{productId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock', 'updatedAt']) &&
+        request.resource.data.stock is number &&
+        request.resource.data.stock >= 0 &&
+        request.resource.data.stock <= resource.data.stock
+      );
     }
 
     // 3. Orders collection: Customers (including anonymous guests) can create and read/write their own orders; admins can manage all orders
@@ -48,10 +54,15 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // 6. Inventory: Anyone can view stock; only admins can modify
+    // 6. Inventory: Anyone can view stock; admins can manage; checkout can decrement stock
     match /inventory/{productId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock', 'lastRestockedAt', 'status']) &&
+        request.resource.data.stock is number &&
+        request.resource.data.stock >= 0
+      );
     }
 
     // 7. Inventory Audit Logs: Admin only

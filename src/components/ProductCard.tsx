@@ -61,7 +61,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Visual Badge Indicator: Out of Stock */}
         {isOutOfStock && (
           <div className="absolute top-3 left-3 rtl:left-auto rtl:right-3 z-10 text-[10px] uppercase tracking-[0.18em] font-semibold text-stone-700 bg-stone-100/95 border border-stone-300/90 backdrop-blur-xs px-2.5 py-1 rounded shadow-xs">
-            {t.outOfStock}
+            {t.soldOut}
           </div>
         )}
 
@@ -191,7 +191,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             <div className="mt-2.5 p-2 bg-stone-100/90 border border-stone-200/80 rounded text-xs text-stone-500 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-stone-400 shrink-0" />
               <div className="flex-1">
-                <span className="font-semibold text-stone-700 block text-[11px]">{t.outOfStock}</span>
+                <span className="font-semibold text-stone-700 block text-[11px]">{t.soldOut}</span>
                 <span className="text-[10px] text-stone-400 block">
                   Currently unavailable for purchase
                 </span>
@@ -239,7 +239,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             {isOutOfStock ? (
               <>
                 <AlertCircle className="w-3.5 h-3.5 text-stone-400" />
-                <span>{t.outOfStock}</span>
+                <span>{t.soldOut}</span>
               </>
             ) : (
               <>

@@ -1,4 +1,4 @@
-import { collection, doc, setDoc, getDocs, orderBy, query, where } from 'firebase/firestore';
+import { collection, doc, setDoc, getDocs, getDoc, updateDoc, orderBy, query, where } from 'firebase/firestore';
 import { db } from './firebaseAuth';
 import { PRODUCTS, BRAND_CONFIG } from '../data/products';
 import { calculateBundleDiscount } from '../utils/pricing';
@@ -246,6 +246,39 @@ export async function submitSecureCheckout(payload: CheckoutRequestPayload): Pro
   } catch (firestoreErr: any) {
     console.warn(`[Firestore] Could not save order #${orderId} to 'orders' collection:`, firestoreErr);
     // Even if Firestore hits permission or offline issue, do not crash checkout - local storage will persist it
+  }
+
+  // 8.1. Authoritative Stock Logic: Decrease stock by the quantity ordered
+  for (const orderedItem of resolvedItems) {
+    try {
+      const prodRef = doc(db, 'products', orderedItem.productId);
+      const prodSnap = await getDoc(prodRef);
+      if (prodSnap.exists()) {
+        const prodData = prodSnap.data();
+        const curStock = typeof prodData.stock === 'number' ? prodData.stock : 0;
+        const newStock = Math.max(0, curStock - orderedItem.quantity);
+        await updateDoc(prodRef, {
+          stock: newStock,
+          updatedAt: new Date().toISOString()
+        });
+        console.info(`[Firestore] Decreased stock for ${orderedItem.productId}: ${curStock} -> ${newStock}`);
+      }
+
+      // Also mirror to inventory collection if configured
+      const invRef = doc(db, 'inventory', orderedItem.productId);
+      const invSnap = await getDoc(invRef);
+      if (invSnap.exists()) {
+        const invData = invSnap.data();
+        const curInvStock = typeof invData.stock === 'number' ? invData.stock : 0;
+        const newInvStock = Math.max(0, curInvStock - orderedItem.quantity);
+        await updateDoc(invRef, {
+          stock: newInvStock,
+          lastRestockedAt: new Date().toISOString()
+        });
+      }
+    } catch (stockErr) {
+      console.warn(`[Firestore] Note on stock decrement for ${orderedItem.productId}:`, stockErr);
+    }
   }
 
   // 9. If user is logged in, also mirror to user subcollection

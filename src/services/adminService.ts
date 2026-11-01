@@ -266,6 +266,48 @@ export async function initializeStoreBackend(): Promise<void> {
 
       await batch.commit();
       console.log('Seeding completed successfully.');
+    } else {
+      // Ensure any newly introduced products (e.g. Crystal Drop Tennis Necklace) exist in Firestore
+      for (const p of PRODUCTS) {
+        try {
+          const prodRef = doc(db, 'products', p.id);
+          const prodSnap = await getDoc(prodRef);
+          if (!prodSnap.exists()) {
+            console.log(`Seeding product ${p.id} into Firestore...`);
+            const adminProduct: AdminProduct = {
+              ...p,
+              sku: p.id.toUpperCase(),
+              status: 'published',
+              costPrice: Math.round(p.price * 0.45),
+              variants: (p.specs?.sizes || ['Standard']).map((size, index) => ({
+                id: `${p.id}-${index}`,
+                size,
+                sku: `${p.id.toUpperCase()}-${index + 1}`,
+                stock: p.stock ?? 1,
+                price: p.price
+              })),
+              seoTitle: `${p.name} | The Taté Glow`,
+              seoDescription: p.description.slice(0, 155),
+              slug: p.id,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+            await setDoc(prodRef, adminProduct);
+
+            const invRef = doc(db, 'inventory', p.id);
+            await setDoc(invRef, {
+              productId: p.id,
+              productName: p.name,
+              sku: p.id.toUpperCase(),
+              stock: p.stock ?? 1,
+              lowStockThreshold: 1,
+              lastRestockedAt: new Date().toISOString()
+            });
+          }
+        } catch (seedErr) {
+          console.warn(`Seed product check for ${p.id} notice:`, seedErr);
+        }
+      }
     }
   } catch (err) {
     console.warn('Store backend initialization notice:', err);

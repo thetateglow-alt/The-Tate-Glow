@@ -83,7 +83,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               />
               {isOutOfStock && (
                 <div className="absolute top-3 left-3 rtl:left-auto rtl:right-3 bg-stone-900/90 text-white text-[10px] uppercase tracking-wider font-semibold px-2.5 py-1 rounded shadow-xs">
-                  {t.outOfStock}
+                  {t.soldOut}
                 </div>
               )}
               {isLowStock && (
@@ -134,7 +134,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               {isOutOfStock && (
                 <div className="mb-3 p-2.5 bg-stone-100 border border-stone-200 rounded text-xs text-stone-600 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-stone-400 shrink-0" />
-                  <span className="font-medium">{t.outOfStock}</span>
+                  <span className="font-medium">{t.soldOut}</span>
                 </div>
               )}
 
@@ -296,9 +296,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     {quantity}
                   </span>
                   <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    disabled={isOutOfStock}
-                    className="px-3 py-2 text-stone-600 hover:text-stone-900 transition-colors text-xs font-semibold cursor-pointer"
+                    onClick={() => {
+                      const maxStock = product.stock !== undefined ? product.stock : 99;
+                      if (quantity < maxStock) {
+                        setQuantity(quantity + 1);
+                      }
+                    }}
+                    disabled={isOutOfStock || (product.stock !== undefined && quantity >= product.stock)}
+                    className="px-3 py-2 text-stone-600 hover:text-stone-900 transition-colors text-xs font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     +
                   </button>
@@ -314,7 +319,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       : 'bg-stone-950 text-white hover:bg-stone-800 cursor-pointer shadow-sm'
                   }`}
                 >
-                  {isOutOfStock ? t.outOfStock : `${t.addToBagBtn} · ${formatEGP(product.price * quantity)}`}
+                  {isOutOfStock ? t.soldOut : `${t.addToBagBtn} · ${formatEGP(product.price * quantity)}`}
                 </button>
 
                 {/* Wishlist Toggle */}

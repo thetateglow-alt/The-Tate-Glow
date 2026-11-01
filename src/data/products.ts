@@ -2,6 +2,7 @@ import { Product, Review } from '../types/jewelry';
 
 import heroImg from '../assets/images/tate_glow_hero_1792339556364.jpg';
 import necklaceImg from '../assets/images/tate_necklace_studio_1792339555862.jpg';
+import crystalDropNecklaceImg from '../assets/images/crystal_drop_tennis_necklace.jpeg';
 import braceletImg from '../assets/images/tate_bracelet_cuff_1792339556553.jpg';
 import ringsImg from '../assets/images/tate_rings_collection_1792339557460.jpg';
 import earringsImg from '../assets/images/tate_earrings_hoops_1792339557141.jpg';
@@ -23,6 +24,35 @@ export const BRAND_IMAGES = {
 
 export const PRODUCTS: Product[] = [
   // --- NECKLACES ---
+  {
+    id: 'tate-crystal-drop-tennis-necklace',
+    name: 'Crystal Drop Tennis Necklace',
+    nameAr: 'قلادة تنس الكريستال المتدلي',
+    category: 'necklace',
+    categoryAr: 'سلاسل وقلادات',
+    price: 650,
+    image: crystalDropNecklaceImg,
+    description: '18K gold plated finish zircon crystal stones',
+    descriptionAr: 'تشطيب مطلي بالذهب عيار 18 قيراط مع أحجار كريستال الزركون اللامعة',
+    details: [
+      'Radiant brilliant-cut zircon crystal drop accents',
+      '18K gold plated finish with surgical steel foundation',
+      'Signature fluid drape that lays comfortably on the neckline',
+      'Hypoallergenic, water-resistant, and 100% skin safe'
+    ],
+    specs: {
+      material: '18K Gold Plated Finish & Surgical Stainless Steel',
+      finish: '18K Gold Plated with Brilliant Cut Crystals',
+      waterproof: '100% Waterproof & Tarnish-Resistant',
+      hypoallergenic: true,
+      weight: '12.4g',
+      sizes: ['40cm + 5cm extender']
+    },
+    isNew: true,
+    rating: 5.0,
+    reviewCount: 22,
+    stock: 1
+  },
   {
     id: 'tate-aura-herringbone',
     name: 'Aura Liquid Herringbone Chain',

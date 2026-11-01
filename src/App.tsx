@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { User } from 'firebase/auth';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { CategoryGrid } from './components/CategoryGrid';
@@ -19,7 +20,7 @@ import { Sparkles, ShieldCheck } from 'lucide-react';
 import { calculateBundleDiscount } from './utils/pricing';
 import { useCartReservation } from './hooks/useCartReservation';
 import { Language, TRANSLATIONS } from './i18n/translations';
-import { initAuth, logout } from './services/firebaseAuth';
+import { initAuth, logout, db } from './services/firebaseAuth';
 import { CustomerAuthModal } from './components/CustomerAuthModal';
 import { CustomerOrdersModal } from './components/CustomerOrdersModal';
 import { AdminDashboard } from './components/admin/AdminDashboard';
@@ -136,6 +137,26 @@ export default function App() {
       loadCatalogProducts();
     });
 
+    // Real-time synchronization with Firestore products collection
+    const unsubscribeProducts = onSnapshot(
+      collection(db, 'products'),
+      (snapshot) => {
+        if (!snapshot.empty) {
+          const prods: Product[] = [];
+          snapshot.forEach((docSnap) => {
+            const data = docSnap.data() as Product & { status?: string };
+            if (data.status !== 'archived') {
+              prods.push({ ...data, id: docSnap.id });
+            }
+          });
+          setCatalogProducts(prods);
+        }
+      },
+      (err) => {
+        console.warn('Real-time catalog listener note:', err);
+      }
+    );
+
     // Keyboard shortcut for quick admin access (Ctrl+Shift+A or Alt+A)
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) || (e.altKey && (e.key === 'a' || e.key === 'A'))) {
@@ -148,6 +169,9 @@ export default function App() {
     return () => {
       if (typeof unsubscribe === 'function') {
         unsubscribe();
+      }
+      if (typeof unsubscribeProducts === 'function') {
+        unsubscribeProducts();
       }
       window.removeEventListener('keydown', handleKeyDown);
     };
@@ -215,8 +239,9 @@ export default function App() {
     selectedSize: string = product.specs.sizes[0] || 'Standard',
     quantity: number = 1
   ) => {
-    if (product.stock !== undefined && product.stock <= 0) {
-      showToast('Sorry, this piece is currently out of stock');
+    const maxStock = product.stock !== undefined ? product.stock : 999;
+    if (maxStock <= 0) {
+      showToast('Sorry, this piece is Sold Out');
       return;
     }
 
@@ -225,19 +250,27 @@ export default function App() {
     setCart((prevCart) => {
       const existing = prevCart.find((item) => item.id === compoundId);
       if (existing) {
+        const nextQty = existing.quantity + quantity;
+        if (nextQty > maxStock) {
+          showToast(`Cannot add more: only ${maxStock} in stock`);
+          return prevCart.map((item) =>
+            item.id === compoundId ? { ...item, quantity: maxStock } : item
+          );
+        }
         return prevCart.map((item) =>
           item.id === compoundId
-            ? { ...item, quantity: item.quantity + quantity }
+            ? { ...item, quantity: nextQty }
             : item
         );
       } else {
+        const initialQty = Math.min(quantity, maxStock);
         return [
           ...prevCart,
           {
             id: compoundId,
             product,
             selectedSize,
-            quantity
+            quantity: initialQty
           }
         ];
       }
@@ -253,7 +286,17 @@ export default function App() {
       handleRemoveItem(compoundId);
     } else {
       setCart((prev) =>
-        prev.map((item) => (item.id === compoundId ? { ...item, quantity: newQty } : item))
+        prev.map((item) => {
+          if (item.id === compoundId) {
+            const maxStock = item.product.stock !== undefined ? item.product.stock : 999;
+            if (newQty > maxStock) {
+              showToast(`Only ${maxStock} piece available in stock`);
+              return { ...item, quantity: maxStock };
+            }
+            return { ...item, quantity: newQty };
+          }
+          return item;
+        })
       );
     }
   };
