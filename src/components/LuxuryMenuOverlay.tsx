@@ -14,7 +14,8 @@ import {
   Clock,
   MapPin,
   ChevronRight,
-  ArrowRight
+  ArrowRight,
+  RotateCcw
 } from 'lucide-react';
 import { JewelryCategory } from '../types/jewelry';
 import { BRAND_CONFIG } from '../data/products';
@@ -27,6 +28,8 @@ interface LuxuryMenuOverlayProps {
   onShopClick: () => void;
   onOpenScience?: () => void;
   onOpenSizeGuide?: () => void;
+  onOpenRefundPolicy?: () => void;
+  onOpenContact?: () => void;
   onOpenWishlist?: () => void;
   onOpenOrders?: () => void;
   onOpenAuth?: () => void;
@@ -41,6 +44,8 @@ export const LuxuryMenuOverlay: React.FC<LuxuryMenuOverlayProps> = ({
   onShopClick,
   onOpenScience,
   onOpenSizeGuide,
+  onOpenRefundPolicy,
+  onOpenContact,
   onOpenWishlist,
   onOpenOrders,
   onPlayFilm,
@@ -136,9 +141,13 @@ export const LuxuryMenuOverlay: React.FC<LuxuryMenuOverlayProps> = ({
   });
 
   const handleContactClick = navigateAndClose(() => {
-    const el = document.getElementById('contact');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+    if (onOpenContact) {
+      onOpenContact();
+    } else {
+      const el = document.getElementById('contact');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   });
 
@@ -425,6 +434,17 @@ export const LuxuryMenuOverlay: React.FC<LuxuryMenuOverlayProps> = ({
               </button>
             )}
 
+            {onOpenRefundPolicy && (
+              <button
+                type="button"
+                onClick={navigateAndClose(onOpenRefundPolicy)}
+                className="flex items-center gap-2 px-3.5 py-2 rounded-md bg-stone-900/90 hover:bg-stone-800 text-stone-300 hover:text-white border border-stone-800 hover:border-stone-700 font-medium transition-colors cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
+                <span>Returns &amp; Exchanges</span>
+              </button>
+            )}
+
             {onPlayFilm && (
               <button
                 type="button"
@@ -493,13 +513,24 @@ export const LuxuryMenuOverlay: React.FC<LuxuryMenuOverlayProps> = ({
             </div>
 
             <div className="pt-1">
-              <a
-                href="mailto:thetateglow@gmail.com?subject=Concierge%20Inquiry%20-%20The%20Tat%C3%A9%20Glow"
-                className="w-full py-3 bg-amber-400 hover:bg-amber-300 text-stone-950 rounded-lg text-xs uppercase tracking-[0.2em] font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md"
-              >
-                <span>Direct Message Concierge</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </a>
+              {onOpenContact ? (
+                <button
+                  type="button"
+                  onClick={navigateAndClose(onOpenContact)}
+                  className="w-full py-3 bg-amber-400 hover:bg-amber-300 text-stone-950 rounded-lg text-xs uppercase tracking-[0.2em] font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                >
+                  <span>Direct Message Concierge</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <a
+                  href="mailto:thetateglow@gmail.com?subject=Concierge%20Inquiry%20-%20The%20Tat%C3%A9%20Glow"
+                  className="w-full py-3 bg-amber-400 hover:bg-amber-300 text-stone-950 rounded-lg text-xs uppercase tracking-[0.2em] font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                >
+                  <span>Direct Message Concierge</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </a>
+              )}
             </div>
           </div>
 

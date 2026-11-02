@@ -8,6 +8,8 @@ interface FooterProps {
   onSelectCategory: (cat: JewelryCategory | 'all') => void;
   onOpenScience: () => void;
   onOpenSizeGuide: () => void;
+  onOpenRefundPolicy?: () => void;
+  onOpenContact?: () => void;
   lang?: Language;
   onOpenAdmin?: () => void;
   onPlayFilm?: () => void;
@@ -17,6 +19,8 @@ export const Footer: React.FC<FooterProps> = ({
   onSelectCategory,
   onOpenScience,
   onOpenSizeGuide,
+  onOpenRefundPolicy,
+  onOpenContact,
   onOpenAdmin,
   onPlayFilm
 }) => {
@@ -50,6 +54,23 @@ export const Footer: React.FC<FooterProps> = ({
             <p className="text-xs text-stone-400 max-w-sm leading-relaxed font-light mt-2">
               {t.footerBrandDesc}
             </p>
+            <div className="pt-2 flex flex-col gap-1 text-xs text-stone-400 font-light">
+              <a
+                href="mailto:thetateglow@gmail.com"
+                className="hover:text-amber-300 transition-colors w-fit"
+                title="Email The Taté Glow"
+              >
+                thetateglow@gmail.com
+              </a>
+              <a
+                href="https://www.instagram.com/thetateglow?vrfl=MXZlNTBqaThzMWUwdw=="
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-amber-300 transition-colors w-fit flex items-center gap-1.5"
+              >
+                <span>Instagram: @thetateglow</span>
+              </a>
+            </div>
           </div>
 
           {/* Shop Categories Col */}
@@ -139,6 +160,40 @@ export const Footer: React.FC<FooterProps> = ({
                 </button>
               </li>
               <li>
+                {onOpenRefundPolicy ? (
+                  <button
+                    onClick={onOpenRefundPolicy}
+                    className="hover:text-white transition-colors cursor-pointer text-left rtl:text-right"
+                  >
+                    Exchange &amp; Refund Policy
+                  </button>
+                ) : (
+                  <a
+                    href="/refund-policy.html"
+                    className="hover:text-white transition-colors block text-left"
+                  >
+                    Exchange &amp; Refund Policy
+                  </a>
+                )}
+              </li>
+              <li>
+                {onOpenContact ? (
+                  <button
+                    onClick={onOpenContact}
+                    className="hover:text-amber-300 text-stone-300 transition-colors cursor-pointer text-left rtl:text-right font-medium"
+                  >
+                    Contact Concierge
+                  </button>
+                ) : (
+                  <a
+                    href="/contact.html"
+                    className="hover:text-amber-300 text-stone-300 transition-colors block text-left rtl:text-right font-medium"
+                  >
+                    Contact Concierge
+                  </a>
+                )}
+              </li>
+              <li>
                 <a
                   href="/privacy.html"
                   className="hover:text-white transition-colors block text-left"
@@ -219,6 +274,23 @@ export const Footer: React.FC<FooterProps> = ({
             >
               Terms of Service
             </a>
+            <span className="text-stone-700">·</span>
+            {onOpenContact ? (
+              <button
+                type="button"
+                onClick={onOpenContact}
+                className="text-stone-400 hover:text-white transition-colors underline underline-offset-4 cursor-pointer"
+              >
+                Contact Us
+              </button>
+            ) : (
+              <a
+                href="/contact.html"
+                className="text-stone-400 hover:text-white transition-colors underline underline-offset-4"
+              >
+                Contact Us
+              </a>
+            )}
             {onPlayFilm && (
               <>
                 <span className="text-stone-700">·</span>

@@ -23,6 +23,8 @@ interface NavbarProps {
   onPlayFilm?: () => void;
   onOpenScience?: () => void;
   onOpenSizeGuide?: () => void;
+  onOpenRefundPolicy?: () => void;
+  onOpenContact?: () => void;
   onShopClick?: () => void;
 }
 
@@ -40,6 +42,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onPlayFilm,
   onOpenScience,
   onOpenSizeGuide,
+  onOpenRefundPolicy,
+  onOpenContact,
   onShopClick,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -472,6 +476,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         }}
         onOpenScience={onOpenScience}
         onOpenSizeGuide={onOpenSizeGuide}
+        onOpenRefundPolicy={onOpenRefundPolicy}
+        onOpenContact={onOpenContact}
         onOpenWishlist={onOpenWishlist}
         onOpenOrders={onOpenOrders}
         onOpenAuth={onOpenAuth}

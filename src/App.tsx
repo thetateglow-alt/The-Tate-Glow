@@ -3,7 +3,6 @@ import { User } from 'firebase/auth';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
-import { CategoryGrid } from './components/CategoryGrid';
 import { CategoryNav } from './components/CategoryNav';
 import { ProductCard } from './components/ProductCard';
 import { ProductModal } from './components/ProductModal';
@@ -11,6 +10,8 @@ import { CartDrawer } from './components/CartDrawer';
 import { CheckoutModal } from './components/CheckoutModal';
 import { SteelScienceModal } from './components/SteelScienceModal';
 import { SizeGuideModal } from './components/SizeGuideModal';
+import { RefundPolicyModal } from './components/RefundPolicyModal';
+import { ContactModal } from './components/ContactModal';
 import { WishlistModal } from './components/WishlistModal';
 import { ReviewsSection } from './components/ReviewsSection';
 import { Footer } from './components/Footer';
@@ -86,6 +87,21 @@ export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAuthGateCheckout, setIsAuthGateCheckout] = useState(false);
   const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
+  const [isRefundPolicyOpen, setIsRefundPolicyOpen] = useState(false);
+  const [isContactOpen, setIsContactOpen] = useState(false);
+
+  // Open Contact modal if URL hash is #contact or #contact-us
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash.toLowerCase();
+      if (hash === '#contact' || hash === '#contact-us' || hash === '#concierge') {
+        setIsContactOpen(true);
+      }
+    };
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
 
   // Cinematic Intro Animation State (triggered via 'The Film' action)
   const [showCinematicIntro, setShowCinematicIntro] = useState<boolean>(false);
@@ -164,6 +180,16 @@ export default function App() {
     };
     window.addEventListener('keydown', handleKeyDown);
 
+    // Deep link hash support for #refund-policy, #returns, #exchanges
+    const checkPolicyHash = () => {
+      const hash = window.location.hash.toLowerCase();
+      if (hash === '#refund-policy' || hash === '#returns' || hash === '#exchange-policy' || hash === '#exchange-refund') {
+        setIsRefundPolicyOpen(true);
+      }
+    };
+    checkPolicyHash();
+    window.addEventListener('hashchange', checkPolicyHash);
+
     return () => {
       if (typeof unsubscribe === 'function') {
         unsubscribe();
@@ -172,6 +198,7 @@ export default function App() {
         unsubscribeProducts();
       }
       window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('hashchange', checkPolicyHash);
     };
   }, []);
 
@@ -382,6 +409,8 @@ export default function App() {
         onShopClick={scrollToCatalog}
         onOpenScience={() => setIsScienceOpen(true)}
         onOpenSizeGuide={() => setIsSizeGuideOpen(true)}
+        onOpenRefundPolicy={() => setIsRefundPolicyOpen(true)}
+        onOpenContact={() => setIsContactOpen(true)}
       />
 
       <main className={`flex-1 transition-all duration-700 ${showCinematicIntro ? 'opacity-90 filter blur-[0.5px]' : 'opacity-100 filter-none'}`}>
@@ -392,17 +421,9 @@ export default function App() {
           lang={lang}
         />
 
-        {/* Visual Category Exploration Grid (Necklaces, Bracelets, Rings, Earrings) */}
-        <CategoryGrid
-          onSelectCategory={(cat) => {
-            setActiveCategory(cat);
-            scrollToCatalog();
-          }}
-          lang={lang}
-        />
-
         {/* Main Product Catalog Section */}
-        <section id="catalog-section" className="py-10 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section id="catalog-section" className="py-10 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-20">
+          <div id="collections" className="scroll-mt-24" />
           
           <div className="mb-4">
             <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] font-medium text-stone-500 mb-1">
@@ -512,6 +533,8 @@ export default function App() {
         }}
         onOpenScience={() => setIsScienceOpen(true)}
         onOpenSizeGuide={() => setIsSizeGuideOpen(true)}
+        onOpenRefundPolicy={() => setIsRefundPolicyOpen(true)}
+        onOpenContact={() => setIsContactOpen(true)}
         lang={lang}
         onOpenAdmin={() => setIsAdminOpen(true)}
         onPlayFilm={handleReplayIntro}
@@ -624,6 +647,16 @@ export default function App() {
         isOpen={isSizeGuideOpen}
         onClose={() => setIsSizeGuideOpen(false)}
         lang={lang}
+      />
+
+      <RefundPolicyModal
+        isOpen={isRefundPolicyOpen}
+        onClose={() => setIsRefundPolicyOpen(false)}
+      />
+
+      <ContactModal
+        isOpen={isContactOpen}
+        onClose={() => setIsContactOpen(false)}
       />
 
       <WishlistModal

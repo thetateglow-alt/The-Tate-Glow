@@ -956,9 +956,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               )}
             </button>
 
-            <div className="flex items-center justify-center gap-2 text-[11px] text-stone-400">
-              <ShieldCheck className="w-3.5 h-3.5 text-stone-600" />
-              <span>{t.pureSolidSteelBadge} · {t.lifetimeGuaranteeBadge}</span>
+            <div className="flex flex-col items-center justify-center gap-1 text-[11px] text-stone-500 pt-1">
+              <div className="flex items-center gap-2 text-stone-600">
+                <ShieldCheck className="w-3.5 h-3.5 text-stone-700" />
+                <span>{t.pureSolidSteelBadge} · {t.lifetimeGuaranteeBadge}</span>
+              </div>
+              <div className="text-[10px] text-stone-400">
+                14-day exchange &amp; return window on all orders. <a href="/refund-policy.html" target="_blank" rel="noopener noreferrer" className="underline hover:text-stone-700">Review Policy</a>
+              </div>
             </div>
           </form>
         )}

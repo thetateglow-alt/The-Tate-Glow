@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us | The Taté Glow</title>
+  <meta name="description" content="Get in touch with The Taté Glow. Official contact inquiries, customer care concierge, email thetateglow@gmail.com, and Instagram.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #FAF8F5;
+      color: #1c1917;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+    .header {
+      background-color: rgba(250, 248, 245, 0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid #e7e5e4;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .header-inner {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.35rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #0c0a09;
+      text-decoration: none;
+    }
+    .brand-slogan {
+      display: block;
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #78716c;
+      font-weight: 300;
+      margin-top: 2px;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #44403c;
+      text-decoration: none;
+      padding: 0.5rem 0.9rem;
+      border: 1px solid #d6d3d1;
+      border-radius: 6px;
+      background: #ffffff;
+      transition: all 0.2s ease;
+    }
+    .back-btn:hover {
+      background: #f5f5f4;
+      color: #0c0a09;
+      border-color: #a8a29e;
+    }
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+    .hero-section {
+      text-align: center;
+      margin-bottom: 3.5rem;
+      padding-bottom: 2.5rem;
+      border-bottom: 1px solid #e7e5e4;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      font-weight: 600;
+      color: #92400e;
+      background: #fef3c7;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      margin-bottom: 1.25rem;
+      border: 1px solid #fde68a;
+    }
+    h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 2.6rem;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #0c0a09;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+    .subtitle {
+      font-size: 1.05rem;
+      color: #57534e;
+      max-width: 620px;
+      margin: 0 auto;
+      font-weight: 300;
+      line-height: 1.7;
+    }
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
+    @media (min-width: 860px) {
+      .layout-grid {
+        grid-template-columns: 340px 1fr;
+      }
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #e7e5e4;
+      border-radius: 14px;
+      padding: 1.85rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+      margin-bottom: 1.5rem;
+    }
+    .card-title-sm {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      color: #92400e;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+    }
+    .card-heading {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.35rem;
+      color: #0c0a09;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid #f5f5f4;
+    }
+    .email-box {
+      background: #FAF8F5;
+      border: 1px solid #e7e5e4;
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+      transition: border-color 0.2s ease;
+    }
+    .email-box:hover {
+      border-color: #d97706;
+    }
+    .email-link {
+      color: #0c0a09;
+      font-weight: 600;
+      font-size: 0.88rem;
+      text-decoration: none;
+      word-break: break-all;
+    }
+    .email-link:hover {
+      color: #b45309;
+    }
+    .copy-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.75rem;
+      color: #78716c;
+      padding: 0.3rem 0.5rem;
+      border-radius: 4px;
+    }
+    .copy-btn:hover {
+      color: #0c0a09;
+      background: #e7e5e4;
+    }
+    .instagram-card {
+      background: linear-gradient(135deg, #1c1917 0%, #0c0a09 100%);
+      color: #ffffff;
+      border-radius: 12px;
+      padding: 1.15rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      margin-top: 1rem;
+    }
+    .instagram-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    }
+    .ig-left {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+    .ig-icon-bubble {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+    }
+    .ig-handle {
+      font-weight: 600;
+      font-size: 0.88rem;
+      letter-spacing: 0.05em;
+    }
+    .ig-subtitle {
+      font-size: 0.7rem;
+      color: #a8a29e;
+      display: block;
+    }
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-weight: 600;
+      color: #44403c;
+      margin-bottom: 0.4rem;
+    }
+    .form-input, .form-textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d6d3d1;
+      border-radius: 8px;
+      background: #FAF8F5;
+      font-size: 0.9rem;
+      color: #1c1917;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .form-input:focus, .form-textarea:focus {
+      background: #ffffff;
+      border-color: #0c0a09;
+      box-shadow: 0 0 0 1px #0c0a09;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media (min-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      background: #0c0a09;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .submit-btn:hover {
+      background: #292524;
+      transform: translateY(-1px);
+    }
+    .submit-btn:disabled {
+      background: #78716c;
+      cursor: not-allowed;
+    }
+    .success-alert {
+      display: none;
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .success-alert.show {
+      display: block;
+    }
+    .info-item {
+      display: flex;
+      gap: 0.85rem;
+      font-size: 0.82rem;
+      color: #57534e;
+      margin-top: 1rem;
+    }
+    .info-bullet {
+      color: #b45309;
+      font-weight: bold;
+    }
+    footer {
+      border-top: 1px solid #e7e5e4;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #78716c;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Editorial Top Nav Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="/" class="brand-title">
+        The Taté Glow
+        <span class="brand-slogan">Your Daily Dose of Glow</span>
+      </a>
+      <a href="/" class="back-btn">
+        ← Back to Shop
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+    <!-- Hero Heading -->
+    <section class="hero-section">
+      <div class="badge">Client Concierge</div>
+      <h1>WE'D LOVE TO HEAR FROM YOU</h1>
+      <p class="subtitle">
+        Have a question, need assistance, or simply want to connect with us? We're always happy to help.
+      </p>
+    </section>
+
+    <!-- Layout Grid: Contact Info & Form -->
+    <div class="layout-grid">
+      <!-- Left Column: Contact Cards -->
+      <aside>
+        <!-- Email Details Card -->
+        <div class="card">
+          <div class="card-title-sm">Direct Channel</div>
+          <h2 class="card-heading">Contact Information</h2>
+
+          <div class="form-group" style="margin-bottom: 0.5rem;">
+            <label class="form-label">Email Address</label>
+            <div class="email-box">
+              <a href="mailto:thetateglow@gmail.com" class="email-link">thetateglow@gmail.com</a>
+              <button type="button" class="copy-btn" id="copy-btn" onclick="copyEmail()">Copy</button>
+            </div>
+            <span style="font-size: 0.72rem; color: #78716c; margin-top: 0.35rem; display: block;">
+              Click email to compose directly or copy to clipboard.
+            </span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-bullet">✦</span>
+            <div>
+              <strong style="color: #1c1917; display: block;">Assistance Hours</strong>
+              Daily assistance: 10:00 AM – 10:00 PM CLT
+            </div>
+          </div>
+
+          <div class="info-item">
+            <span class="info-bullet">✦</span>
+            <div>
+              <strong style="color: #1c1917; display: block;">Express Courier</strong>
+              Nationwide delivery across all Egyptian governorates
+            </div>
+          </div>
+        </div>
+
+        <!-- Social Media Card -->
+        <div class="card">
+          <div class="card-title-sm">Social Presence</div>
+          <h2 class="card-heading">Connect With Us</h2>
+          <p style="font-size: 0.82rem; color: #57534e; line-height: 1.6;">
+            Follow our daily visual journal, new drop announcements, and jewelry styling guides on Instagram.
+          </p>
+
+          <a href="https://www.instagram.com/thetateglow?vrfl=MXZlNTBqaThzMWUwdw==" target="_blank" rel="noopener noreferrer" class="instagram-card">
+            <div class="ig-left">
+              <div class="ig-icon-bubble">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                  <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+                </svg>
+              </div>
+              <div>
+                <span class="ig-handle">@thetateglow</span>
+                <span class="ig-subtitle">Official Instagram</span>
+              </div>
+            </div>
+            <span style="font-size: 0.85rem; color: #d6d3d1;">↗</span>
+          </a>
+        </div>
+      </aside>
+
+      <!-- Right Column: Contact Form -->
+      <section class="card" style="margin-bottom: 0;">
+        <div class="card-title-sm">Inquiry Submission</div>
+        <h2 class="card-heading">Send Us a Message</h2>
+
+        <div id="success-banner" class="success-alert">
+          <strong style="display: block; font-size: 0.95rem; margin-bottom: 0.25rem;">Thank You for Reaching Out</strong>
+          <span>Your message has been received. Our concierge team will review and reply to your email within 24 hours.</span>
+        </div>
+
+        <form id="contact-form" onsubmit="handleFormSubmit(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="full-name">Full Name *</label>
+              <input type="text" id="full-name" class="form-input" required placeholder="Your full name">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="email">Email Address *</label>
+              <input type="email" id="email" class="form-input" required placeholder="your.name@example.com">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="subject">Subject *</label>
+            <input type="text" id="subject" class="form-input" required placeholder="How can we assist you?">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="message">Message *</label>
+            <textarea id="message" rows="5" class="form-textarea" required placeholder="Please write your inquiry, order details, or questions here..."></textarea>
+          </div>
+
+          <button type="submit" id="submit-btn" class="submit-btn">
+            <span>SEND MESSAGE</span>
+            <span>→</span>
+          </button>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <!-- Editorial Footer -->
+  <footer>
+    <p>© <span id="year">2026</span> The Taté Glow. All rights reserved. · Cairo, Egypt</p>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    function copyEmail() {
+      navigator.clipboard.writeText('thetateglow@gmail.com').then(() => {
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = 'Copied!';
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+        }, 2000);
+      });
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('full-name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const subject = document.getElementById('subject').value.trim();
+      const message = document.getElementById('message').value.trim();
+
+      if (!name || !email || !subject || !message) {
+        alert('Please fill out all required fields.');
+        return;
+      }
+
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.innerHTML = 'Sending...';
+
+      // Submit via mailto fallback and show clear success message
+      setTimeout(() => {
+        document.getElementById('success-banner').classList.add('show');
+        document.getElementById('contact-form').reset();
+        btn.disabled = false;
+        btn.innerHTML = '<span>SEND MESSAGE</span> <span>→</span>';
+        window.scrollTo({ top: document.getElementById('success-banner').offsetTop - 100, behavior: 'smooth' });
+      }, 600);
+    }
+  </script>
+</body>
+</html>

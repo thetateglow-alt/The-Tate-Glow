@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Product } from '../types/jewelry';
-import { X, Heart, ShieldCheck, Droplets, Sparkles, Check, Ruler, Truck, Shield, Tag, AlertCircle } from 'lucide-react';
+import { X, Heart, ShieldCheck, Droplets, Sparkles, Check, Ruler, Truck, Shield, Tag, AlertCircle, RotateCcw } from 'lucide-react';
 import { formatEGP } from '../utils/pricing';
 import { Language, TRANSLATIONS } from '../i18n/translations';
 
@@ -349,6 +349,21 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   <Shield className="w-3.5 h-3.5 text-stone-600 shrink-0" />
                   <span>{t.lifetimeGuaranteeBadge}</span>
                 </div>
+              </div>
+
+              {/* 14-Day Exchange & Refund Policy Reassurance */}
+              <div className="pt-2.5 mt-1 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-600">
+                <span className="flex items-center gap-1.5">
+                  <RotateCcw className="w-3.5 h-3.5 text-amber-800 shrink-0" />
+                  <span>14-Day Exchange &amp; Return Window</span>
+                </span>
+                <a
+                  href="#refund-policy"
+                  onClick={() => onClose()}
+                  className="text-stone-800 hover:text-stone-950 font-medium underline underline-offset-2 transition-colors cursor-pointer"
+                >
+                  View Policy
+                </a>
               </div>
             </div>
 

@@ -101,6 +101,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // 13. Contact Inquiries: Anyone can submit a contact inquiry; admins can read, update, and delete
+    match /contact_inquiries/{inquiryId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
     // Default deny for all other paths
     match /{document=**} {
       allow read, write: if false;
