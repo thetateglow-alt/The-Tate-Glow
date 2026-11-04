@@ -248,7 +248,7 @@ export default function App() {
       if (!a.isBestSeller && b.isBestSeller) return 1;
       return 0;
     });
-  }, [activeCategory, searchQuery, sortBy]);
+  }, [catalogProducts, activeCategory, searchQuery, sortBy]);
 
   // Cart operations (Pure Stainless Steel - no color needed)
   const handleAddToCart = (
