@@ -421,8 +421,82 @@ export default function App() {
           lang={lang}
         />
 
-        <div id="collections" className="scroll-mt-24" />
-        <div id="catalog-section" className="scroll-mt-20" />
+        {/* Main Product Catalog Section */}
+        <section id="catalog-section" className="py-10 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-20">
+          <div id="collections" className="scroll-mt-24" />
+          
+          <div className="mb-4">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] font-medium text-stone-500 mb-1">
+              <span>{t.slogan}</span>
+              <span aria-hidden="true">·</span>
+              <span className="text-amber-800 font-semibold">{t.specialBundleActive}</span>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
+              <h2 className="text-3xl font-serif font-normal text-stone-950 tracking-tight">
+                {activeCategory === 'all'
+                  ? t.catalogCollectionTitle
+                  : activeCategory === 'necklace'
+                  ? t.categoryNecklacesTitle
+                  : activeCategory === 'bracelet'
+                  ? t.categoryBraceletsTitle
+                  : activeCategory === 'ring'
+                  ? t.categoryRingsTitle
+                  : t.categoryEarringsTitle}
+              </h2>
+
+              <button
+                onClick={() => setIsSizeGuideOpen(true)}
+                className="text-xs text-stone-700 hover:text-stone-950 underline underline-offset-4 cursor-pointer self-start sm:self-auto"
+              >
+                {t.viewSizeGuide}
+              </button>
+            </div>
+          </div>
+
+          {/* Interactive Filters & Sorting */}
+          <CategoryNav
+            activeCategory={activeCategory}
+            onSelectCategory={setActiveCategory}
+            sortBy={sortBy}
+            onSelectSort={setSortBy}
+            totalCount={filteredProducts.length}
+            lang={lang}
+          />
+
+          {/* Products Grid */}
+          {filteredProducts.length === 0 ? (
+            <div className="bg-white rounded-lg border border-stone-200/80 p-12 text-center max-w-md mx-auto my-8">
+              <p className="font-serif text-lg text-stone-900">{t.noPiecesFound}</p>
+              <p className="text-xs text-stone-500 mt-1 leading-relaxed">
+                {t.noPiecesFoundDesc}
+              </p>
+              <button
+                onClick={() => {
+                  setActiveCategory('all');
+                  setSearchQuery('');
+                }}
+                className="mt-5 px-5 py-2.5 bg-stone-950 text-white rounded text-xs uppercase tracking-wider font-medium hover:bg-stone-800 transition-colors cursor-pointer"
+              >
+                {t.resetFilters}
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {filteredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onOpenQuickView={setQuickViewProduct}
+                  onQuickAdd={(p) => handleAddToCart(p)}
+                  isWishlisted={wishlist.includes(product.id)}
+                  onToggleWishlist={handleToggleWishlist}
+                  lang={lang}
+                />
+              ))}
+            </div>
+          )}
+        </section>
 
         {/* Special Offer Banner Strip */}
         <section className="py-12 bg-amber-50/70 border-y border-amber-200/80">

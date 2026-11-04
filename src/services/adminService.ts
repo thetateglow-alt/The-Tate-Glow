@@ -14,7 +14,7 @@ import {
   runTransaction
 } from 'firebase/firestore';
 import { User } from 'firebase/auth';
-import { db } from './firebaseAuth';
+import { auth, db } from './firebaseAuth';
 import { PRODUCTS, BRAND_CONFIG } from '../data/products';
 import {
   AdminProduct,
@@ -162,6 +162,13 @@ export async function logAuditEvent(
  */
 export async function initializeStoreBackend(): Promise<void> {
   try {
+    // For normal visitors (not logged in as admin), only read public catalog and never write
+    const isAdmin = await checkIsAdmin(auth.currentUser);
+    if (!isAdmin) {
+      await getDocs(collection(db, 'products'));
+      return;
+    }
+
     // 1. Ensure store owner exists in adminUsers
     const ownerRef = doc(db, 'adminUsers', STORE_OWNER_EMAIL);
     const ownerSnap = await getDoc(ownerRef);
