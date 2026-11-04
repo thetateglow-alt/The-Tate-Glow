@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Product } from '../types/jewelry';
 import { Heart, Plus, Eye, Sparkles, ShieldCheck, AlertCircle, ShoppingBag } from 'lucide-react';
 import { formatEGP } from '../utils/pricing';
@@ -22,6 +22,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const [imageFailed, setImageFailed] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [product.image]);
   const t = TRANSLATIONS.en;
 
   const displayName = product.name;
@@ -95,7 +99,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             alt={displayName}
             onError={() => setImageFailed(true)}
             referrerPolicy="no-referrer"
-            loading="lazy"
             className={`w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105 ${
               isOutOfStock ? 'opacity-65 grayscale-[35%]' : ''
             }`}

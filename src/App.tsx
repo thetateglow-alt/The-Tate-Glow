@@ -53,15 +53,7 @@ export default function App() {
     } catch (e) {
       // fallback
     }
-    const defaultProduct = PRODUCTS[0];
-    return [
-      {
-        id: `${defaultProduct.id}-${defaultProduct.specs.sizes[0]}`,
-        product: defaultProduct,
-        selectedSize: defaultProduct.specs.sizes[0],
-        quantity: 1
-      }
-    ];
+    return [];
   });
 
   // Wishlist State
@@ -120,7 +112,7 @@ export default function App() {
   };
 
   // Live Catalog Products State (synced from Firestore)
-  const [catalogProducts, setCatalogProducts] = useState<Product[]>(PRODUCTS);
+  const [catalogProducts, setCatalogProducts] = useState<Product[]>([]);
 
   // Authenticated User State (Firebase Auth & Google Workspace Gmail)
   const [currentUser, setCurrentUser] = useState<User | null>(null);

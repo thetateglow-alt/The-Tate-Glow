@@ -134,16 +134,30 @@ export async function submitSecureCheckout(payload: CheckoutRequestPayload): Pro
     throw new Error('Please fill in your name, delivery phone number, and street address.');
   }
 
-  // 1. Resolve and validate items against authoritative catalog
+  // 1. Resolve and validate items against authoritative Firestore catalog
   const resolvedItems: OrderItemRecord[] = [];
+  const resolvedProductsMap: Record<string, any> = {};
   let rawSubtotal = 0;
 
   for (const requestedItem of payload.items) {
-    const catalogItem = PRODUCTS.find((p) => p.id === requestedItem.productId);
-    const itemPrice = catalogItem ? catalogItem.price : 550; // Fallback price
+    let catalogItem: any = null;
+    try {
+      const prodSnap = await getDoc(doc(db, 'products', requestedItem.productId));
+      if (prodSnap.exists()) {
+        catalogItem = { id: prodSnap.id, ...prodSnap.data() };
+      }
+    } catch {
+      // fallback if offline
+    }
+
+    const itemPrice = catalogItem ? Number(catalogItem.price) : 550;
     const itemName = catalogItem ? catalogItem.name : requestedItem.productId;
     const itemNameAr = catalogItem ? catalogItem.nameAr : undefined;
     const itemImage = catalogItem ? catalogItem.image : undefined;
+
+    if (catalogItem) {
+      resolvedProductsMap[requestedItem.productId] = catalogItem;
+    }
 
     const qty = Math.max(1, requestedItem.quantity || 1);
     rawSubtotal += itemPrice * qty;
@@ -162,7 +176,25 @@ export async function submitSecureCheckout(payload: CheckoutRequestPayload): Pro
   // 2. Compute bundle discounts using authoritative product definitions
   const bundleCalculation = calculateBundleDiscount(
     resolvedItems.map((item) => {
-      const fullProduct = PRODUCTS.find((p) => p.id === item.productId) || PRODUCTS[0];
+      const fullProduct = resolvedProductsMap[item.productId] || {
+        id: item.productId,
+        name: item.name,
+        price: item.price,
+        category: 'necklace',
+        description: '',
+        details: [],
+        specs: {
+          material: 'Pure Surgical Stainless Steel',
+          finish: 'Mirror Polish',
+          waterproof: '100% Waterproof',
+          hypoallergenic: true,
+          weight: '10g',
+          sizes: [item.selectedSize || 'Standard']
+        },
+        rating: 5,
+        reviewCount: 0,
+        image: item.image || ''
+      };
       return {
         id: `${item.productId}-${item.selectedSize || 'standard'}`,
         product: fullProduct,
