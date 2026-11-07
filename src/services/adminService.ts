@@ -293,13 +293,36 @@ export async function initializeStoreBackend(): Promise<void> {
 // 1. PRODUCTS MANAGEMENT (CRUD)
 // ==========================================
 
+export function sanitizeProductText<T extends Partial<AdminProduct>>(p: T): T {
+  const sanitizeArr = (arr?: string[]) =>
+    (arr || []).filter((item) => !/lifetime|color\s*guarantee/i.test(item));
+
+  const sanitizeStr = (s?: string) =>
+    s ? s.replace(/lifetime\s*color\s*guarantee/gi, 'Skin-Safe Quality').replace(/lifetime\s*guarantee/gi, 'Quality Promise') : s;
+
+  return {
+    ...p,
+    description: sanitizeStr(p.description) || '',
+    descriptionAr: sanitizeStr(p.descriptionAr),
+    details: sanitizeArr(p.details),
+    detailsAr: sanitizeArr(p.detailsAr),
+    specs: p.specs
+      ? {
+          ...p.specs,
+          finish: sanitizeStr(p.specs.finish) || p.specs.finish,
+          waterproof: sanitizeStr(p.specs.waterproof) || p.specs.waterproof
+        }
+      : p.specs
+  };
+}
+
 export async function fetchAdminProducts(): Promise<AdminProduct[]> {
   try {
     const productsCol = collection(db, 'products');
     const snapshot = await getDocs(productsCol);
     const items: AdminProduct[] = [];
     snapshot.forEach((d) => {
-      items.push({ ...(d.data() as AdminProduct), id: d.id });
+      items.push(sanitizeProductText({ ...(d.data() as AdminProduct), id: d.id }) as AdminProduct);
     });
     return items;
   } catch (err) {
@@ -334,8 +357,10 @@ export async function saveAdminProduct(
     const docId = product.id || `tate-${product.sku.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
     const productRef = doc(db, 'products', docId);
 
+    const sanitized = sanitizeProductText(product);
+
     const payload: AdminProduct = {
-      ...product,
+      ...sanitized,
       id: docId,
       sku: product.sku.trim().toUpperCase(),
       updatedAt: new Date().toISOString(),

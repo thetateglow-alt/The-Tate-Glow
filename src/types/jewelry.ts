@@ -10,6 +10,8 @@ export interface Product {
   originalPrice?: number; // in EGP
   image: string;
   secondaryImage?: string;
+  silverImage?: string;
+  goldImage?: string;
   description: string;
   descriptionAr?: string;
   details: string[];
@@ -32,12 +34,14 @@ export interface Product {
   stock?: number;
   status?: 'published' | 'active' | 'archived' | 'draft';
   createdAt?: string;
+  colors?: string[];
 }
 
 export interface CartItem {
-  id: string; // compound key: productId + size
+  id: string; // compound key: productId + size + color
   product: Product;
   selectedSize: string;
+  selectedColor?: string;
   quantity: number;
 }
 

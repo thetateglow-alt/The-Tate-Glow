@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Product } from '../types/jewelry';
-import { Heart, Plus, Eye, Sparkles, ShieldCheck, AlertCircle, ShoppingBag } from 'lucide-react';
+import { Heart, Plus, Eye, Sparkles, AlertCircle, ShoppingBag } from 'lucide-react';
 import { formatEGP } from '../utils/pricing';
 import { Language, TRANSLATIONS } from '../i18n/translations';
 
@@ -150,11 +150,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       {/* Content Area */}
       <div className="p-4 sm:p-5 flex flex-col flex-1 justify-between">
         <div>
-          {/* Pure Steel unboxed metadata */}
+          {/* Category metadata */}
           <div className="flex items-center gap-2 text-[11px] text-stone-500 uppercase tracking-wider mb-1 font-medium">
             <span>{displayCategory}</span>
-            <span aria-hidden="true">·</span>
-            <span>{t.pureSteelBadge}</span>
           </div>
 
           <h3
@@ -203,25 +201,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           )}
         </div>
 
-        {/* Footer: Material Assurance & Price in EGP */}
+        {/* Footer: Price in EGP & Add to Cart */}
         <div className="mt-4 pt-3 border-t border-stone-100">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-1 text-[11px] text-stone-500 font-medium">
-              <ShieldCheck className="w-3.5 h-3.5 text-stone-700" />
-              <span>{t.pureSteelBadge}</span>
-            </div>
-
-            {/* Pricing in EGP */}
-            <div className="flex items-baseline gap-2">
-              {product.originalPrice && (
-                <span className="text-xs text-stone-400 line-through tabular-nums">
-                  {formatEGP(product.originalPrice)}
-                </span>
-              )}
-              <span className="text-sm font-semibold text-stone-900 tabular-nums">
-                {formatEGP(product.price)}
+          <div className="flex items-baseline justify-end gap-2 mb-3">
+            {product.originalPrice && (
+              <span className="text-xs text-stone-400 line-through tabular-nums">
+                {formatEGP(product.originalPrice)}
               </span>
-            </div>
+            )}
+            <span className="text-sm font-semibold text-stone-900 tabular-nums">
+              {formatEGP(product.price)}
+            </span>
           </div>
 
           {/* Primary Add to Cart CTA (Disabled if Out of Stock) */}

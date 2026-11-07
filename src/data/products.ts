@@ -86,7 +86,7 @@ export const STEEL_COMPARISON = [
   },
   {
     feature: 'Maintenance & Longevity',
-    tateSteel: 'Zero polishing needed, lasts a lifetime',
+    tateSteel: 'Zero polishing needed, long-lasting durability',
     sterlingSilver: 'Needs regular chemical polish baths',
     brassAlloy: 'Cannot be restored once peeling starts'
   }

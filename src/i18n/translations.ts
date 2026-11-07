@@ -85,7 +85,7 @@ export interface Translations {
   quantityLabel: string;
   addToBagBtn: string;
   pureSolidSteelBadge: string;
-  lifetimeGuaranteeBadge: string;
+  skinSafeBadge: string;
   fastEgyptDeliveryBadge: string;
   bundleAppliedBanner: string;
   mixAndMatchSavingsNotice: string;
@@ -341,7 +341,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     noPiecesFound: 'No pieces found',
     noPiecesFoundDesc: "We couldn't find any jewelry matching your search. Try resetting your search query.",
     resetFilters: 'Reset Filters',
-    pureSteelBadge: 'Pure Stainless Steel',
+    pureSteelBadge: '18K Gold Plated',
     waterproofBadge: '100% Waterproof',
     lowStockOnly: 'Only {count} left',
     lowStockBadge: 'Low Stock · Only {count} left',
@@ -358,8 +358,8 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     selectSizeLabel: 'Select Size',
     quantityLabel: 'Quantity',
     addToBagBtn: 'Add to Bag',
-    pureSolidSteelBadge: 'Pure Solid Steel',
-    lifetimeGuaranteeBadge: 'Lifetime Color Guarantee',
+    pureSolidSteelBadge: '18K Gold Plated',
+    skinSafeBadge: '100% Skin Safe & Waterproof',
     fastEgyptDeliveryBadge: 'Fast Courier in Egypt (2-4 Days)',
     bundleAppliedBanner: 'Bundle Offer Active: Mix & match items to get 3rd 50% off or 4th free!',
     mixAndMatchSavingsNotice: 'Qualifies for our Buy 2 get 3rd 50% off & Buy 3 get 4th Free bundle',
@@ -492,8 +492,8 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     waterproof100Desc: 'Unlike sterling silver which oxidizes and blackens, pure stainless steel will never react with shower water, pool chlorine, or sea salt.',
     zeroPlating: 'Zero Plating to Peel',
     zeroPlatingDesc: 'Because our pieces are pure stainless steel, there is no surface plating that chips away. Its clean, natural mirror luster lasts indefinitely.',
-    tarnishFreeGuaranteeTitle: 'Our Tarnish-Free Lifetime Guarantee',
-    tarnishFreeGuaranteeDesc: 'Your jewelry should effortlessly keep up with your life. If any Taté Glow pure stainless steel piece ever tarnishes, rusts, or stains your skin, we replace it free of charge — guaranteed.',
+    tarnishFreeGuaranteeTitle: 'Our Quality & Durability Standard',
+    tarnishFreeGuaranteeDesc: 'Your jewelry is crafted with high-grade finishes designed for everyday wear. 100% waterproof, rust-resistant, and gentle on sensitive skin.',
     closeAndExplore: 'Close & Explore Jewelry',
     comparePureSteel: 'The Taté Glow (Pure Steel)',
     compareSterlingSilver: '925 Sterling Silver',

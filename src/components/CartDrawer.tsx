@@ -4,6 +4,7 @@ import { X, Trash2, ArrowRight, ShieldCheck, ShoppingBag, Sparkles, Tag, Clock, 
 import { calculateBundleDiscount, formatEGP, getLocalizedBundleInfo } from '../utils/pricing';
 import { BRAND_CONFIG } from '../data/products';
 import { Language, TRANSLATIONS } from '../i18n/translations';
+import { resolveProductImage } from '../utils/productImages';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -178,9 +179,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             ) : (
               items.map((item) => (
                 <div key={item.id} className="py-4 flex gap-4">
-                  {/* Thumbnail */}
+                  {/* Thumbnail with color matching */}
                   <img
-                    src={item.product.image}
+                    src={resolveProductImage(item.product, item.selectedColor)}
                     alt={item.product.name}
                     className="w-18 h-18 rounded bg-stone-100 object-cover border border-stone-200 shrink-0"
                   />
@@ -201,9 +202,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         </button>
                       </div>
 
-                      {/* Pure Steel & Size */}
-                      <div className="text-[11px] text-stone-500 mt-0.5 space-x-2 rtl:space-x-reverse">
-                        <span>{t.pureSteel}</span>
+                      {/* 18K Gold Plated & Color & Size */}
+                      <div className="text-[11px] text-stone-500 mt-0.5 space-x-1.5 rtl:space-x-reverse flex items-center flex-wrap">
+                        <span className="text-amber-800 font-medium bg-amber-50 px-1 py-0.2 rounded border border-amber-200/60">
+                          18K Gold Plated
+                        </span>
+                        <span aria-hidden="true">·</span>
+                        <span className="font-semibold text-stone-800">
+                          {item.selectedColor === 'Yellow' ? 'Gold' : (item.selectedColor || 'Gold')}
+                        </span>
                         <span aria-hidden="true">·</span>
                         <span>{item.selectedSize}</span>
                       </div>

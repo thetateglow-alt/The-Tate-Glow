@@ -124,7 +124,7 @@ export const SteelScienceModal: React.FC<SteelScienceModalProps> = ({ isOpen, on
             </div>
           </div>
 
-          {/* Section 3: The Taté Glow Lifetime Promise */}
+          {/* Section 3: The Taté Glow Quality Standard */}
           <div className="p-5 bg-stone-100 rounded-lg border border-stone-200 flex items-start gap-4">
             <Award className="w-8 h-8 text-stone-800 shrink-0 mt-0.5" />
             <div>

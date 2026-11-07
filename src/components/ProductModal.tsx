@@ -3,15 +3,17 @@ import { Product } from '../types/jewelry';
 import { X, Heart, ShieldCheck, Droplets, Sparkles, Check, Ruler, Truck, Shield, Tag, AlertCircle, RotateCcw } from 'lucide-react';
 import { formatEGP } from '../utils/pricing';
 import { Language, TRANSLATIONS } from '../i18n/translations';
+import { resolveProductImage } from '../utils/productImages';
 
 interface ProductModalProps {
   product: Product | null;
   onClose: () => void;
-  onAddToCart: (product: Product, size: string, quantity: number) => void;
+  onAddToCart: (product: Product, size: string, quantity: number, color: string) => void;
   isWishlisted: boolean;
   onToggleWishlist: (productId: string) => void;
   onOpenSizeGuide: () => void;
   lang?: Language;
+  initialColor?: string;
 }
 
 export const ProductModal: React.FC<ProductModalProps> = ({
@@ -21,8 +23,17 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   isWishlisted,
   onToggleWishlist,
   onOpenSizeGuide,
+  initialColor,
 }) => {
   const t = TRANSLATIONS.en;
+  const availableColors = product?.colors && product.colors.length > 0
+    ? product.colors.map(c => c.toLowerCase() === 'yellow' ? 'Gold' : c)
+    : ['Gold', 'Silver'];
+  const [selectedColor, setSelectedColor] = useState<string>(initialColor || availableColors[0] || 'Gold');
+  const isSilver = selectedColor.toLowerCase().includes('silver');
+
+  const displayImage = resolveProductImage(product, selectedColor);
+
   const [selectedSize, setSelectedSize] = useState<string>(
     product?.specs?.sizes?.[0] || 'Standard'
   );
@@ -33,21 +44,31 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     if (product?.specs?.sizes?.[0]) {
       setSelectedSize(product.specs.sizes[0]);
     }
-  }, [product?.id]);
+    if (initialColor) {
+      setSelectedColor(initialColor.toLowerCase() === 'yellow' ? 'Gold' : initialColor);
+    } else if (product?.colors?.[0]) {
+      const first = product.colors[0];
+      setSelectedColor(first.toLowerCase() === 'yellow' ? 'Gold' : first);
+    } else {
+      setSelectedColor('Gold');
+    }
+  }, [product?.id, initialColor]);
 
   if (!product) return null;
 
   const displayName = product.name;
   const displayCategory = product.category;
   const displayDesc = product.description;
-  const displayDetails = product.details;
+  const displayDetails = (product.details || []).filter(
+    (det) => !/lifetime|color\s*guarantee/i.test(det)
+  );
 
   const isOutOfStock = product.stock !== undefined && product.stock <= 0;
   const isLowStock = !isOutOfStock && product.stock !== undefined && product.stock > 0 && product.stock <= 5;
 
   const handleAdd = () => {
     if (isOutOfStock) return;
-    onAddToCart(product, selectedSize, quantity);
+    onAddToCart(product, selectedSize, quantity, selectedColor);
     onClose();
   };
 
@@ -74,13 +95,24 @@ export const ProductModal: React.FC<ProductModalProps> = ({
           <div className="md:col-span-6 bg-stone-100 p-6 sm:p-8 flex flex-col justify-center items-center relative">
             <div className="relative aspect-square w-full rounded-md overflow-hidden bg-white shadow-xs">
               <img
-                src={product.image}
+                src={displayImage}
                 alt={displayName}
-                className={`w-full h-full object-cover object-center ${
+                className={`w-full h-full object-cover object-center transition-all duration-300 ${
                   isOutOfStock ? 'opacity-65 grayscale-[35%]' : ''
                 }`}
                 referrerPolicy="no-referrer"
               />
+              {/* Finish Badge Chip on Image */}
+              <div className="absolute top-3 right-3 rtl:right-auto rtl:left-3 bg-stone-950/80 backdrop-blur-xs px-2.5 py-1 rounded text-white text-[11px] font-medium flex items-center gap-1.5 shadow-xs">
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    isSilver
+                      ? 'bg-stone-200 border border-white'
+                      : 'bg-[#FFD700] border border-[#B38622]'
+                  }`}
+                />
+                <span>{isSilver ? 'Silver' : '18K Gold'}</span>
+              </div>
               {isOutOfStock && (
                 <div className="absolute top-3 left-3 rtl:left-auto rtl:right-3 bg-stone-900/90 text-white text-[10px] uppercase tracking-wider font-semibold px-2.5 py-1 rounded shadow-xs">
                   {t.soldOut}
@@ -106,7 +138,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               </div>
               <div className="p-2.5 bg-white/70 rounded border border-stone-200/60 flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-stone-700 shrink-0" />
-                <span>{t.lifetimeGuaranteeBadge}</span>
+                <span>100% Waterproof</span>
               </div>
             </div>
           </div>
@@ -142,7 +174,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-stone-500 font-medium mb-1.5">
                 <span>{displayCategory}</span>
                 <span aria-hidden="true">·</span>
-                <span className="text-stone-900 font-semibold">{t.pureSteelBadge}</span>
+                <span className="text-amber-800 font-semibold">{t.pureSteelBadge}</span>
               </div>
 
               <h2 className="text-2xl sm:text-3xl font-serif font-medium text-stone-950 leading-tight">
@@ -175,14 +207,59 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               </p>
 
               {/* Material info notice */}
-              <div className="mt-5 p-3 bg-stone-50 rounded border border-stone-200/80 text-xs text-stone-700 flex items-center justify-between">
+              <div className="mt-5 p-3 bg-amber-50/70 rounded border border-amber-200/80 text-xs text-stone-700 flex items-center justify-between">
                 <div>
                   <span className="font-semibold text-stone-900 block">{t.pureSolidSteelBadge}</span>
                   <span className="text-stone-500 text-[11px]">
-                    Natural silvery mirror luster · No surface plating to chip
+                    Available in radiant Yellow Gold &amp; lustrous Silver finish · 100% Water-safe &amp; Hypoallergenic
                   </span>
                 </div>
-                <ShieldCheck className="w-5 h-5 text-stone-700" />
+                <ShieldCheck className="w-5 h-5 text-amber-700" />
+              </div>
+
+              {/* Color Selector: Gold and Silver as Icons */}
+              <div className="mt-5">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs uppercase tracking-wider text-stone-500 font-medium flex items-center gap-1.5">
+                    <span>Color:</span>
+                    <strong className="text-stone-900 font-semibold">{isSilver ? 'Silver' : 'Gold'}</strong>
+                  </span>
+                  <span className="text-[11px] text-amber-800 font-medium">18K Gold &amp; Rhodium Silver Finish</span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  {/* Gold Icon */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedColor('Gold')}
+                    className={`group relative p-1.5 rounded-full transition-all cursor-pointer ${
+                      !isSilver
+                        ? 'ring-2 ring-amber-600 ring-offset-2 scale-110 shadow-sm'
+                        : 'opacity-70 hover:opacity-100 hover:scale-105'
+                    }`}
+                    title="Gold"
+                    aria-label="Gold"
+                    aria-pressed={!isSilver}
+                  >
+                    <span className="block w-7 h-7 rounded-full border border-[#B38622] bg-gradient-to-br from-[#FFE898] via-[#DEAB3D] to-[#996C18] shadow-[inset_0_1px_2px_rgba(255,255,255,0.7),inset_0_-1px_1px_rgba(0,0,0,0.3)] transition-transform group-hover:scale-105" />
+                  </button>
+
+                  {/* Silver Icon */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedColor('Silver')}
+                    className={`group relative p-1.5 rounded-full transition-all cursor-pointer ${
+                      isSilver
+                        ? 'ring-2 ring-stone-900 ring-offset-2 scale-110 shadow-sm'
+                        : 'opacity-70 hover:opacity-100 hover:scale-105'
+                    }`}
+                    title="Silver"
+                    aria-label="Silver"
+                    aria-pressed={isSilver}
+                  >
+                    <span className="block w-7 h-7 rounded-full border border-[#9CA3AF] bg-gradient-to-br from-[#FFFFFF] via-[#DCE1E7] to-[#8A92A0] shadow-[inset_0_1px_2px_rgba(255,255,255,0.9),inset_0_-1px_1px_rgba(0,0,0,0.25)] transition-transform group-hover:scale-105" />
+                  </button>
+                </div>
               </div>
 
               {/* Size Selector */}
@@ -347,7 +424,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Shield className="w-3.5 h-3.5 text-stone-600 shrink-0" />
-                  <span>{t.lifetimeGuaranteeBadge}</span>
+                  <span>100% Skin Safe</span>
                 </div>
               </div>
 

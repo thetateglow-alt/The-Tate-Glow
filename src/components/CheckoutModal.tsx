@@ -176,6 +176,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         items: items.map(i => ({
           productId: i.product.id,
           selectedSize: i.selectedSize,
+          selectedColor: i.selectedColor === 'Yellow' ? 'Gold' : (i.selectedColor || 'Gold'),
           quantity: i.quantity
         })),
         customer: {
@@ -231,7 +232,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         address: formData.address,
         paymentMethod: getPaymentMethodLabel(),
         items: items.map((i) => ({
-          name: i.product.name,
+          name: `${i.product.name} (${i.selectedColor === 'Yellow' ? 'Gold' : (i.selectedColor || 'Gold')}, ${i.selectedSize})`,
           price: i.product.price,
           quantity: i.quantity,
           selectedSize: i.selectedSize
@@ -407,7 +408,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               
               <div className="text-[11px] text-stone-500 flex items-center gap-1.5 pt-1">
                 <Sparkles className="w-3.5 h-3.5 text-amber-700" />
-                <span>{t.pureSolidSteelBadge} · {t.lifetimeGuaranteeBadge}</span>
+                <span>{t.pureSolidSteelBadge} · 100% Waterproof</span>
               </div>
             </div>
 
@@ -959,7 +960,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             <div className="flex flex-col items-center justify-center gap-1 text-[11px] text-stone-500 pt-1">
               <div className="flex items-center gap-2 text-stone-600">
                 <ShieldCheck className="w-3.5 h-3.5 text-stone-700" />
-                <span>{t.pureSolidSteelBadge} · {t.lifetimeGuaranteeBadge}</span>
+                <span>{t.pureSolidSteelBadge} · 100% Waterproof</span>
               </div>
               <div className="text-[10px] text-stone-400">
                 14-day exchange &amp; return window on all orders. <a href="/refund-policy.html" target="_blank" rel="noopener noreferrer" className="underline hover:text-stone-700">Review Policy</a>

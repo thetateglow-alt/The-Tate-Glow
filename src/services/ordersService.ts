@@ -13,6 +13,7 @@ export interface OrderItemRecord {
   price: number;
   quantity: number;
   selectedSize?: string;
+  selectedColor?: string;
   image?: string;
 }
 
@@ -81,7 +82,7 @@ export const ORDER_STATUS_MAP: Record<OrderStatus, { en: string; ar: string; col
 };
 
 export interface CheckoutRequestPayload {
-  items: { productId: string; selectedSize?: string; quantity: number }[];
+  items: { productId: string; selectedSize?: string; selectedColor?: string; quantity: number }[];
   customer: {
     name: string;
     email: string;
@@ -169,6 +170,7 @@ export async function submitSecureCheckout(payload: CheckoutRequestPayload): Pro
       price: itemPrice,
       quantity: qty,
       selectedSize: requestedItem.selectedSize,
+      selectedColor: requestedItem.selectedColor,
       image: itemImage
     });
   }
