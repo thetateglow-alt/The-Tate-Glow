@@ -202,14 +202,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         </button>
                       </div>
 
-                      {/* 18K Gold Plated & Color & Size */}
+                      {/* Size and specs */}
                       <div className="text-[11px] text-stone-500 mt-0.5 space-x-1.5 rtl:space-x-reverse flex items-center flex-wrap">
                         <span className="text-amber-800 font-medium bg-amber-50 px-1 py-0.2 rounded border border-amber-200/60">
                           18K Gold Plated
-                        </span>
-                        <span aria-hidden="true">·</span>
-                        <span className="font-semibold text-stone-800">
-                          {item.selectedColor === 'Yellow' ? 'Gold' : (item.selectedColor || 'Gold')}
                         </span>
                         <span aria-hidden="true">·</span>
                         <span>{item.selectedSize}</span>

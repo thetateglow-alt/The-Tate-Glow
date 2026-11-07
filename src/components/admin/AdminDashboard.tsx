@@ -461,7 +461,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         weight: '12g',
         sizes: ['40cm + 5cm', '45cm + 5cm']
       },
-      colors: ['Yellow', 'Silver'],
       stock: 15,
       rating: 5.0,
       reviewCount: 1,

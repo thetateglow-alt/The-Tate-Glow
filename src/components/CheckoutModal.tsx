@@ -176,7 +176,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         items: items.map(i => ({
           productId: i.product.id,
           selectedSize: i.selectedSize,
-          selectedColor: i.selectedColor === 'Yellow' ? 'Gold' : (i.selectedColor || 'Gold'),
           quantity: i.quantity
         })),
         customer: {
@@ -232,7 +231,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         address: formData.address,
         paymentMethod: getPaymentMethodLabel(),
         items: items.map((i) => ({
-          name: `${i.product.name} (${i.selectedColor === 'Yellow' ? 'Gold' : (i.selectedColor || 'Gold')}, ${i.selectedSize})`,
+          name: `${i.product.name} (${i.selectedSize})`,
           price: i.product.price,
           quantity: i.quantity,
           selectedSize: i.selectedSize

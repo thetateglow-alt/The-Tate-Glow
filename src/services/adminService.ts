@@ -306,6 +306,9 @@ export function sanitizeProductText<T extends Partial<AdminProduct>>(p: T): T {
     descriptionAr: sanitizeStr(p.descriptionAr),
     details: sanitizeArr(p.details),
     detailsAr: sanitizeArr(p.detailsAr),
+    colors: undefined,
+    silverImage: undefined,
+    goldImage: undefined,
     specs: p.specs
       ? {
           ...p.specs,

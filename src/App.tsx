@@ -69,7 +69,6 @@ export default function App() {
 
   // Modals & Drawers
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
-  const [quickViewColor, setQuickViewColor] = useState<string>('Gold');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isScienceOpen, setIsScienceOpen] = useState(false);
@@ -168,7 +167,10 @@ export default function App() {
               id: docSnap.id,
               description: cleanDesc,
               details: cleanDetails,
-              detailsAr: cleanDetailsAr
+              detailsAr: cleanDetailsAr,
+              colors: undefined,
+              silverImage: undefined,
+              goldImage: undefined
             });
           }
         });
@@ -270,8 +272,7 @@ export default function App() {
   const handleAddToCart = (
     product: Product,
     selectedSize: string = product.specs?.sizes?.[0] || 'Standard',
-    quantity: number = 1,
-    selectedColor: string = 'Gold'
+    quantity: number = 1
   ) => {
     const maxStock = product.stock !== undefined ? product.stock : 999;
     if (maxStock <= 0) {
@@ -279,7 +280,7 @@ export default function App() {
       return;
     }
 
-    const compoundId = `${product.id}-${selectedSize.toLowerCase().replace(/\s+/g, '-')}-${selectedColor.toLowerCase()}`;
+    const compoundId = `${product.id}-${selectedSize.toLowerCase().replace(/\s+/g, '-')}`;
 
     setCart((prevCart) => {
       const existing = prevCart.find((item) => item.id === compoundId);
@@ -304,7 +305,6 @@ export default function App() {
             id: compoundId,
             product,
             selectedSize,
-            selectedColor,
             quantity: initialQty
           }
         ];
@@ -313,7 +313,7 @@ export default function App() {
 
     renewReservation();
     const pName = product.name;
-    showToast(`Added "${pName}" (${selectedColor}) to your bag (reserved for 15m)`);
+    showToast(`Added "${pName}" to your bag (reserved for 15m)`);
   };
 
   const handleUpdateQuantity = (compoundId: string, newQty: number) => {
@@ -565,7 +565,6 @@ export default function App() {
       {/* Modals & Slide-overs */}
       <ProductModal
         product={quickViewProduct}
-        initialColor={quickViewColor}
         onClose={() => setQuickViewProduct(null)}
         onAddToCart={handleAddToCart}
         isWishlisted={quickViewProduct ? wishlist.includes(quickViewProduct.id) : false}
