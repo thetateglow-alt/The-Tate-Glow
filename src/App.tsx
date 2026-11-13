@@ -168,9 +168,7 @@ export default function App() {
               description: cleanDesc,
               details: cleanDetails,
               detailsAr: cleanDetailsAr,
-              colors: undefined,
-              silverImage: undefined,
-              goldImage: undefined
+              colors: []
             });
           }
         });

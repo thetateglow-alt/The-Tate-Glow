@@ -214,7 +214,7 @@ export async function initializeStoreBackend(): Promise<void> {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
           };
-          batch.set(prodRef, adminProduct);
+          batch.set(prodRef, stripUndefined(sanitizeProductText(adminProduct)));
 
           const invRef = doc(db, 'inventory', p.id);
           batch.set(invRef, {
@@ -293,6 +293,24 @@ export async function initializeStoreBackend(): Promise<void> {
 // 1. PRODUCTS MANAGEMENT (CRUD)
 // ==========================================
 
+export function stripUndefined<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value
+      .filter((item) => item !== undefined)
+      .map((item) => stripUndefined(item)) as unknown as T;
+  }
+  if (value !== null && typeof value === 'object') {
+    const cleaned: Record<string, unknown> = {};
+    for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
+      if (val !== undefined) {
+        cleaned[key] = stripUndefined(val);
+      }
+    }
+    return cleaned as T;
+  }
+  return value;
+}
+
 export function sanitizeProductText<T extends Partial<AdminProduct>>(p: T): T {
   const sanitizeArr = (arr?: string[]) =>
     (arr || []).filter((item) => !/lifetime|color\s*guarantee/i.test(item));
@@ -300,15 +318,13 @@ export function sanitizeProductText<T extends Partial<AdminProduct>>(p: T): T {
   const sanitizeStr = (s?: string) =>
     s ? s.replace(/lifetime\s*color\s*guarantee/gi, 'Skin-Safe Quality').replace(/lifetime\s*guarantee/gi, 'Quality Promise') : s;
 
-  return {
+  const cleaned: Partial<AdminProduct> = {
     ...p,
     description: sanitizeStr(p.description) || '',
     descriptionAr: sanitizeStr(p.descriptionAr),
     details: sanitizeArr(p.details),
     detailsAr: sanitizeArr(p.detailsAr),
-    colors: undefined,
-    silverImage: undefined,
-    goldImage: undefined,
+    colors: [],
     specs: p.specs
       ? {
           ...p.specs,
@@ -317,6 +333,11 @@ export function sanitizeProductText<T extends Partial<AdminProduct>>(p: T): T {
         }
       : p.specs
   };
+
+  delete cleaned.silverImage;
+  delete cleaned.goldImage;
+
+  return stripUndefined(cleaned) as T;
 }
 
 export async function fetchAdminProducts(): Promise<AdminProduct[]> {
@@ -362,26 +383,27 @@ export async function saveAdminProduct(
 
     const sanitized = sanitizeProductText(product);
 
-    const payload: AdminProduct = {
+    const payload: AdminProduct = stripUndefined({
       ...sanitized,
       id: docId,
       sku: product.sku.trim().toUpperCase(),
+      colors: [],
       updatedAt: new Date().toISOString(),
       createdAt: product.createdAt || new Date().toISOString()
-    };
+    });
 
     await setDoc(productRef, payload, { merge: true });
 
     // Sync inventory record
     const invRef = doc(db, 'inventory', docId);
-    await setDoc(invRef, {
+    await setDoc(invRef, stripUndefined({
       productId: docId,
       productName: product.name,
       sku: payload.sku,
       stock: product.stock ?? 10,
       lowStockThreshold: 5,
       lastRestockedAt: new Date().toISOString()
-    }, { merge: true });
+    }), { merge: true });
 
     await logAuditEvent(
       adminEmail,
