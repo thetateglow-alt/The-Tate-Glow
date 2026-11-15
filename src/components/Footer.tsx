@@ -63,6 +63,14 @@ export const Footer: React.FC<FooterProps> = ({
                 thetateglow@gmail.com
               </a>
               <a
+                href="tel:+201200051329"
+                className="hover:text-amber-300 transition-colors w-fit tabular-nums"
+                title="Call The Taté Glow"
+                dir="ltr"
+              >
+                +201200051329
+              </a>
+              <a
                 href="https://www.instagram.com/thetateglow?vrfl=MXZlNTBqaThzMWUwdw=="
                 target="_blank"
                 rel="noopener noreferrer"
@@ -70,6 +78,7 @@ export const Footer: React.FC<FooterProps> = ({
               >
                 <span>Instagram: @thetateglow</span>
               </a>
+              <span className="text-stone-500">Cairo, Egypt</span>
             </div>
           </div>
 

@@ -12,7 +12,9 @@ import {
   ExternalLink,
   CheckCircle2,
   AlertCircle,
-  Instagram
+  Instagram,
+  Phone,
+  MapPin
 } from 'lucide-react';
 import { BRAND_CONFIG } from '../data/products';
 import { submitContactInquiry, ContactFormData, validateContactForm } from '../services/contactService';
@@ -24,6 +26,7 @@ interface ContactModalProps {
 
 export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [copiedPhone, setCopiedPhone] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [submissionId, setSubmissionId] = useState<string | null>(null);
@@ -39,6 +42,8 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
   const [errors, setErrors] = useState<Partial<Record<keyof ContactFormData, string>>>({});
 
   const supportEmail = 'thetateglow@gmail.com';
+  const supportPhone = '+201200051329';
+  const businessLocation = 'Cairo, Egypt';
   const instagramUrl = 'https://www.instagram.com/thetateglow?vrfl=MXZlNTBqaThzMWUwdw==';
 
   // Handle ESC key and backdrop scroll lock
@@ -75,6 +80,13 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
     navigator.clipboard.writeText(supportEmail);
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2000);
+  };
+
+  const handleCopyPhone = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(supportPhone);
+    setCopiedPhone(true);
+    setTimeout(() => setCopiedPhone(false), 2000);
   };
 
   const handleInputChange = (field: keyof ContactFormData, value: string) => {
@@ -212,8 +224,49 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
                   </p>
                 </div>
 
-                {/* Response Time & Care */}
+                {/* Contact Number Card */}
+                <div className="space-y-2">
+                  <span className="text-[11px] uppercase tracking-wider text-stone-500 font-medium block">
+                    Contact Number
+                  </span>
+                  <div className="p-3.5 rounded-lg bg-stone-50 border border-stone-200/80 hover:border-amber-400/80 transition-all flex items-center justify-between group">
+                    <a
+                      href={`tel:${supportPhone}`}
+                      className="flex items-center gap-2.5 text-stone-900 hover:text-amber-800 transition-colors font-medium text-xs sm:text-sm truncate tabular-nums"
+                      title="Click to call"
+                      dir="ltr"
+                    >
+                      <Phone className="w-4 h-4 text-amber-700 shrink-0" />
+                      <span className="truncate">{supportPhone}</span>
+                    </a>
+                    <button
+                      type="button"
+                      onClick={handleCopyPhone}
+                      aria-label="Copy contact number"
+                      className="p-1.5 text-stone-400 hover:text-amber-800 rounded transition-colors cursor-pointer shrink-0 ml-2"
+                      title="Copy to clipboard"
+                    >
+                      {copiedPhone ? (
+                        <Check className="w-4 h-4 text-emerald-600" />
+                      ) : (
+                        <Copy className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-stone-500 font-light">
+                    Call or copy our direct concierge number anytime.
+                  </p>
+                </div>
+
+                {/* Business Location, Response Time & Care */}
                 <div className="pt-2 border-t border-stone-100 space-y-3 text-xs text-stone-600 font-light">
+                  <div className="flex items-start gap-2.5">
+                    <MapPin className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="font-medium text-stone-800 block">Business Location</strong>
+                      <span>{businessLocation}</span>
+                    </div>
+                  </div>
                   <div className="flex items-start gap-2.5">
                     <Clock className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
                     <div>

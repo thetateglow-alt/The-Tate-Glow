@@ -15,7 +15,8 @@ import {
   MapPin,
   ChevronRight,
   ArrowRight,
-  RotateCcw
+  RotateCcw,
+  Phone
 } from 'lucide-react';
 import { JewelryCategory } from '../types/jewelry';
 import { BRAND_CONFIG } from '../data/products';
@@ -497,6 +498,20 @@ export const LuxuryMenuOverlay: React.FC<LuxuryMenuOverlayProps> = ({
                 >
                   {copiedEmail ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
+              </div>
+
+              {/* Phone Direct */}
+              <div className="flex items-center justify-between p-3 rounded-lg bg-stone-950/70 border border-stone-800">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Phone className="w-4 h-4 text-amber-400 shrink-0" />
+                  <a
+                    href="tel:+201200051329"
+                    className="font-medium text-stone-100 hover:text-amber-300 truncate transition-colors tabular-nums"
+                    dir="ltr"
+                  >
+                    +201200051329
+                  </a>
+                </div>
               </div>
 
               {/* Working Hours */}

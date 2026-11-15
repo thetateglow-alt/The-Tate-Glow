@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contact Us | The Taté Glow</title>
-  <meta name="description" content="Get in touch with The Taté Glow. Official contact inquiries, customer care concierge, email thetateglow@gmail.com, and Instagram.">
+  <meta name="description" content="Get in touch with The Taté Glow in Cairo, Egypt. Official contact inquiries, customer care concierge, phone +201200051329, email thetateglow@gmail.com, and Instagram.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
@@ -365,7 +365,7 @@
           <div class="card-title-sm">Direct Channel</div>
           <h2 class="card-heading">Contact Information</h2>
 
-          <div class="form-group" style="margin-bottom: 0.5rem;">
+          <div class="form-group" style="margin-bottom: 1rem;">
             <label class="form-label">Email Address</label>
             <div class="email-box">
               <a href="mailto:thetateglow@gmail.com" class="email-link">thetateglow@gmail.com</a>
@@ -374,6 +374,25 @@
             <span style="font-size: 0.72rem; color: #78716c; margin-top: 0.35rem; display: block;">
               Click email to compose directly or copy to clipboard.
             </span>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.75rem;">
+            <label class="form-label">Contact Number</label>
+            <div class="email-box">
+              <a href="tel:+201200051329" class="email-link" dir="ltr">+201200051329</a>
+              <button type="button" class="copy-btn" id="copy-phone-btn" onclick="copyPhone()">Copy</button>
+            </div>
+            <span style="font-size: 0.72rem; color: #78716c; margin-top: 0.35rem; display: block;">
+              Click number to call directly or copy to clipboard.
+            </span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-bullet">✦</span>
+            <div>
+              <strong style="color: #1c1917; display: block;">Business Location</strong>
+              Cairo, Egypt
+            </div>
           </div>
 
           <div class="info-item">
@@ -472,6 +491,16 @@
     function copyEmail() {
       navigator.clipboard.writeText('thetateglow@gmail.com').then(() => {
         const btn = document.getElementById('copy-btn');
+        btn.textContent = 'Copied!';
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+        }, 2000);
+      });
+    }
+
+    function copyPhone() {
+      navigator.clipboard.writeText('+201200051329').then(() => {
+        const btn = document.getElementById('copy-phone-btn');
         btn.textContent = 'Copied!';
         setTimeout(() => {
           btn.textContent = 'Copy';
