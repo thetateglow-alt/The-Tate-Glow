@@ -34,6 +34,13 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ onSelectCategory }) 
       count: '3 Designs'
     },
     {
+      category: 'hand-chain',
+      title: 'Hand Chains',
+      subtitle: 'Delicate wrist-to-finger slave bracelets',
+      image: BRAND_IMAGES.bracelet,
+      count: 'New Category'
+    },
+    {
       category: 'ring',
       title: 'Rings & Signets',
       subtitle: 'Molten sculptural domes & stackable bands',
@@ -67,8 +74,8 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ onSelectCategory }) 
           </p>
         </div>
 
-        {/* 4-column responsive visual cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Responsive visual category cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
           {cards.map((c) => (
             <div
               key={c.category}

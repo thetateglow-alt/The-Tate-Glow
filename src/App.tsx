@@ -249,7 +249,12 @@ export default function App() {
       if (searchQuery.trim() !== '') {
         const q = searchQuery.toLowerCase();
         const matchesName = product.name.toLowerCase().includes(q) || (product.nameAr && product.nameAr.includes(q));
-        const matchesCategory = product.category.toLowerCase().includes(q) || (product.categoryAr && product.categoryAr.includes(q));
+        const normalizedCat = product.category.replace(/-/g, ' ').toLowerCase();
+        const matchesCategory =
+          product.category.toLowerCase().includes(q) ||
+          normalizedCat.includes(q) ||
+          (product.category === 'hand-chain' && 'hand chains'.includes(q)) ||
+          (product.categoryAr && product.categoryAr.includes(q));
         const matchesDesc = product.description.toLowerCase().includes(q) || (product.descriptionAr && product.descriptionAr.includes(q));
         if (!matchesName && !matchesCategory && !matchesDesc) {
           return false;
@@ -448,6 +453,8 @@ export default function App() {
                   ? t.categoryNecklacesTitle
                   : activeCategory === 'bracelet'
                   ? t.categoryBraceletsTitle
+                  : activeCategory === 'hand-chain'
+                  ? t.categoryHandChainsTitle
                   : activeCategory === 'ring'
                   ? t.categoryRingsTitle
                   : t.categoryEarringsTitle}

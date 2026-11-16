@@ -25,6 +25,7 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
     { label: t.allPieces, value: 'all' },
     { label: t.necklaces, value: 'necklace' },
     { label: t.bracelets, value: 'bracelet' },
+    { label: t.handChains, value: 'hand-chain' },
     { label: t.rings, value: 'ring' },
     { label: t.earrings, value: 'earrings' }
   ];

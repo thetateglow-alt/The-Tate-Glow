@@ -65,7 +65,7 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
           ) : (
             wishlistProducts.map((p) => {
               const displayName = p.name;
-              const displayCategory = p.category;
+              const displayCategory = p.category === 'hand-chain' ? 'Hand Chains' : p.category;
 
               const isOutOfStock = p.stock !== undefined && p.stock <= 0;
 

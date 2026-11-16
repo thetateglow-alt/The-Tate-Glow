@@ -1295,6 +1295,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <option value="all">All Categories</option>
                     <option value="necklace">Necklaces & Chains</option>
                     <option value="bracelet">Bracelets & Cuffs</option>
+                    <option value="hand-chain">Hand Chains</option>
                     <option value="ring">Rings & Bands</option>
                     <option value="earrings">Earrings & Hoops</option>
                   </select>
@@ -1350,7 +1351,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                               {p.sku || p.id.toUpperCase()}
                             </td>
                             <td className="py-3 px-3 capitalize text-stone-600">
-                              {p.category}
+                              {p.category === 'hand-chain' ? 'Hand Chains' : p.category}
                             </td>
                             <td className="py-3 px-3 font-semibold text-stone-900 tabular-nums">
                               {formatEGP(p.price, 'en')}
@@ -2108,6 +2109,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   >
                     <option value="necklace">Necklaces & Chains</option>
                     <option value="bracelet">Bracelets & Cuffs</option>
+                    <option value="hand-chain">Hand Chains</option>
                     <option value="ring">Rings & Bands</option>
                     <option value="earrings">Earrings & Hoops</option>
                   </select>

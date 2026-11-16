@@ -29,7 +29,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const t = TRANSLATIONS.en;
 
   const displayName = product.name;
-  const displayCategory = product.category;
+  const displayCategory = product.category === 'hand-chain' ? 'Hand Chains' : product.category;
   const displayDesc = product.description;
 
   const isOutOfStock = product.stock !== undefined && product.stock <= 0;

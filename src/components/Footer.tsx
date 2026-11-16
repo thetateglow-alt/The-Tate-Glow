@@ -124,6 +124,17 @@ export const Footer: React.FC<FooterProps> = ({
               <li>
                 <button
                   onClick={() => {
+                    onSelectCategory('hand-chain');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="hover:text-white transition-colors cursor-pointer"
+                >
+                  {t.handChains}
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => {
                     onSelectCategory('ring');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}

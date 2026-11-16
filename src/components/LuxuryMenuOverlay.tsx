@@ -155,6 +155,7 @@ export const LuxuryMenuOverlay: React.FC<LuxuryMenuOverlayProps> = ({
   const categoriesList: { label: string; cat: JewelryCategory }[] = [
     { label: 'Necklaces & Chains', cat: 'necklace' },
     { label: 'Bracelets & Cuffs', cat: 'bracelet' },
+    { label: 'Hand Chains', cat: 'hand-chain' },
     { label: 'Rings & Signets', cat: 'ring' },
     { label: 'Earrings & Huggies', cat: 'earrings' },
   ];

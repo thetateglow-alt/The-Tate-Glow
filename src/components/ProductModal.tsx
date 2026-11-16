@@ -42,7 +42,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   if (!product) return null;
 
   const displayName = product.name;
-  const displayCategory = product.category;
+  const displayCategory = product.category === 'hand-chain' ? 'Hand Chains' : product.category;
   const displayDesc = product.description;
   const displayDetails = (product.details || []).filter(
     (det) => !/lifetime|color\s*guarantee/i.test(det)

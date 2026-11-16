@@ -267,7 +267,7 @@ export async function initializeStoreBackend(): Promise<void> {
             descriptionEn: 'Designed in Cairo for women who want permanent jewelry luxury that stands up to daily showers, sea water, and skincare.',
             descriptionAr: 'Designed in Cairo for women who want permanent jewelry luxury that stands up to daily showers, sea water, and skincare.'
           },
-          featuredCategoryIds: ['necklace', 'bracelet', 'ring', 'earrings'],
+          featuredCategoryIds: ['necklace', 'bracelet', 'hand-chain', 'ring', 'earrings'],
           featuredProductIds: ['tate-aura-herringbone', 'tate-arc-cuff', 'tate-dome-signet-ring', 'tate-goutte-teardrop-huggies'],
           updatedAt: new Date().toISOString(),
           updatedBy: STORE_OWNER_EMAIL
@@ -917,7 +917,7 @@ export async function fetchHomepageContent(): Promise<HomepageContentConfig> {
       descriptionEn: 'Designed in Cairo for women who want permanent jewelry luxury that stands up to daily showers, sea water, and skincare.',
       descriptionAr: 'Designed in Cairo for women who want permanent jewelry luxury that stands up to daily showers, sea water, and skincare.'
     },
-    featuredCategoryIds: ['necklace', 'bracelet', 'ring', 'earrings'],
+    featuredCategoryIds: ['necklace', 'bracelet', 'hand-chain', 'ring', 'earrings'],
     featuredProductIds: ['tate-aura-herringbone', 'tate-arc-cuff', 'tate-dome-signet-ring', 'tate-goutte-teardrop-huggies'],
     updatedAt: new Date().toISOString(),
     updatedBy: STORE_OWNER_EMAIL

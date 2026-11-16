@@ -9,7 +9,7 @@
         "sku": { "type": "string", "description": "Unique Stock Keeping Unit (e.g. TG-AURA-01)" },
         "name": { "type": "string", "description": "Product display name in English" },
         "nameAr": { "type": "string", "description": "Product display name in Arabic" },
-        "category": { "type": "string", "enum": ["necklace", "bracelet", "ring", "earrings"] },
+        "category": { "type": "string", "enum": ["necklace", "bracelet", "ring", "earrings", "hand-chain"] },
         "price": { "type": "number", "description": "Current selling price in EGP" },
         "originalPrice": { "type": "number", "description": "Strikethrough reference price in EGP" },
         "costPrice": { "type": "number", "description": "Manufacturing cost price for margin calculation" },

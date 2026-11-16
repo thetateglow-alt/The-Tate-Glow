@@ -219,6 +219,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
           </button>
           <button
+            onClick={() => onSelectCategory('hand-chain')}
+            className={`cursor-pointer transition-colors whitespace-nowrap shrink-0 hover:text-stone-950 relative py-1 ${
+              activeCategory === 'hand-chain' ? 'text-stone-950 font-semibold' : ''
+            }`}
+          >
+            {t.handChains}
+            {activeCategory === 'hand-chain' && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-stone-950" />
+            )}
+          </button>
+          <button
             onClick={() => onSelectCategory('ring')}
             className={`cursor-pointer transition-colors whitespace-nowrap shrink-0 hover:text-stone-950 relative py-1 ${
               activeCategory === 'ring' ? 'text-stone-950 font-semibold' : ''
@@ -446,6 +457,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           className={`whitespace-nowrap shrink-0 py-1 ${activeCategory === 'bracelet' ? 'text-stone-950 font-bold border-b border-stone-950' : ''}`}
         >
           {t.bracelets}
+        </button>
+        <button
+          onClick={() => onSelectCategory('hand-chain')}
+          className={`whitespace-nowrap shrink-0 py-1 ${activeCategory === 'hand-chain' ? 'text-stone-950 font-bold border-b border-stone-950' : ''}`}
+        >
+          {t.handChains}
         </button>
         <button
           onClick={() => onSelectCategory('ring')}

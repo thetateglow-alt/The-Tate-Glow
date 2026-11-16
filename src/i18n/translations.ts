@@ -13,6 +13,7 @@ export interface Translations {
   allPieces: string;
   necklaces: string;
   bracelets: string;
+  handChains: string;
   rings: string;
   earrings: string;
   pureSteelPromise: string;
@@ -48,6 +49,7 @@ export interface Translations {
   catalogCollectionTitle: string;
   categoryNecklacesTitle: string;
   categoryBraceletsTitle: string;
+  categoryHandChainsTitle: string;
   categoryRingsTitle: string;
   categoryEarringsTitle: string;
   specialBundleActive: string;
@@ -287,6 +289,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     allPieces: 'All Pieces',
     necklaces: 'Necklaces',
     bracelets: 'Bracelets',
+    handChains: 'Hand Chains',
     rings: 'Rings',
     earrings: 'Earrings',
     pureSteelPromise: 'Pure Steel Promise',
@@ -322,6 +325,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     catalogCollectionTitle: 'Pure Stainless Steel Collection',
     categoryNecklacesTitle: 'Pure Stainless Steel Necklaces',
     categoryBraceletsTitle: 'Pure Stainless Steel Bracelets',
+    categoryHandChainsTitle: 'Pure Stainless Steel Hand Chains',
     categoryRingsTitle: 'Pure Stainless Steel Rings',
     categoryEarringsTitle: 'Pure Stainless Steel Earrings',
     specialBundleActive: 'Special Bundle Offer Active',
@@ -367,7 +371,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     // Promotion Banner
     mixAndMatchTitle: 'Mix & Match Any 4 Pieces',
     mixAndMatchSub: 'Buy 2 Items, Get 3rd at 50% Off · Buy 3 Items, Get 4th Free!',
-    mixAndMatchDesc: 'Build your signature pure stainless steel stack across necklaces, bracelets, rings, and earrings. Discount automatically applies inside your bag.',
+    mixAndMatchDesc: 'Build your signature pure stainless steel stack across necklaces, bracelets, hand chains, rings, and earrings. Discount automatically applies inside your bag.',
     buildStackBtn: 'Build Your Glow Stack',
     bundleApplied: 'Bundle Offer Applied!',
 
